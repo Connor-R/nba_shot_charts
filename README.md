@@ -5,7 +5,7 @@ A python script made to create shot charts for any NBA player season or career (
 For a tutorial on how to use this code, click [here (coming soon)](http://google.com).
 To see what everything going on in the charts mean, click [here (coming soon)](http://google.com).
 
-A directory of charts I’ve created (updated weekly) can be found by clicking [here](http://bit.ly/CR_nba_shot_charts).
+A directory of charts I’ve created (updated weekly) can be found [on Dropbox](http://bit.ly/CR_nba_shot_charts).
 
 If you would like to add a player, report a bug, or contact me for any other reason, my contact information is at the bottom of [my personal github.io page](http://connor-r.github.io/).
 
