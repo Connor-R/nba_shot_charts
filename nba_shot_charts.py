@@ -256,7 +256,7 @@ def shooting_plot(path, shot_df, player_id, season_id, player_title, player_name
 
     # Add date text
     _date = date.today()
-    if datetime.now().hour() > 21:
+    if datetime.now().hour > 18:
         _date = date.today() + timedelta(days=1)
 
     ax.text(250,-31,'AS OF %s' % (str(_date)),
