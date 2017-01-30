@@ -12,7 +12,7 @@ import matplotlib as mpb
 import matplotlib.pyplot as plt
 from matplotlib import  offsetbox as osb
 from matplotlib.patches import RegularPolygon
-from datetime import date
+from datetime import date, datetime, timedelta
 
 
 # setting the color map we want to use
@@ -255,7 +255,11 @@ def shooting_plot(path, shot_df, player_id, season_id, player_title, player_name
         fontsize=10,  horizontalalignment='center', verticalalignment = 'bottom', family='Bitstream Vera Sans', color='white', fontweight='bold')
 
     # Add date text
-    ax.text(250,-31,'AS OF %s' % (str(date.today())),
+    _date = date.today()
+    if datetime.now().hour() > 21:
+        _date = date.today() + timedelta(days=1)
+
+    ax.text(250,-31,'AS OF %s' % (str(_date)),
         fontsize=10,  horizontalalignment='right', verticalalignment = 'bottom', family='Bitstream Vera Sans', color='white', fontweight='bold')
 
 
