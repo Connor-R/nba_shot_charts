@@ -26,11 +26,11 @@ def initiate(p_list, list_length):
     # iterating through our player dictionary to grab the player_title and player_id
     counter = 1
     for player_title, player_data in p_list.items():
-        print "\nProcessing Player " + str(counter) + " of " + list_length
-        counter += 1
-
         player_id, start_year, end_year = player_data
         start_year, end_year = int(start_year), int(end_year)
+
+        print "\n\nProcessing Player " + str(counter) + " of " + list_length + ': ' + player_title + ' (' + str(start_year) + ' - ' + str(end_year) + ')\n'
+        counter += 1
 
         if start_year < 1996:
             start_year = 1996
