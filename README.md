@@ -8,9 +8,9 @@ To run this code, download the script and player_list and put them in a director
 
 Two lesser noticed features of these charts are the following:
 * Each chart’s name will save under the template `shot_charts_Firstname_Lastname_Season_eFG.png`
-* The color of the Player Name and Zone Frequencies key is the corresponding color to their overall eFG% for the season (e.g., if a player’s eFG% for a year was 100%, their name and key would be dark red, while if their eFG% was 0%, then those colors would be light yellow. The most visible examples of this are [DeAndre Liggins’s 2013/14 shot chart](http://bit.ly/DLiggins13_14) in comparison to [Andrei Kirilenko’s 2014/15 shot chart](http://bit.ly/AKirilenko14_15)).
+* The color of the Player Name and Zone Frequencies key is the corresponding color to their overall eFG% for the season (e.g., if a player’s eFG% for a year was 100%, their name and key would be dark red, while if their eFG% was 0%, then those colors would be light yellow).
 
-A directory of charts I’ve created (350+ current and past players, updated weekly) can be found [on Dropbox](http://bit.ly/CR_nba_shot_charts).
+If you're interested in seeing more charts, I created a [twitter bot](https://twitter.com/NBAChartBot) that posts a pseudo-random shot chart every hour.
 
 If you would like to add a player, report a bug, or contact me for any other reason, my contact information is at the bottom of [my personal github.io page](http://connor-r.github.io/).
 

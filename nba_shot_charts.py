@@ -292,10 +292,12 @@ def shooting_plot(path, shot_df, player_id, season_id, player_title, player_name
     cb.set_ticklabels(['0%','25%', '50%','75%', '$\mathbf{\geq}$100%'])
     
     # if the isCareer argument is set to True, we have to slightly alter the title of the plot
+    title_efg = eff_fg_all_float
+
     if isCareer is False:
-        figtit = path+'shot_charts_%s_%s_%s.png' % (player_name, season_id, str(int(eff_fg_all_float)))
+        figtit = path+'shot_charts_%s_%s_%s.png' % (player_name, season_id, str(int(round(eff_fg_all_float))))
     else:
-        figtit = path+'shot_charts_%s_CAREER_%s-%s_%s.png' % (player_name, min_year, max_year, str(int(eff_fg_all_float)))
+        figtit = path+'shot_charts_%s_CAREER_%s-%s_%s.png' % (player_name, min_year, max_year, str(int(round(eff_fg_all_float))))
     plt.savefig(figtit, facecolor='#305E72', edgecolor='black')
     plt.clf()
 
