@@ -12,6 +12,6 @@ Two lesser noticed features of these charts are the following:
 
 If you're interested in seeing more charts, I created a [twitter bot](https://twitter.com/NBAChartBot) that posts a pseudo-random player/season shot chart every hour.
 
-If you would like to add a player, report a bug, or contact me for any other reason, my contact information is at the bottom of [my personal github.io page](http://connor-r.github.io/).
+If you would like to report a bug, request a specific player chart, or contact me for any other reason, my contact information is at the bottom of [my personal github.io page](http://connor-r.github.io/).
 
 
