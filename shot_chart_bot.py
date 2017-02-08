@@ -14,7 +14,7 @@ auth = tweepy.OAuthHandler(consumer_key, consumer_sec)
 auth.set_access_token(access_key, access_sec)
 api = tweepy.API(auth)
 
-base_path = "/Users/connordog/Dropbox/Desktop_Files/Work_Things/CodeBase/Python_Scripts/Python_Projects/nba_shot_charts/shot_charts/"
+base_path = os.getcwd()+"/shot_charts/"
 
 def tweet():
     path, pic = get_random_pic()
