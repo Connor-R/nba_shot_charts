@@ -20,8 +20,8 @@ mymap = mpb.cm.YlOrRd
 
 # taking in a dictionary of player information and initializing the processes
 def initiate(p_list, list_length):
-    # setting our base directory (this will be different for each user)
-    base_path = "/Users/connordog/Dropbox/Desktop_Files/Work_Things/CodeBase/Python_Scripts/Python_Projects/nba_shot_charts/"
+    # setting our base directory, I have this set to your current working directory (cwd)
+    base_path = os.getcwd()
 
     # iterating through our player dictionary to grab the player_title and player_id
     counter = 1
@@ -40,7 +40,7 @@ def initiate(p_list, list_length):
         player_name = player_title.replace(" ","_")
 
         # defines a path to a directory for saving the charts of the current player
-        path = base_path+'shot_charts/'+player_name+'/'
+        path = base_path+'/shot_charts/'+player_name+'/'
 
         # checks if our desired directory exists, and if not, creates it
         if not os.path.exists(path):
@@ -454,7 +454,7 @@ def acquire_playerPic(player_id, zoom, offset=(250,370)):
 if __name__ == "__main__": 
 
     # a list of interesting players/player_id's that I want to generate shot charts for
-    csv_file = "/Users/connordog/Dropbox/Desktop_Files/Work_Things/CodeBase/Python_Scripts/Python_Projects/nba_shot_charts/player_list.csv"
+    csv_file = os.getcwd()+"/player_list.csv"
 
     p_list = {}
 
