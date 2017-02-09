@@ -8,10 +8,10 @@ from urllib import urlopen
 from bs4 import BeautifulSoup
 
 #keep the quotes, replace this with your information
-consumer_key = 'iBh2GInLhKDb4FfcrXnCIg1SP' 
-consumer_sec = 't3QfvfLaiYDAZTFGpJutuprez3VTtaVmwVXy3L5mL5Tl2TY2uQ'
-access_key = '829083054106816512-L1TZJEJocnqD5LerlTVcaQzTJEOadhv'
-access_sec = 'gVtpmYOYw1KSyx0y92VKvAYozf2pfzqrB39jX2Tf0vKlB'
+consumer_key = '123abc...' 
+consumer_sec = '123abc...'
+access_key = '123abc...'
+access_sec = '123abc...'
 
 auth = tweepy.OAuthHandler(consumer_key, consumer_sec)
 auth.set_access_token(access_key, access_sec)
