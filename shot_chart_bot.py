@@ -3,14 +3,15 @@ import time
 import sys
 import os
 import random
+import csv
 from urllib import urlopen
 from bs4 import BeautifulSoup
 
 #keep the quotes, replace this with your information
-consumer_key = '123abc...' 
-consumer_sec = '123abc...'
-access_key = '123abc...'
-access_sec = '123abc...'
+consumer_key = 'iBh2GInLhKDb4FfcrXnCIg1SP' 
+consumer_sec = 't3QfvfLaiYDAZTFGpJutuprez3VTtaVmwVXy3L5mL5Tl2TY2uQ'
+access_key = '829083054106816512-L1TZJEJocnqD5LerlTVcaQzTJEOadhv'
+access_sec = 'gVtpmYOYw1KSyx0y92VKvAYozf2pfzqrB39jX2Tf0vKlB'
 
 auth = tweepy.OAuthHandler(consumer_key, consumer_sec)
 auth.set_access_token(access_key, access_sec)
@@ -18,12 +19,22 @@ api = tweepy.API(auth)
 
 base_path = os.getcwd()+"/shot_charts/"
 
+hashtag_file = os.getcwd()+"/nba_hashtags.csv"
+hashtag_list = {}
+with open(hashtag_file, 'rU') as f:
+    mycsv = csv.reader(f)
+    for row in mycsv:
+        team, hashtag = row
+        hashtag_list[team]=hashtag
+
+
 def tweet():
     path, pic = get_random_pic()
     tweet_text = parse_text(pic)
 
     pic_path = path + pic
 
+    raw_input(tweet_text)
     api.update_with_media(pic_path, status=tweet_text)
 
 def get_random_pic():
@@ -44,12 +55,11 @@ def parse_text(pic):
     if twitter is not None:
         tweet += '(' + twitter + ') '
 
+    year = pic.split('_')[-2]
     if pic.split('_')[4] == 'CAREER':
-        year = pic.split('_')[5]
         tweet += 'Career (' + year + ') Shot Chart' 
         teams = get_reference(fname, lname, year, isCareer=True)
     else:
-        year = pic.split('_')[4]
         tweet += year + ' Shot Chart' 
         teams = get_reference(fname, lname, year)
 
@@ -59,7 +69,12 @@ def parse_text(pic):
 
     for team in teams:
         if team is not None:
-            tweet += ' #' + team
+            hashtag = hashtag_list.get(team)
+            if hashtag is None:
+                tweet += ' #' + team
+            else:
+                tweet += ' #' + hashtag
+
 
     return tweet
 
