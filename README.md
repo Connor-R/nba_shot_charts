@@ -1,4 +1,5 @@
 # NBA Shot Charts
+This project is licensed under the terms of the MIT license.
 
 A python script made to create shot charts for any NBA player season or career (from 1996 to present).
 
