@@ -19,7 +19,7 @@ from datetime import date, datetime, timedelta
 mymap = mpb.cm.YlOrRd
 
 # taking in a dictionary of player information and initializing the processes
-def initiate(p_list, list_length):
+def initiate(p_list, list_length, printer=True):
     # setting our base directory, I have this set to your current working directory (cwd)
     base_path = os.getcwd()
 
@@ -29,7 +29,8 @@ def initiate(p_list, list_length):
         player_id, start_year, end_year = player_data
         start_year, end_year = int(start_year), int(end_year)
 
-        print "\n\nProcessing Player " + str(counter) + " of " + list_length + ': ' + player_title + ' (' + str(start_year) + ' - ' + str(end_year) + ')\n'
+        if printer is True:
+            print "\n\nProcessing Player " + str(counter) + " of " + list_length + ': ' + player_title + ' (' + str(start_year) + ' - ' + str(end_year) + ')\n'
         counter += 1
 
         if start_year < 1996:
@@ -67,9 +68,10 @@ def initiate(p_list, list_length):
             # takes a season (e.g. 2008) and returns the nba ID (e.g. 2008-09)
             season_id = str(season_start)+'-'+str(season_start%100+1).zfill(2)[-2:]
 
-            # we print the season/player combo in order to monitor progress
-            print '\t',
-            print season_id, player_name
+            if printer is True:
+                # we print the season/player combo in order to monitor progress
+                print '\t',
+                print season_id, player_name
 
             # a DataFrame of the shots a player took in a given season
             year_shots_df = acquire_shootingData(player_id, season_id)
@@ -91,7 +93,9 @@ def initiate(p_list, list_length):
 
         # making a text string for usage in the career shot chart
         career_string = "CAREER (%s-%s)" % (min_year, max_year)
-        print '\t\t\t', career_string, player_name
+
+        if printer is True:
+            print '\t\t\t', career_string, player_name
 
         # making a shot chart for all shots in the player's career. note that we have to use the option isCareer, min_year, and max_year arguments to properly format this chart
         shooting_plot(path, all_shots_df, player_id, career_string, player_title, player_name, isCareer=True, min_year=min_year, max_year=max_year)
@@ -101,6 +105,32 @@ def initiate(p_list, list_length):
     files=glob.glob('*.png')
     for filename in files:
         os.unlink(filename)
+
+
+#Getting the shot data and returning a DataFrame with every shot for a specific player/season combo
+def acquire_shootingData(player_id,season):
+    import requests
+    shot_chart_temp = 'http://stats.nba.com/stats/shotchartdetail?CFID=33&CFPARAMS=%s&ContextFilter=&ContextMeasure=FGA&DateFrom=&DateTo=&GameID=&GameSegment=&LastNGames=0&LeagueID=00&Location=&MeasureType=Base&Month=0&OpponentTeamID=0&Outcome=&PaceAdjust=N&PerMode=PerGame&Period=0&PlayerID=%s&PlusMinus=N&PlayerPosition=&Rank=N&RookieYear=&Season=%s&SeasonSegment=&SeasonType=Regular+Season&TeamID=0&VsConference=&VsDivision=&mode=Advanced&showDetails=0&showShots=1&showZones=0'
+    shot_chart_url = shot_chart_temp % (season, player_id, season)
+
+    # print shot_chart_url
+    # user agent makes it seem as though we're an actual user getting the data
+    user_agent = 'User-Agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.111 Safari/537.36'
+    response = requests.get(shot_chart_url, headers={'User-Agent': user_agent})
+
+    # headers is the column titles for our DataFrame
+    headers = response.json()['resultSets'][0]['headers']
+
+    # shots will be each row in the DataFrame
+    shots = response.json()['resultSets'][0]['rowSet']
+
+    # if there were no shots at that URL, we return nothing
+    if shots == []:
+        return
+
+    # creating our DataFrame from our shots and headers variables
+    shot_df = pd.DataFrame(shots, columns=headers)
+    return shot_df
 
 
 # we set gridNum to be 30 (basically a grid of 30x30 hexagons)
@@ -256,8 +286,6 @@ def shooting_plot(path, shot_df, player_id, season_id, player_title, player_name
 
     # Add date text
     _date = date.today()
-    if datetime.now().hour > 18:
-        _date = date.today() + timedelta(days=1)
 
     ax.text(250,-31,'AS OF %s' % (str(_date)),
         fontsize=10,  horizontalalignment='right', verticalalignment = 'bottom', family='Bitstream Vera Sans', color='white', fontweight='bold')
@@ -367,32 +395,6 @@ def find_shootingPcts(shot_df, gridNum):
     return (ShootingPctLocs, hb_shot), shot_pts_all, shot_pts_3, shot_pts_2, shot_pts_mid, shot_pts_NONres, shot_pts_res, shot_count_all, shot_count_3, shot_count_2, shot_count_mid, shot_count_NONres, shot_count_res, team_list
 
 
-#Getting the shot data and returning a DataFrame with every shot for a specific player/season combo
-def acquire_shootingData(player_id,season):
-    import requests
-    shot_chart_temp = 'http://stats.nba.com/stats/shotchartdetail?CFID=33&CFPARAMS=%s&ContextFilter=&ContextMeasure=FGA&DateFrom=&DateTo=&GameID=&GameSegment=&LastNGames=0&LeagueID=00&Location=&MeasureType=Base&Month=0&OpponentTeamID=0&Outcome=&PaceAdjust=N&PerMode=PerGame&Period=0&PlayerID=%s&PlusMinus=N&PlayerPosition=&Rank=N&RookieYear=&Season=%s&SeasonSegment=&SeasonType=Regular+Season&TeamID=0&VsConference=&VsDivision=&mode=Advanced&showDetails=0&showShots=1&showZones=0'
-    shot_chart_url = shot_chart_temp % (season, player_id, season)
-
-    # print shot_chart_url
-    # user agent makes it seem as though we're an actual user getting the data
-    user_agent = 'User-Agent:Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/47.0.2526.111 Safari/537.36'
-    response = requests.get(shot_chart_url, headers={'User-Agent': user_agent})
-
-    # headers is the column titles for our DataFrame
-    headers = response.json()['resultSets'][0]['headers']
-
-    # shots will be each row in the DataFrame
-    shots = response.json()['resultSets'][0]['rowSet']
-
-    # if there were no shots at that URL, we return nothing
-    if shots == []:
-        return
-
-    # creating our DataFrame from our shots and headers variables
-    shot_df = pd.DataFrame(shots, columns=headers)
-    return shot_df
-
-
 #Drawing the outline of the court
 #Most of this code was recycled from Savvas Tjortjoglou [http://savvastjortjoglou.com] 
 def draw_court(ax=None, color='white', lw=2, outer_lines=False):
@@ -438,21 +440,19 @@ def draw_court(ax=None, color='white', lw=2, outer_lines=False):
     ax.set_yticks([])
     return ax
 
+#for usage with shot_chart_boy
+def gen_charts(player_name):
+    p_list = get_plist()
+    vals = p_list.get(player_name)
+    if vals is None:
+        sys.exit('Need a valid player_id')
+    player_list = {player_name:vals}
 
-#Getting the player picture that we will later place in the chart
-#Most of this code was recycled from Savvas Tjortjoglou [http://savvastjortjoglou.com] 
-def acquire_playerPic(player_id, zoom, offset=(250,370)):
-    from matplotlib import  offsetbox as osb
-    import urllib
-    pic = urllib.urlretrieve("http://stats.nba.com/media/players/230x185/"+str(player_id)+".png",str(player_id)+".png")
-    player_pic = plt.imread(pic[0])
-    img = osb.OffsetImage(player_pic, zoom)
-    img = osb.AnnotationBbox(img, offset,xycoords='data',pad=0.0, box_alignment=(1,0), frameon=False)
-    return img
+    initiate(player_list, str(len(player_list)), printer=False)
 
 
-if __name__ == "__main__": 
-
+#player_list generation
+def get_plist(operator='', filt_value=0):
     # a list of interesting players/player_id's that I want to generate shot charts for
     csv_file = os.getcwd()+"/player_list.csv"
 
@@ -468,9 +468,43 @@ if __name__ == "__main__":
             else:
                 player_title, player_id, start_year, end_year = row
 
+                # If a player doesn't have a start_year or end_year, we set those to the max values
+                if start_year == '':
+                    start_year = 0
+                if end_year == '':
+                    end_year = 9999
+
                 # a filter for which players to update
-                if int(end_year) >= 2017:
+                if operator is '':
                     p_list[player_title]=[int(player_id), int(start_year), int(end_year)]
+                else:
+                    if operator == '>=':
+                        if int(end_year) >= filt_value:
+                            p_list[player_title]=[int(player_id), int(start_year), int(end_year)]
+                    elif operator == '<=':
+                        if int(end_year) <= filt_value:
+                            p_list[player_title]=[int(player_id), int(start_year), int(end_year)]
+                    else:
+                        'print, unknown operator, using =='
+                        if int(end_year) == filt_value:
+                            p_list[player_title]=[int(player_id), int(start_year), int(end_year)]
+
+    return p_list
+
+
+#Getting the player picture that we will later place in the chart
+#Most of this code was recycled from Savvas Tjortjoglou [http://savvastjortjoglou.com] 
+def acquire_playerPic(player_id, zoom, offset=(250,370)):
+    from matplotlib import  offsetbox as osb
+    import urllib
+    pic = urllib.urlretrieve("http://stats.nba.com/media/players/230x185/"+str(player_id)+".png",str(player_id)+".png")
+    player_pic = plt.imread(pic[0])
+    img = osb.OffsetImage(player_pic, zoom)
+    img = osb.AnnotationBbox(img, offset,xycoords='data',pad=0.0, box_alignment=(1,0), frameon=False)
+    return img
+
+
+if __name__ == "__main__": 
 
     parser = argparse.ArgumentParser()
 
@@ -483,6 +517,7 @@ if __name__ == "__main__":
 
     if args.player_name != '':
         if args.player_id == 0:
+            p_list = get_plist()
             vals = p_list.get(args.player_name)
             if vals is None:
                 sys.exit('Need a valid player_id')
@@ -490,7 +525,7 @@ if __name__ == "__main__":
         else:
             player_list = {args.player_name:[args.player_id, args.start_year, args.end_year],}
     else:
-        player_list = p_list
+        player_list = get_plist(operator='==', filt_value=2017)
 
     if len(player_list) == 1:    
         print "\nBegin processing " + str(len(player_list)) + " player\n"
