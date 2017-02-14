@@ -1,3 +1,6 @@
 .DS_Store
+*.pyc
+*.png
 shot_charts/
+pid_scraper.py
 temp_player_list.csv
