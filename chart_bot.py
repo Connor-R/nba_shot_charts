@@ -4,6 +4,7 @@ import sys
 import os
 import random
 import csv
+import nba_shot_charts as charts
 from urllib import urlopen
 from bs4 import BeautifulSoup
 
@@ -28,35 +29,65 @@ with open(hashtag_file, 'rU') as f:
         hashtag_list[team]=hashtag
 
 
-def tweet():
-    path, pic = get_random_pic()
-    tweet_text = parse_text(pic)
+def initiate():
+    players = ['']
+    # players = ['Jalen Rose']
 
-    pic_path = path + pic
+    get_random_pic(players)
 
-    raw_input(tweet_text)
+def get_random_pic(players):
+
+    if players == ['']:
+        p_name = get_rand_player()
+        chart_player = p_name.replace(' ','_')
+        player_path = base_path+chart_player+'/'
+        charts.gen_charts(p_name)
+        rand_chart = os.listdir(player_path)[random.randint(0,len(os.listdir(player_path))-1)]
+        tweet(player_path, rand_chart)
+    else:
+        for player in players:
+            charts.gen_charts(player)
+        for player in players:
+            player_path = base_path+player.replace(' ','_')+'/'
+            for i in range(max(0, len(os.listdir(player_path))-4), len(os.listdir(player_path))):
+                chart = os.listdir(player_path)[i]
+                tweet(player_path, chart) 
+
+def tweet(player_path, chart):
+    tweet_text = parse_text(chart)
+
+    pic_path = player_path + chart
+
+    # raw_input(tweet_text)
+
+    time.sleep(15)
     api.update_with_media(pic_path, status=tweet_text)
 
-def get_random_pic():
+def get_rand_player():
+    p_list = charts.get_plist()
+    player = random.choice(p_list.keys())
 
-    rand_player = os.listdir(base_path)[random.randint(0,len(os.listdir(base_path))-1)]
-    player_path = base_path+rand_player+'/'
-    rand_chart = os.listdir(player_path)[random.randint(0,len(os.listdir(player_path))-1)]
-
-    return player_path, rand_chart
+    return player
 
 def parse_text(pic):
     tweet = ''
     fname = pic.split('_')[2]
-    lname = pic.split('_')[3]
-    tweet = fname + ' ' + lname +'\'s '
+    if pic.split('_')[-3] == 'CAREER':
+        lname = pic.split('_')[3:-3]
+    else:
+        lname = pic.split('_')[3:-2]
+    tweet = fname + ' '
+
+    for i in range(0,len(lname)-1):
+        tweet += lname[i] + ' '
+    tweet += lname[-1] + '\'s '
 
     twitter = get_twitter(fname, lname)
     if twitter is not None:
         tweet += '(' + twitter + ') '
 
     year = pic.split('_')[-2]
-    if pic.split('_')[4] == 'CAREER':
+    if pic.split('_')[-3] == 'CAREER':
         tweet += 'Career (' + year + ') Shot Chart' 
         teams = get_reference(fname, lname, year, isCareer=True)
     else:
@@ -75,12 +106,21 @@ def parse_text(pic):
             else:
                 tweet += ' #' + hashtag
 
+    player_hashtag = fname
+    for name in lname:
+        player_hashtag += name
+    player_hashtag = player_hashtag.replace('-','').replace('.','').replace('CAREER','')
+
+    tweet += ' #' + player_hashtag
 
     return tweet
 
 def get_reference(fname, lname, year, isCareer=False):
-    search_letter = lname[:1]
-    search_name = fname + ' ' + lname
+    search_letter = lname[0][:1]
+    search_name = fname + ' '
+    for i in range(0,len(lname)-1):
+        search_name += lname[i] + ' '
+    search_name += lname[-1]
 
     index_url = "http://www.basketball-reference.com/players/%s/" % search_letter.lower()
     ind_html = urlopen(index_url)
@@ -135,7 +175,10 @@ def get_curr_team(player_url, year, isCareer):
     return teams
 
 def get_twitter(fname, lname):
-    search_name = fname + ' ' + lname
+    search_name = fname + ' '
+    for i in range(0,len(lname)-1):
+        search_name += lname[i] + ' '
+    search_name += lname[-1]
     url = "http://www.basketball-reference.com/friv/twitter.html"
     html = urlopen(url)
     soup = BeautifulSoup(html, "lxml")
@@ -156,4 +199,4 @@ def get_twitter(fname, lname):
     return twitter_name
 
 if __name__ == "__main__": 
-    tweet()
+    initiate()
