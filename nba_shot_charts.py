@@ -467,7 +467,6 @@ def get_plist(operator='', filt_value=0):
                 continue
             else:
                 player_title, player_id, start_year, end_year = row
-                print player_title
 
                 # If a player doesn't have a start_year or end_year, we set those to the max values
                 if start_year == '':
@@ -490,7 +489,6 @@ def get_plist(operator='', filt_value=0):
                         if int(end_year) == filt_value:
                             p_list[player_title]=[int(player_id), int(start_year), int(end_year)]
 
-    raw_input(len(p_list))
     return p_list
 
 
