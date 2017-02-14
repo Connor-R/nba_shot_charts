@@ -445,7 +445,7 @@ def gen_charts(player_name):
     p_list = get_plist()
     vals = p_list.get(player_name)
     if vals is None:
-        sys.exit('Need a valid player_id')
+        sys.exit('Need a valid player (check spelling)')
     player_list = {player_name:vals}
 
     initiate(player_list, str(len(player_list)), printer=False)
@@ -467,6 +467,7 @@ def get_plist(operator='', filt_value=0):
                 continue
             else:
                 player_title, player_id, start_year, end_year = row
+                print player_title
 
                 # If a player doesn't have a start_year or end_year, we set those to the max values
                 if start_year == '':
@@ -489,6 +490,7 @@ def get_plist(operator='', filt_value=0):
                         if int(end_year) == filt_value:
                             p_list[player_title]=[int(player_id), int(start_year), int(end_year)]
 
+    raw_input(len(p_list))
     return p_list
 
 
@@ -508,24 +510,18 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
 
-    # call via [python shot_charts.py --player_name 'Zach Randolph' --player_id 2216 --start_year 2001 --end_year 2017]
+    # call via [python nba_shot_charts.py --player_name "Zach Randolph"]
     parser.add_argument('--player_name',type=str,   default='')
-    parser.add_argument('--player_id',  type=int,   default=0)
-    parser.add_argument('--start_year', type=int,   default=1996)
-    parser.add_argument('--end_year',   type=int,   default=2017)
     args = parser.parse_args()
 
     if args.player_name != '':
-        if args.player_id == 0:
-            p_list = get_plist()
-            vals = p_list.get(args.player_name)
-            if vals is None:
-                sys.exit('Need a valid player_id')
-            player_list = {args.player_name:vals}
-        else:
-            player_list = {args.player_name:[args.player_id, args.start_year, args.end_year],}
+        p_list = get_plist()
+        vals = p_list.get(args.player_name)
+        if vals is None:
+            sys.exit('Need a valid player_id')
+        player_list = {args.player_name:vals}
     else:
-        player_list = get_plist(operator='==', filt_value=2017)
+        player_list = get_plist(operator='<=', filt_value=2017)
 
     if len(player_list) == 1:    
         print "\nBegin processing " + str(len(player_list)) + " player\n"
