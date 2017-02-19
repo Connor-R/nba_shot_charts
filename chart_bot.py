@@ -8,11 +8,18 @@ import nba_shot_charts as charts
 from urllib import urlopen
 from bs4 import BeautifulSoup
 
-#keep the quotes, replace this with your information
-consumer_key = '123abc...' 
-consumer_sec = '123abc...'
-access_key = '123abc...'
-access_sec = '123abc...'
+key_file = os.getcwd()+"/twitter_keys.csv"
+key_list = {}
+with open(key_file, 'rU') as f:
+    mycsv = csv.reader(f)
+    for row in mycsv:
+        _type, _key = row
+        key_list[_type]=_key
+
+consumer_key = key_list.get('consumer_key')
+consumer_sec = key_list.get('consumer_sec')
+access_key = key_list.get('access_key')
+access_sec = key_list.get('access_sec')
 
 auth = tweepy.OAuthHandler(consumer_key, consumer_sec)
 auth.set_access_token(access_key, access_sec)
@@ -28,6 +35,13 @@ with open(hashtag_file, 'rU') as f:
         team, hashtag = row
         hashtag_list[team]=hashtag
 
+hardcode_file = os.getcwd()+"/hardcode_players.csv"
+hardcode_list = {}
+with open(hardcode_file, 'rU') as f:
+    mycsv = csv.reader(f)
+    for row in mycsv:
+        player_name, twitter, player_ext = row
+        hardcode_list[player_name]=[twitter, player_ext]
 
 def initiate():
     players = ['']
@@ -56,7 +70,7 @@ def get_random_pic(players, hashtags):
                 # tweets current season chart
             # for i in range(max(0, len(os.listdir(player_path))-2), len(os.listdir(player_path))-1):
                 # tweets last 3 seasons as well as career chart
-            for i in range(max(0, len(os.listdir(player_path))-4), len(os.listdir(player_path))-0):
+            for i in range(max(0, len(os.listdir(player_path))-2), len(os.listdir(player_path))-0):
                 chart = os.listdir(player_path)[i]
                 tweet(player_path, chart, hashtags)
 
@@ -65,8 +79,8 @@ def tweet(player_path, chart, hashtags):
 
     pic_path = player_path + chart
 
-    # raw_input(tweet_text)
     print tweet_text, len(tweet_text)
+    # raw_input(pic_path)
     time.sleep(15)
     api.update_with_media(pic_path, status=tweet_text)
 
@@ -87,19 +101,21 @@ def parse_text(pic, hashtags):
 
     for i in range(0,len(lname)-1):
         tweet += lname[i] + ' '
-    tweet += lname[-1] + '\'s '
+    tweet += lname[-1]
+    full_name = tweet
+    tweet += '\'s '
 
-    twitter = get_twitter(fname, lname)
+    twitter = get_twitter(fname, lname, full_name)
     if twitter is not None:
         tweet += '(' + twitter + ') '
 
     year = pic.split('_')[-2]
     if pic.split('_')[-3] == 'CAREER':
         tweet += 'Career (' + year + ') Shot Chart' 
-        teams = get_reference(fname, lname, year, isCareer=True)
+        teams = get_reference(fname, lname, year, full_name, isCareer=True)
     else:
         tweet += year + ' Shot Chart' 
-        teams = get_reference(fname, lname, year)
+        teams = get_reference(fname, lname, year, full_name)
 
     efg = pic.split('_')[-1].split('.')[0]
     
@@ -116,7 +132,7 @@ def parse_text(pic, hashtags):
     player_hashtag = fname
     for name in lname:
         player_hashtag += name
-    player_hashtag = player_hashtag.replace('-','').replace('.','').replace('CAREER','')
+    player_hashtag = player_hashtag.replace('-','').replace('.','').replace('CAREER','').replace('(2)','').replace('(3)','')
 
     tweet += ' #' + player_hashtag
 
@@ -126,27 +142,36 @@ def parse_text(pic, hashtags):
 
     return tweet
 
-def get_reference(fname, lname, year, isCareer=False):
+def get_reference(fname, lname, year, full_name, isCareer=False):
     search_letter = lname[0][:1]
     search_name = fname + ' '
     for i in range(0,len(lname)-1):
         search_name += lname[i] + ' '
     search_name += lname[-1]
 
-    index_url = "http://www.basketball-reference.com/players/%s/" % search_letter.lower()
-    ind_html = urlopen(index_url)
-    ind_soup = BeautifulSoup(ind_html, "lxml")
+    try:
+        player_ext = hardcode_list.get(full_name)[1]
+    except TypeError:
+        player_ext = ''
 
-    data_rows = ind_soup.findAll('tr')[1:]
-    for row in data_rows:
-        p_data = row.findAll('th')
-        p_name = p_data[0].getText()
+    if player_ext != '':
+        player_url = 'http://www.basketball-reference.com' + player_ext
+        teams = get_curr_team(player_url, year, isCareer)
+        return teams
+    else:
+        index_url = "http://www.basketball-reference.com/players/%s/" % search_letter.lower()
+        ind_html = urlopen(index_url)
+        ind_soup = BeautifulSoup(ind_html, "lxml")
 
-        if p_name[:len(search_name)] == search_name:
-            player_url = 'http://www.basketball-reference.com' + row.findAll('a', href=True)[0]['href']
+        data_rows = ind_soup.findAll('tr')[1:]
+        for row in data_rows:
+            p_data = row.findAll('th')
+            p_name = p_data[0].getText()
 
-            teams = get_curr_team(player_url, year, isCareer)
-            return teams
+            if p_name[:len(search_name)] == search_name:
+                player_url = 'http://www.basketball-reference.com' + row.findAll('a', href=True)[0]['href']
+                teams = get_curr_team(player_url, year, isCareer)
+                return teams
 
     return [None]
 
@@ -185,27 +210,37 @@ def get_curr_team(player_url, year, isCareer):
     teams = list(set(teams))
     return teams
 
-def get_twitter(fname, lname):
-    search_name = fname + ' '
-    for i in range(0,len(lname)-1):
-        search_name += lname[i] + ' '
-    search_name += lname[-1]
-    url = "http://www.basketball-reference.com/friv/twitter.html"
-    html = urlopen(url)
-    soup = BeautifulSoup(html, "lxml")
+def get_twitter(fname, lname, full_name):
+    try:
+        twitter_name = hardcode_list.get(full_name)[0]
+    except TypeError:
+        twitter_name = None
 
-    data_rows = soup.findAll('tr')[2:] 
+    if twitter_name in (None, ''):
 
-    for row in data_rows:
-        p_entry = {}
-        p_data = row.findAll('td')
-        p_name = p_data[0].getText()
+        search_name = fname + ' '
+        for i in range(0,len(lname)-1):
+            search_name += lname[i] + ' '
+        search_name += lname[-1]
+        url = "http://www.basketball-reference.com/friv/twitter.html"
+        html = urlopen(url)
+        soup = BeautifulSoup(html, "lxml")
 
-        if p_name == search_name:
-            twitter_name = p_data[1].getText()
-            break
-        else:
-            twitter_name = None
+        data_rows = soup.findAll('tr')[2:] 
+
+        for row in data_rows:
+            p_entry = {}
+            p_data = row.findAll('td')
+            p_name = p_data[0].getText()
+
+            if p_name == search_name:
+                twitter_name = p_data[1].getText()
+                break
+            else:
+                twitter_name = None
+
+    if twitter_name == 'notwitter':
+        twitter_name = None
 
     return twitter_name
 
