@@ -20,7 +20,7 @@ api = tweepy.API(auth)
 
 base_path = os.getcwd()+"/shot_charts/"
 
-hashtag_file = os.getcwd()+"/nba_hashtags.csv"
+hashtag_file = os.getcwd()+"/team_hashtags.csv"
 hashtag_list = {}
 with open(hashtag_file, 'rU') as f:
     mycsv = csv.reader(f)
@@ -31,35 +31,42 @@ with open(hashtag_file, 'rU') as f:
 
 def initiate():
     players = ['']
-    # players = ['Jalen Rose']
+    hashtags = ['']
+    # players = ['']
+    # hashtags = ['']
 
-    get_random_pic(players)
+    get_random_pic(players, hashtags)
 
-def get_random_pic(players):
+def get_random_pic(players, hashtags):
 
     if players == ['']:
         p_name = get_rand_player()
+        print p_name
         chart_player = p_name.replace(' ','_')
         player_path = base_path+chart_player+'/'
         charts.gen_charts(p_name)
         rand_chart = os.listdir(player_path)[random.randint(0,len(os.listdir(player_path))-1)]
-        tweet(player_path, rand_chart)
+        tweet(player_path, rand_chart, hashtags)
     else:
         for player in players:
+            print player
             charts.gen_charts(player)
         for player in players:
             player_path = base_path+player.replace(' ','_')+'/'
-            for i in range(max(0, len(os.listdir(player_path))-4), len(os.listdir(player_path))):
+                # tweets current season chart
+            # for i in range(max(0, len(os.listdir(player_path))-2), len(os.listdir(player_path))-1):
+                # tweets last 3 seasons as well as career chart
+            for i in range(max(0, len(os.listdir(player_path))-4), len(os.listdir(player_path))-0):
                 chart = os.listdir(player_path)[i]
-                tweet(player_path, chart) 
+                tweet(player_path, chart, hashtags)
 
-def tweet(player_path, chart):
-    tweet_text = parse_text(chart)
+def tweet(player_path, chart, hashtags):
+    tweet_text = parse_text(chart, hashtags)
 
     pic_path = player_path + chart
 
     # raw_input(tweet_text)
-
+    print tweet_text, len(tweet_text)
     time.sleep(15)
     api.update_with_media(pic_path, status=tweet_text)
 
@@ -69,7 +76,7 @@ def get_rand_player():
 
     return player
 
-def parse_text(pic):
+def parse_text(pic, hashtags):
     tweet = ''
     fname = pic.split('_')[2]
     if pic.split('_')[-3] == 'CAREER':
@@ -112,6 +119,10 @@ def parse_text(pic):
     player_hashtag = player_hashtag.replace('-','').replace('.','').replace('CAREER','')
 
     tweet += ' #' + player_hashtag
+
+    if hashtags != ['']:
+        for tag in hashtags:
+            tweet += ' #' + tag
 
     return tweet
 
@@ -197,6 +208,7 @@ def get_twitter(fname, lname):
             twitter_name = None
 
     return twitter_name
+
 
 if __name__ == "__main__": 
     initiate()
