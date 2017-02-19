@@ -14,7 +14,6 @@ from matplotlib import  offsetbox as osb
 from matplotlib.patches import RegularPolygon
 from datetime import date, datetime, timedelta
 
-
 # setting the color map we want to use
 mymap = mpb.cm.YlOrRd
 
@@ -43,8 +42,13 @@ def initiate(p_list, list_length, printer=True):
         # defines a path to a directory for saving the charts of the current player
         path = base_path+'/shot_charts/'+player_name+'/'
 
-        # checks if our desired directory exists, and if not, creates it
+        # checks if our desired directory exists, archived the charts if they exist, and (re-)create the directory
         if not os.path.exists(path):
+            os.makedirs(path)
+        # if you download this code and re-use it, you'll either have to alter the path in the next line, or delete the following 3 lines
+        else:
+            arch_path = '/Users/connordog/Desktop/archived_charts/'+player_name+'_'+str(datetime.now())
+            os.rename(path, arch_path)
             os.makedirs(path)
 
         # deletes previous versions of images
@@ -92,13 +96,18 @@ def initiate(p_list, list_length, printer=True):
                 all_shots_df = all_shots_df.append(year_shots_df, ignore_index=True)
 
         # making a text string for usage in the career shot chart
-        career_string = "CAREER (%s-%s)" % (min_year, max_year)
+        # again, if you download and are re-using this code, you'll either have to delete or change the arch_path that I use for archiving old charts
+        if min_year == 9999 or max_year == 0:
+            arch_path = '/Users/connordog/Desktop/archived_charts/'+player_name+'_NOGAMES'
+            os.makedirs(arch_path)
+        else:
+            career_string = "CAREER (%s-%s)" % (min_year, max_year)
 
-        if printer is True:
-            print '\t\t\t', career_string, player_name
+            if printer is True:
+                print '\t\t\t', career_string, player_name
 
-        # making a shot chart for all shots in the player's career. note that we have to use the option isCareer, min_year, and max_year arguments to properly format this chart
-        shooting_plot(path, all_shots_df, player_id, career_string, player_title, player_name, isCareer=True, min_year=min_year, max_year=max_year)
+            # making a shot chart for all shots in the player's career. note that we have to use the option isCareer, min_year, and max_year arguments to properly format this chart
+            shooting_plot(path, all_shots_df, player_id, career_string, player_title, player_name, isCareer=True, min_year=min_year, max_year=max_year)
 
     # after we finish the script, we remove all the player images that were saved to the directory during the acquire_playerPic function
     os.chdir(base_path)
@@ -440,7 +449,7 @@ def draw_court(ax=None, color='white', lw=2, outer_lines=False):
     ax.set_yticks([])
     return ax
 
-#for usage with shot_chart_boy
+#for usage with shot_chart_bot
 def gen_charts(player_name):
     p_list = get_plist()
     vals = p_list.get(player_name)
@@ -452,7 +461,7 @@ def gen_charts(player_name):
 
 
 #player_list generation
-def get_plist(operator='', filt_value=0):
+def get_plist(operator='', filt_value=0, backfill=False):
     # a list of interesting players/player_id's that I want to generate shot charts for
     csv_file = os.getcwd()+"/player_list.csv"
 
@@ -466,7 +475,15 @@ def get_plist(operator='', filt_value=0):
                 i += 1
                 continue
             else:
+                i += 1
                 player_title, player_id, start_year, end_year = row
+
+                player_search_name = player_title.replace(" ","_")
+
+                # Charts for only new players (only for backfilling)
+                if backfill is True:
+                    if os.path.exists(os.getcwd()+'/shot_charts/'+player_search_name):
+                        continue
 
                 # If a player doesn't have a start_year or end_year, we set those to the max values
                 if start_year == '':
@@ -485,7 +502,7 @@ def get_plist(operator='', filt_value=0):
                         if int(end_year) <= filt_value:
                             p_list[player_title]=[int(player_id), int(start_year), int(end_year)]
                     else:
-                        'print, unknown operator, using =='
+                        print 'unknown operator, using =='
                         if int(end_year) == filt_value:
                             p_list[player_title]=[int(player_id), int(start_year), int(end_year)]
 
@@ -519,7 +536,8 @@ if __name__ == "__main__":
             sys.exit('Need a valid player_id')
         player_list = {args.player_name:vals}
     else:
-        player_list = get_plist(operator='<=', filt_value=2017)
+        # If we don't have a name, we assume we're trying to backfill
+        player_list = get_plist(operator='<=', filt_value=9999, backfill=True)
 
     if len(player_list) == 1:    
         print "\nBegin processing " + str(len(player_list)) + " player\n"
