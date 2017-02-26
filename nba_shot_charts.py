@@ -1,6 +1,7 @@
 import requests
 import urllib
 import os
+import shutil
 import csv
 import sys
 import glob
@@ -47,7 +48,9 @@ def initiate(p_list, list_length, printer=True):
             os.makedirs(path)
         # if you download this code and re-use it, you'll either have to alter the path in the next line, or delete the following 3 lines
         else:
-            arch_path = '/Users/connordog/Desktop/archived_charts/'+player_name+'_'+str(datetime.now())
+            arch_path = '/Users/connordog/Desktop/archived_charts/'+str(date.today())+'_'+str(datetime.now().hour)+'_'+player_name
+            if os.path.exists(arch_path):
+                shutil.rmtree(arch_path)
             os.rename(path, arch_path)
             os.makedirs(path)
 

@@ -1,7 +1,7 @@
 # NBA Shot Charts
 This project is licensed under the terms of the MIT license.
 
-A python script made to create shot charts for any NBA player season or career (from 1996 to present).
+A python script made to create shot charts for any NBA player season or career (from 1996 to present, currently at 11000+ unique player/season combinations).
 
 These charts are primarily an extension from the work of [Dan Vatterott](http://www.danvatterott.com/) and [Savvas Tjortjoglou](http://www.savvastjortjoglou.com). I made an attempt to combine my favorite aspects of other shot charts on the internet (primarily from: [Kirk](https://www.instagram.com/kirkgoldsberry/) [Goldsberry](https://fivethirtyeight.com/contributors/kirk-goldsberry/), [Buckets (by Peter Beshai)](http://buckets.peterbeshai.com/app/#/playerView/201935_2015), [BallR (by Todd Schneider)](http://toddwschneider.com/posts/ballr-interactive-nba-shot-charts-with-r-and-shiny/), and [Swish (by Austin Clemens)](http://www.austinclemens.com/shotcharts/)) into one image, while also adding some additional features I thought would be nice in order to better distinguish the strengths and weaknesses of a player.
 

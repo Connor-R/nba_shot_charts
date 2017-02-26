@@ -508,7 +508,7 @@ Reggie Evans,2501,2002,2015
 Tyreke Evans,201936,2009,2017
 Daniel Ewing,101137,2005,2007
 Patrick Ewing,121,1985,2002
-Patrick Ewing Jr.,201607,2010,2011
+Patrick Ewing(2),201607,2010,2011
 Dante Exum,203957,2014,2017
 Christian Eyenga,201963,2010,2012
 Festus Ezeli,203105,2012,2017
@@ -665,6 +665,7 @@ Anthony Grundy,101219,2005,2006
 Tom Gugliotta,339,1992,2005
 Jorge Gutierrez,203268,2013,2016
 A.J. Guyton,2062,2000,2003
+Ha Ha,2775,2004,2006
 Hamed Haddadi,201632,2008,2013
 Malik Hairston,201612,2008,2010
 P.J. Hairston,203798,2014,2016
@@ -709,7 +710,7 @@ Gary Harris,203914,2014,2017
 Joe Harris,203925,2014,2017
 Lucious Harris,446,1993,2005
 Manny Harris,202412,2010,2014
-Michael Harris,200839,2007,2014
+Mike Harris,200839,2007,2014
 Terrel Harris,202227,2011,2013
 Tobias Harris,202699,2011,2017
 Aaron Harrison,1626151,2015,2017
@@ -725,7 +726,7 @@ Spencer Hawes,201150,2007,2017
 Hersey Hawkins,765,1988,2001
 Juaquin Hawkins,1038,2002,2003
 Michael Hawkins,1138,1996,2001
-Charles Hayes,101236,2005,2016
+Chuck Hayes,101236,2005,2016
 Jarvis Hayes,2553,2003,2010
 Gordon Hayward,202330,2010,2017
 Lazar Hayward,202351,2010,2013
@@ -815,7 +816,7 @@ Brandon Ingram,1627742,2016,2017
 Kyrie Irving,202681,2011,2017
 Allen Iverson,947,1996,2010
 Royal Ivey,2767,2004,2014
-Jarrett Jack,101127,2005,2016
+Jarrett Jack,101127,2005,2017
 Bobby Jackson,1517,1997,2009
 Cedric Jackson,202132,2009,2010
 Darnell Jackson,201616,2008,2011
@@ -911,7 +912,7 @@ Solomon Jones,200780,2006,2014
 Terrence Jones,203093,2012,2017
 Tyus Jones,1626145,2015,2017
 Perry Jones III,203103,2012,2015
-Derrick Jones Jr.,1627884,2016,2017
+"Derrick Jones, Jr.",1627884,2016,2017
 Adonis Jordan,1817,1993,1999
 DeAndre Jordan,201599,2008,2017
 Jerome Jordan,202366,2011,2015
@@ -1200,17 +1201,16 @@ Erik Murphy,203513,2013,2014
 Kevin Murphy,203122,2012,2013
 Troy Murphy,2211,2001,2013
 Dejounte Murray,1627749,2016,2017
+Flip Murray,2436,2002,2010
 Jamal Murray,1627750,2016,2017
 Lamond Murray,441,1994,2006
-Ronald Murray,2436,2002,2010
 Tracy Murray,145,1992,2004
 Toure' Murry,203315,2013,2015
 Mike Muscala,203488,2013,2017
 Dikembe Mutombo,87,1991,2009
 Martin Muursepp,982,1996,1998
 Pete Myers,939,1986,1998
-Makhtar N'Diaye,1823,1998,1999
-Boniface N'Dong,101238,2005,2006
+Makhtar N'diaye,1823,1998,1999
 Mamadou N'diaye,2055,2000,2005
 Bostjan Nachbar,2411,2002,2008
 Lee Nailon,1924,2000,2006
@@ -1220,6 +1220,7 @@ Shabazz Napier,203894,2014,2017
 Steve Nash,959,1996,2014
 Juan Carlos Navarro,2434,2007,2008
 Hamady Ndiaye,202380,2010,2014
+Boniface Ndong,101238,2005,2006
 Maurice Ndour,1626254,2016,2017
 Gary Neal,202390,2010,2017
 Nemanja Nedovic,203517,2013,2014
@@ -1348,8 +1349,8 @@ Olden Polynice,178,1987,2004
 Quincy Pondexter,202347,2010,2017
 Mark Pope,998,1997,2005
 Chris Porter,2084,2000,2001
-Otto Porter,203490,2013,2017
 Terry Porter,345,1985,2002
+Otto Porter Jr.,203490,2013,2017
 Bobby Portis,1626171,2015,2017
 Kristaps Porzingis,204001,2015,2017
 James Posey,1899,1999,2011
@@ -1379,7 +1380,7 @@ Vladimir Radmanovic,2209,2001,2013
 Aleksandar Radojevic,1893,1999,2005
 Miroslav Raduljica,203545,2013,2015
 Igor Rakocevic,2080,2002,2003
-Peter Ramos,2762,2004,2005
+Peter John Ramos,2762,2004,2005
 Chasson Randle,1626184,2016,2017
 Julius Randle,203944,2014,2017
 Anthony Randolph,201576,2008,2014
@@ -1476,7 +1477,7 @@ Cheikh Samb,200798,2007,2009
 JaKarr Sampson,203960,2014,2016
 Jamal Sampson,2441,2002,2007
 Samardo Samuels,202396,2010,2013
-Juan Sanchez,2143,2000,2003
+Pepe Sanchez,2143,2000,2003
 Larry Sanders,202336,2010,2015
 Melvin Sanders,2684,2005,2006
 Daniel Santiago,2091,2000,2005
@@ -1509,7 +1510,6 @@ Mouhamed Sene,200754,2006,2009
 Kevin Seraphin,202338,2010,2017
 Ansu Sesay,1738,2001,2005
 Ramon Sessions,201196,2007,2017
-Ha Seung-Jin,2775,2004,2006
 Charles Shackleford,1593,1988,1999
 Mustafa Shakur,201203,2009,2014
 God Shammgod,1539,1997,1998
@@ -1617,6 +1617,7 @@ Derek Strong,400,1991,2001
 Rodney Stuckey,201155,2007,2017
 Jared Sullinger,203096,2012,2017
 DaJuan Summers,201969,2009,2013
+Sun Sun,201180,2008,2009
 Bruno Sundov,1743,1998,2005
 Bob Sura,682,1995,2007
 Michael Sweetney,2552,2003,2007
@@ -1631,7 +1632,7 @@ Chris Taft,101147,2005,2006
 Dragan Tarlac,1434,2000,2001
 Edy Tavares,204002,2015,2017
 Donell Taylor,101182,2005,2007
-Jeff Taylor,203106,2012,2015
+Jeffery Taylor,203106,2012,2015
 Jermaine Taylor,201966,2009,2011
 Johnny Taylor,1511,1997,2000
 Maurice Taylor,1508,1997,2007
@@ -1698,7 +1699,7 @@ Edwin Ubiles,202775,2011,2012
 Ekpe Udoh,202327,2010,2015
 Ime Udoka,2137,2003,2011
 Beno Udrih,2757,2004,2017
-Roko Leni Ukic,101146,2008,2010
+Roko Ukic,101146,2008,2010
 Tyler Ulis,1627755,2016,2017
 Ben Uzoh,202386,2010,2012
 Jonas Valanciunas,202685,2012,2017
@@ -1873,7 +1874,6 @@ Nick Young,201156,2007,2017
 Sam Young,201970,2009,2013
 Thaddeus Young,201152,2007,2017
 Tim Young,1937,1999,2000
-Sun Yue,201180,2008,2009
 Cody Zeller,203469,2013,2017
 Luke Zeller,202545,2012,2013
 Tyler Zeller,203092,2012,2017

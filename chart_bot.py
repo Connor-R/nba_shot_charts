@@ -43,17 +43,24 @@ with open(hardcode_file, 'rU') as f:
         player_name, twitter, player_ext = row
         hardcode_list[player_name]=[twitter, player_ext]
 
-def initiate():
-    players = ['']
-    hashtags = ['']
+def initiate(p_name=None, hardcode_tags=None):
+
+    players = []
+    hashtags = []
     # players = ['']
     # hashtags = ['']
+
+    if p_name is not None:
+        players = [p_name]
+    if hardcode_tags is not None:
+        for tag in hardcode_tags:
+            hashtags.append(tag)
 
     get_random_pic(players, hashtags)
 
 def get_random_pic(players, hashtags):
 
-    if players == ['']:
+    if players == []:
         p_name = get_rand_player()
         print p_name
         chart_player = p_name.replace(' ','_')
@@ -65,11 +72,10 @@ def get_random_pic(players, hashtags):
         for player in players:
             print player
             charts.gen_charts(player)
+        # raw_input("READY TO TWEET?")
         for player in players:
             player_path = base_path+player.replace(' ','_')+'/'
-                # tweets current season chart
-            # for i in range(max(0, len(os.listdir(player_path))-2), len(os.listdir(player_path))-1):
-                # tweets last 3 seasons as well as career chart
+            # tweets a range of seasons (-1 is career, -2 is current season, -3 is 2 seasons previous, etc.)
             for i in range(max(0, len(os.listdir(player_path))-2), len(os.listdir(player_path))-0):
                 chart = os.listdir(player_path)[i]
                 tweet(player_path, chart, hashtags)
@@ -114,7 +120,10 @@ def parse_text(pic, hashtags):
         tweet += 'Career (' + year + ') Shot Chart' 
         teams = get_reference(fname, lname, year, full_name, isCareer=True)
     else:
-        tweet += year + ' Shot Chart' 
+        if year == '2016-17':
+            tweet += year + '(in progress) Shot Chart'
+        else:
+            tweet += year + ' Shot Chart' 
         teams = get_reference(fname, lname, year, full_name)
 
     efg = pic.split('_')[-1].split('.')[0]
@@ -136,7 +145,7 @@ def parse_text(pic, hashtags):
 
     tweet += ' #' + player_hashtag
 
-    if hashtags != ['']:
+    if hashtags != []:
         for tag in hashtags:
             tweet += ' #' + tag
 
@@ -205,7 +214,8 @@ def get_curr_team(player_url, year, isCareer):
                 teams.append(seas_team)
 
     if isCareer is True:
-        teams.append('NBA')
+        if int(year.split('-')[-1]) < 2005:
+            teams.append('NBA')
 
     teams = list(set(teams))
     return teams
@@ -245,5 +255,15 @@ def get_twitter(fname, lname, full_name):
     return twitter_name
 
 
-if __name__ == "__main__": 
-    initiate()
+if __name__ == "__main__":
+    tweet_dict = {} 
+    # tweet_dict = {'DeMarcus Cousins':['Pelicans'],}
+
+
+    if tweet_dict == {}:
+        initiate()
+    else:
+        for name, tags in tweet_dict.items():
+            initiate(p_name=name, hardcode_tags=tags)
+
+

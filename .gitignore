@@ -3,4 +3,5 @@
 *.png
 shot_charts/
 pid_scraper.py
+total_chart_checker.py
 temp_player_list.csv
