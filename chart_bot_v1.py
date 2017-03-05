@@ -4,7 +4,7 @@ import sys
 import os
 import random
 import csv
-import nba_shot_charts as charts
+import nba_shot_charts_v1 as charts
 from urllib import urlopen
 from bs4 import BeautifulSoup
 
