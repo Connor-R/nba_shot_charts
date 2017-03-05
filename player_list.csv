@@ -144,6 +144,7 @@ Elmer Bennett,1120,1994,1997
 Mario Bennett,712,1995,2003
 David Benoit,128,1991,2001
 Keith Benson,202728,2011,2012
+Ben Bentil,1627791,2016,2017
 Davis Bertans,202722,2016,2017
 Travis Best,696,1995,2005
 Patrick Beverley,201976,2012,2017
@@ -322,7 +323,7 @@ Speedy Claxton,2049,2001,2009
 Mateen Cleaves,2043,2000,2006
 Keith Closs,1569,1997,2001
 John Coker,715,1995,2001
-Norris Cole,202708,2011,2016
+Norris Cole,202708,2011,2017
 Derrick Coleman,934,1990,2005
 Bimbo Coles,902,1990,2004
 Jason Collier,2044,2000,2005
@@ -341,6 +342,7 @@ Will Conroy,101215,2006,2013
 Brian Cook,2567,2003,2012
 Daequan Cook,201161,2007,2013
 Omar Cook,2241,2001,2005
+Quinn Cook,1626188,2016,2017
 Jack Cooley,204022,2014,2015
 Chris Copeland,203142,2012,2016
 Tyrone Corbin,895,1985,2001
@@ -407,7 +409,6 @@ Todd Day,103,1992,2001
 Austin Daye,201948,2009,2015
 Nando De Colo,201986,2012,2014
 Andrew DeClercq,692,1995,2005
-DeMar DeRozan,201942,2009,2017
 Dewayne Dedmon,203473,2013,2017
 Terry Dehere,143,1993,1999
 Bryce Dejean-Jones,1626214,2015,2016
@@ -421,6 +422,7 @@ Matthew Dellavedova,203521,2013,2017
 Dell Demps,725,1993,1997
 Luol Deng,2736,2004,2017
 Justin Dentmon,202458,2011,2013
+DeMar DeRozan,201942,2009,2017
 Derrick Dial,1760,1999,2004
 Cheick Diallo,1627767,2016,2017
 Boris Diaw,2564,2003,2017
@@ -599,7 +601,6 @@ Matt Geiger,761,1992,2002
 Mickael Gelabale,101153,2006,2013
 Devean George,1904,1999,2010
 Paul George,202331,2010,2017
-Marcus Georges-Hunt,1627875,2016,2017
 Daniel Gibson,200789,2006,2013
 Jonathan Gibson,1626780,2016,2017
 Taj Gibson,201959,2009,2017
@@ -695,7 +696,7 @@ Tim Hardaway Jr.,203501,2013,2017
 James Harden,201935,2009,2017
 Maurice Harkless,203090,2012,2017
 Derek Harper,157,1983,1999
-Justin Harper,202712,2011,2016
+Justin Harper,202712,2011,2017
 Ron Harper,166,1986,2001
 Matt Harpring,1723,1998,2009
 Montrezl Harrell,1626149,2015,2017
@@ -860,6 +861,7 @@ Chris Jent,1137,1993,1997
 Jonas Jerebko,201973,2009,2017
 Grant Jerrett,203511,2013,2015
 Pooh Jeter,200817,2010,2011
+Yi Jianlian,201146,2007,2012
 Britton Johnsen,2639,2003,2005
 Alexander Johnson,200792,2006,2010
 Amir Johnson,101161,2005,2017
@@ -912,7 +914,7 @@ Solomon Jones,200780,2006,2014
 Terrence Jones,203093,2012,2017
 Tyus Jones,1626145,2015,2017
 Perry Jones III,203103,2012,2015
-"Derrick Jones, Jr.",1627884,2016,2017
+Derrick Jones Jr.,1627884,2016,2017
 Adonis Jordan,1817,1993,1999
 DeAndre Jordan,201599,2008,2017
 Jerome Jordan,202366,2011,2015
@@ -969,12 +971,10 @@ Rob Kurz,201633,2008,2010
 Ibrahim Kutluay,2825,2004,2005
 Ognjen Kuzmic,203136,2013,2015
 Mindaugas Kuzminskas,1627851,2016,2017
-Raef LaFrentz,1711,1998,2009
-Rusty LaRue,1601,1997,2004
-Zach LaVine,203897,2014,2017
 Skal Labissiere,1627746,2016,2017
 Christian Laettner,363,1992,2005
 Oliver Lafayette,201802,2009,2010
+Raef LaFrentz,1711,1998,2009
 Doron Lamb,203117,2012,2014
 Jeremy Lamb,203087,2012,2017
 Maciej Lampe,2573,2003,2006
@@ -989,14 +989,15 @@ Keith Langford,101247,2007,2008
 Dan Langhi,2061,2000,2004
 Nicolas Laprovittola,1627879,2016,2017
 Shane Larkin,203499,2013,2016
+Rusty LaRue,1601,1997,2004
 Stephane Lasme,201186,2007,2008
 Priest Lauderdale,968,1996,1998
 Joffrey Lauvergne,203530,2014,2017
+Zach LaVine,203897,2014,2017
 Acie Law,201151,2007,2011
 Jason Lawson,1535,1997,2003
 Ty Lawson,201951,2009,2017
 Jake Layman,1627774,2016,2017
-Caris LeVert,1627747,2016,2017
 Eric Leckner,287,1988,1997
 Ricky Ledo,203495,2013,2015
 Courtney Lee,201584,2008,2017
@@ -1009,6 +1010,7 @@ Kawhi Leonard,202695,2011,2017
 Meyers Leonard,203086,2012,2017
 Travis Leslie,202727,2011,2012
 Jon Leuer,202720,2011,2017
+Caris LeVert,1627747,2016,2017
 Martin Lewis,729,1995,1997
 Quincy Lewis,1900,1999,2004
 Rashard Lewis,1740,1998,2014
@@ -1038,12 +1040,12 @@ Timothe Luwawu-Cabarrot,1627789,2016,2017
 Trey Lyles,1626168,2015,2017
 George Lynch,248,1993,2005
 Todd MacCulloch,1928,1999,2004
-Don MacLean,931,1992,2001
 Scott Machado,203159,2012,2013
 Arvydas Macijauskas,101178,2005,2006
 Sam Mack,694,1992,2002
 Shelvin Mack,202714,2011,2017
 Vernon Macklin,202731,2011,2012
+Don MacLean,931,1992,2001
 Mark Macon,1855,1991,1999
 Tito Maddox,2432,2002,2003
 Gerald Madkins,1666,1993,1998
@@ -1091,7 +1093,7 @@ O.J. Mayo,201564,2008,2016
 Luc Mbah a Moute,201601,2008,2017
 D.J. Mbenga,2788,2004,2011
 James Michael McAdoo,203949,2014,2017
-Ray McCallum,203492,2013,2017
+Ray McCallum,203492,2013,2016
 Bob McCann,737,1989,1998
 Rashad McCants,101119,2005,2009
 Kelly McCarty,1820,1998,1999
@@ -1157,6 +1159,7 @@ Patty Mills,201988,2009,2017
 Terry Mills,371,1990,2001
 Elijah Millsap,202407,2014,2016
 Paul Millsap,200794,2006,2017
+Yao Ming,2397,2002,2012
 Greg Minor,65,1994,1999
 Nikola Mirotic,202703,2014,2017
 Jason Miskiri,1954,1999,2000
@@ -1249,6 +1252,7 @@ Steve Novak,200779,2006,2017
 Dirk Nowitzki,1717,1998,2017
 James Nunnally,203263,2013,2014
 Jusuf Nurkic,203994,2014,2017
+David Nwaba,1628021,2016,2017
 Charles O'Bannon,1525,1997,1999
 Ed O'Bannon,709,1995,1997
 J.J. O'Brien,1626266,2015,2016
@@ -1525,7 +1529,6 @@ Pascal Siakam,1627783,2016,2017
 Xavier Silas,202918,2011,2012
 Garret Siler,202081,2010,2011
 Wayne Simien,101134,2005,2007
-Ben Simmons,1627732,2016,2017
 Bobby Simmons,2250,2001,2012
 Cedric Simmons,200759,2006,2009
 Jonathon Simmons,203613,2015,2017
@@ -1551,12 +1554,12 @@ Craig Smith,200783,2006,2012
 Donta Smith,2764,2004,2006
 Greg Smith,202962,2011,2016
 Ish Smith,202397,2010,2017
-J.R. Smith,2747,2004,2017
 Jabari Smith,2074,2000,2005
 Jason Smith,201160,2007,2017
 Jerry Smith,202536,2011,2012
 Joe Smith,693,1995,2011
 Josh Smith,2746,2004,2016
+J.R. Smith,2747,2004,2017
 Kenny Smith,181,1987,1997
 Leon Smith,1910,2001,2004
 Michael Smith,63,1994,2001
@@ -1632,6 +1635,7 @@ Chris Taft,101147,2005,2006
 Dragan Tarlac,1434,2000,2001
 Edy Tavares,204002,2015,2017
 Donell Taylor,101182,2005,2007
+Isaiah Taylor,1627819,2016,2017
 Jeffery Taylor,203106,2012,2015
 Jermaine Taylor,201966,2009,2011
 Johnny Taylor,1511,1997,2000
@@ -1677,7 +1681,7 @@ Wayman Tisdale,47,1985,1997
 Mike Tobey,1627861,2016,2017
 Anthony Tolliver,201229,2008,2017
 Oscar Torres,2351,2001,2003
-Axel Toupane,1626253,2015,2016
+Axel Toupane,1626253,2015,2017
 Keith Tower,700,1993,1997
 Karl-Anthony Towns,1626157,2015,2017
 Robert Traylor,1714,1998,2005
@@ -1706,8 +1710,8 @@ Jonas Valanciunas,202685,2012,2017
 Denzel Valentine,1627756,2016,2017
 Nick Van Exel,89,1993,2006
 Keith Van Horn,1496,1997,2006
-Fred VanVleet,1627832,2016,2017
 David Vanterpool,2128,2000,2001
+Fred VanVleet,1627832,2016,2017
 Ratko Varda,2237,2001,2003
 Anderson Varejao,2760,2004,2017
 Jarvis Varnado,202363,2012,2014
@@ -1792,8 +1796,8 @@ Hassan Whiteside,202355,2010,2017
 Chris Whitney,43,1993,2004
 Shayne Whittington,203963,2014,2016
 Andrew Wiggins,203952,2014,2017
-C.J. Wilcox,203912,2014,2017
 Chris Wilcox,2404,2002,2013
+C.J. Wilcox,203912,2014,2017
 Damien Wilkins,2863,2004,2013
 Dominique Wilkins,1122,1982,1999
 Gerald Wilkins,786,1985,1999
@@ -1864,9 +1868,7 @@ Julian Wright,201153,2007,2011
 Lorenzen Wright,953,1996,2009
 Sharone Wright,412,1994,1998
 Tony Wroten,203100,2012,2016
-Yao Ming,2397,2002,2012
 Vincent Yarbrough,2428,2002,2003
-Yi Jianlian,201146,2007,2012
 James Young,203923,2014,2017
 Joe Young,1626202,2015,2017
 Korleone Young,1748,1998,1999

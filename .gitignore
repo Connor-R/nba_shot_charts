@@ -2,6 +2,8 @@
 *.pyc
 *.png
 shot_charts/
-pid_scraper.py
 total_chart_checker.py
 temp_player_list.csv
+nba_shots_daily_run.sh
+nba_shot_charts_v2.py
+chart_bot_v2.py
