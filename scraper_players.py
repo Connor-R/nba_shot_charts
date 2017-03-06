@@ -3,6 +3,7 @@ import urllib
 import csv
 import os
 import sys
+from time import time
 
 sys.path.append('/Users/connordog/Dropbox/Desktop_Files/Work_Things/CodeBase/Python_Scripts/Python_Projects/packages')
 sys.path.append('/Users/connordog/Dropbox/Desktop_Files/Work_Things/maxdalury/sports/general')
@@ -11,6 +12,9 @@ from py_data_getter import data_getter
 from py_db import db
 
 db = db('nba_shots')
+
+start_time = time()
+
 
 getter = data_getter()
 
@@ -105,3 +109,10 @@ for player in players:
 
         row = [p_name, player_id, from_year, to_year]
         append_csv.writerow(row)
+
+
+end_time = time()
+elapsed_time = float(end_time - start_time)
+print "scraper_players.py"
+print "time elapsed (in seconds): " + str(elapsed_time)
+print "time elapsed (in minutes): " + str(elapsed_time/60.0)

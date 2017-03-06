@@ -3,6 +3,8 @@ import urllib
 import csv
 import os
 import sys
+from time import time
+
 
 sys.path.append('/Users/connordog/Dropbox/Desktop_Files/Work_Things/CodeBase/Python_Scripts/Python_Projects/packages')
 sys.path.append('/Users/connordog/Dropbox/Desktop_Files/Work_Things/maxdalury/sports/general')
@@ -14,6 +16,8 @@ db = db('nba_shots')
 
 
 def initiate():
+    start_time = time()
+
     for year in range(2016,2017):
         season_start = year
         season_id = str(season_start)+str(season_start%100+1).zfill(2)[-2:]
@@ -22,6 +26,12 @@ def initiate():
         process_players(season_id)
         process_teams(season_id)
         process_league(season_id)
+
+    end_time = time()
+    elapsed_time = float(end_time - start_time)
+    print "shots_Breakdown.py"
+    print "time elapsed (in seconds): " + str(elapsed_time)
+    print "time elapsed (in minutes): " + str(elapsed_time/60.0)
 
 def process_players(season_id):
     print '\tplayers'
