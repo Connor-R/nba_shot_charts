@@ -1,4 +1,6 @@
 # NBA Shot Charts
+
+## General Details
 This project is licensed under the terms of the MIT license.
 
 A python script made to create shot charts for any NBA player season or career (from 1996 to present).
@@ -16,7 +18,7 @@ If you're interested in seeing more charts, I created a twitter bot ([@NBAChartB
 If you would like to report a bug, request a specific player chart, or contact me for any other reason, my contact information is at the bottom of [my personal github.io page](http://connor-r.github.io/).
 
 
-March 4, 2017 Update:
+### March 4, 2017 Update
 I'm changing the code structure a bit. I've added scrapers and some post-processing scripts so I can store/manipulate the shot data a little bit easier in a MySQL database. I'm leaving the original chart generator (`nba_shot_charts_v1.py`) and chart bot script (`chart_bot_v1.py`), but will eventually add a v2 of both of this scripts, using the MySQL db instead of re-scraping nba.com each time. Part of the reason I'm changing the structure is to help facilitate a few longer term goals of these charts:
 - [ ] Speeding up the process of generating a chart (querying the database is faster than scraping the web)
 - [ ] Generating team shot charts similar to how we current generate player charts.
