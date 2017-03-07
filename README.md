@@ -18,7 +18,7 @@ If you would like to report a bug, request a specific player chart, or contact m
 
 March 4, 2017 Update:
 I'm changing the code structure a bit. I've added scrapers and some post-processing scripts so I can store/manipulate the shot data a little bit easier in a MySQL database. I'm leaving the original chart generator (`nba_shot_charts_v1.py`) and chart bot script (`chart_bot_v1.py`), but will eventually add a v2 of both of this scripts, using the MySQL db instead of re-scraping nba.com each time. Part of the reason I'm changing the structure is to help facilitate a few longer term goals of these charts:
-* Speeding up the process of generating a chart (querying the database is faster than scraping the web)
-* Generating team shot charts similar to how we current generate player charts.
-* Calculating some form of a similarity score, to see which players/teams have the most similar distribution and shot making ability from some pre-defined zones
-* Creating some form of an era-adjustment, to be able to more accurately compare charts from players from different seasons (think of how a player like Ray Allen's shot chart may differ if his career started in 2015, or how a player like Patrick Beverley's may have differed if his career started in 1990).
+- [ ] Speeding up the process of generating a chart (querying the database is faster than scraping the web)
+- [ ] Generating team shot charts similar to how we current generate player charts.
+- [ ] Calculating some form of a similarity score, to see which players/teams have the most similar distribution and shot making ability from some pre-defined zones
+- [x] Creating some form of an era-adjustment, to be able to more accurately compare charts from players from different seasons (think of how a player like Ray Allen's shot chart may differ if his career started in 2015, or how a player like Patrick Beverley's may have differed if his career started in 1990).
