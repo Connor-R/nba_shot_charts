@@ -33,7 +33,7 @@ def process():
 
         query = """SELECT
 %s_id, season_id, shot_zone_basic, shot_zone_area, a.attempts, 
-a.zone_pct/b.zone_pct AS zone_pct_plus, 
+(a.zone_pct/b.zone_pct)*100 AS zone_pct_plus, 
 (a.efg/b.efg)*100 AS efg_plus
 FROM shots_%s_YearDistribution a
 JOIN shots_League_YearDistribution b USING (season_id, shot_zone_basic, shot_zone_area)

@@ -40,8 +40,8 @@ def process():
         query = """SELECT
 %s_id, %s AS career, shot_zone_basic, shot_zone_area,
 SUM(a.attempts) AS attempts,
-SUM(b.zone_pct)/SUM(c.zone_pct) AS zone_pct_plus,
-100*(SUM(b.efg)/SUM(c.efg)) AS efg_plus
+100*(SUM(b.attempts*b.zone_pct/c.zone_pct)/SUM(b.attempts)) AS zone_pct_plus,
+100*(SUM(b.attempts*b.efg/c.efg)/SUM(b.attempts)) AS efg_plus
 FROM shots_%s_YearRelative a
 %sJOIN shots_%s_YearDistribution b USING (%s_id, season_id, shot_zone_basic, shot_zone_area)
 JOIN shots_League_YearDistribution c USING (season_id, shot_zone_basic, shot_zone_area)
