@@ -1,0 +1,26 @@
+zone_pct - Zone Percentage - The percentage of a players shot that come from a given zone, essentially giving the distribution of where a players shots come from.
+    Example: A zone_pct of 0.1850 says that 18.5% of a player's shots come from that zone.
+
+efg - Effective Field Goal Percentage - The formula is efg = (points/attempts)/2 for a given zone. It accounts for the fact that 3-point shot is worth more than a 2-point shot, and is on the same scale of FG%.
+    Example: An efg of 0.5500 says that for any shot attempt, the expected value of points would be 0.5500*2 = 1.10 points, or over 100 shot attempts, you would expect to score 110 points.
+
+zone_pct_plus - Zone Percentage Plus - The percentage of shots that come from a given zone compared to the league average percentage of shots from that zone. The formula is ((player zone_pct)/(league zone_pct))*100 for a given zone. 
+    Example: A zone_pct_plus of 130.00 for a zone would imply that the player's shot distribution had 30% more shots from that zone when compared to league average.
+
+efg_plus - Effective Field Goal Percentage Plus - A player's efg compared to the league average efg from all shots.
+    Example: An efg_plus of 115.00 for a zone would suggest that a player receives 15% more points per shot on shots from this zone, than the average NBA shot in that season.
+
+ZONE_efg_plus - Zone Effective Field Goal Percentage Plus - A player's efg compared to the league efg from that zone.
+    Example: A ZONE_efg_plus of 115.00 for a zone would suggest that a player receives 15% more points per shot on shots from this zone when compared to the average NBA shot from that zone in that season.
+
+paa - Points Above Average - Combines efg_plus and total attempts to provide the number of points gained/lost from a players shots when compared to an average NBA shot in that season.
+    Example: A paa of 95.00 says that a player produced +95 more points than you would expect if those shots were re-distributed to be the average NBA shot in that season.
+
+ZONE_paa - Zone Points Above Average - The number of points gained/lost from a players shots when compared to an average NBA shot from that zone in that season.
+    Example: A ZONE_paa of 18.00 says that a player produced +18 more points than you would expect if those shots were re-distrubuted to be the average NBA shot from that zone in that season.
+
+paa_per_game - Points Above Average per Game - Defined as paa/games, this is the number of points added/lost per game when compared to the average NBA shot in that season.
+    Example: A paa_per_game of 2.50 says that on average, a player produced +2.50 more points per game than you would expect if their shots were re-distributed to be the average NBA shot in that season.
+
+ZONE_paa_per_game - Zone Points Above Average per Game - Defined as ZONE_paa/games, this is the number of points added/lost per game when compared to the average NBA shot from that zone in that season.
+    Example: A paa_per_game of 1.50 says that on average, a player produced 1.50 more points per game than you would expect if their shots were re-distributed to be the average NBA shot from that zone in that season.

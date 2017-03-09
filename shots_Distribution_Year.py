@@ -6,7 +6,6 @@ import sys
 from time import time
 
 sys.path.append('/Users/connordog/Dropbox/Desktop_Files/Work_Things/CodeBase/Python_Scripts/Python_Projects/packages')
-sys.path.append('/Users/connordog/Dropbox/Desktop_Files/Work_Things/maxdalury/sports/general')
 
 from py_data_getter import data_getter
 from py_db import db
@@ -16,15 +15,20 @@ db = db('nba_shots')
 def initiate():
     start_time = time()
 
-    process()
+    for year in range(2016,2017):
+        season_start = year
+        season_id = str(season_start)+str(season_start%100+1).zfill(2)[-2:]
+        print season_id
+        
+        process(season_id)
 
     end_time = time()
     elapsed_time = float(end_time - start_time)
-    print "shots_YearDistribution.py"
+    print "shots_Distribution_Year.py"
     print "time elapsed (in seconds): " + str(elapsed_time)
     print "time elapsed (in minutes): " + str(elapsed_time/60.0)
 
-def process():
+def process(season_id):
     for _type in ('Player', 'Team', 'League'):
         print '\t' + _type
 
@@ -32,6 +36,7 @@ def process():
 FROM(
     SELECT
     %s_id, season_id, shot_zone_basic, shot_zone_area,
+    games,
     SUM(attempts) AS attempts,
     SUM(attempts)/all_atts AS zone_pct,
     SUM(points)/SUM(attempts)/2 AS efg
@@ -39,45 +44,28 @@ FROM(
     JOIN(
         SELECT %s_id, season_id, SUM(attempts) AS all_atts
         FROM shots_%s_Breakdown
+        WHERE season_id = '%s'
+        AND shot_zone_basic = 'all'
+        AND shot_zone_area = 'all'
         GROUP BY %s_id, season_id
     ) allatts USING (%s_id, season_id)
+    WHERE season_id = '%s'
     GROUP BY %s_id, season_id, shot_zone_basic, shot_zone_area
-    UNION
-    SELECT
-    %s_id, season_id, shot_zone_basic, 'all' AS shot_zone_area,
-    SUM(attempts) AS attempts,
-    SUM(attempts)/all_atts AS zone_pct,
-    SUM(points)/SUM(attempts)/2 AS efg
-    FROM shots_%s_Breakdown
-    JOIN(
-        SELECT %s_id, season_id, SUM(attempts) AS all_atts
-        FROM shots_%s_Breakdown
-        GROUP BY %s_id, season_id
-    ) allatts USING (%s_id, season_id)
-    GROUP BY %s_id, season_id, shot_zone_basic
-    UNION
-    SELECT
-    %s_id, season_id, 'all' AS shot_zone_basic, 'all' AS shot_zone_area,
-    SUM(attempts) AS attempts,
-    SUM(attempts)/SUM(attempts) AS zone_pct,
-    SUM(points)/SUM(attempts)/2 AS efg
-    FROM shots_%s_Breakdown
-    GROUP BY %s_id, season_id
 ) a
 ORDER BY %s_id ASC, season_id ASC, shot_zone_basic ASC, shot_zone_area ASC
 """
-        q = query % (_type, _type, _type, _type, _type, _type, _type, _type, _type, _type, _type, _type, _type, _type, _type, _type, _type, _type)
+        q = query % (_type, _type, _type, _type, season_id, _type, _type, season_id, _type, _type)
 
         res = db.query(q)
 
         entries = []
         _id = '%s_id' % (_type.lower())
         for row in res:
-            type_id, season_id, shot_zone_basic, shot_zone_area, attempts, zone_pct, efg = row
-            entry = {_id:type_id, "season_id":season_id, "shot_zone_basic":shot_zone_basic, "shot_zone_area":shot_zone_area, "attempts":attempts, "zone_pct":zone_pct, "efg":efg}   
+            type_id, season_id, shot_zone_basic, shot_zone_area, games, attempts, zone_pct, efg = row
+            entry = {_id:type_id, "season_id":season_id, "shot_zone_basic":shot_zone_basic, "shot_zone_area":shot_zone_area, "games":games, "attempts":attempts, "zone_pct":zone_pct, "efg":efg}   
             entries.append(entry)
 
-        table = "shots_%s_YearDistribution" % (_type)
+        table = "shots_%s_Distribution_Year" % (_type)
         if entries != []:
             for i in range(0, len(entries), 1000):
                 db.insertRowDict(entries[i: i + 1000], table, insertMany=True, replace=True, rid=0,debug=1)
