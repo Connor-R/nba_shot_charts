@@ -31,7 +31,7 @@ for team in teams:
     entry = {}
     entry["team_id"] = team[1]
     entry["city"] = team[2]
-    entry["name"] = team[3]
+    entry["tname"] = team[3]
     entry["start_year"] = team[4]
     entry["end_year"] = int(team[5])+1
 

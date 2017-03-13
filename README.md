@@ -13,9 +13,9 @@ Two lesser noticed features of these charts are the following:
 * Each chart’s name will save under the template `shot_charts_Firstname_Lastname_Season_eFG.png`
 * The color of the Player Name and Zone Frequencies key is the corresponding color to their overall eFG% for the season (e.g., if a player’s eFG% for a year was 100%, their name and key would be dark red, while if their eFG% was 0%, then those colors would be light yellow).
 
-If you're interested in seeing more charts, I created a twitter bot ([@NBAChartBot](https://twitter.com/NBAChartBot)) that posts a pseudo-random player/season shot chart every 4 hours.
+If you're interested in seeing more charts, I created a twitter bot ([@NBAChartBot](https://twitter.com/NBAChartBot)) that posts a pseudo-random player/season shot chart every 3 hours.
 
-If you would like to report a bug, request a specific player chart, or contact me for any other reason, my contact information is at the bottom of [my personal github.io page](http://connor-r.github.io/).
+If you would like to report a bug, request a copy of the data, or contact me for any other reason, my contact information is at the bottom of [my personal github.io page](http://connor-r.github.io/).
 
 
 ### March 4, 2017 Update

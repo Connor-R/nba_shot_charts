@@ -45,6 +45,7 @@ def process(season_id):
 FROM(
     SELECT %s_id, season_id, shot_zone_basic, shot_zone_area,
     COUNT(*) AS attempts,
+    AVG(shot_distance) AS avg_dist,
     SUM(CASE WHEN event_type = "Made Shot" THEN 1 ELSE 0 END) AS makes,
     SUM(CASE WHEN event_type = "Made Shot" AND shot_type = '2PT Field Goal' THEN 2 
         WHEN event_type = "Made Shot" AND shot_type = '3PT Field Goal' THEN 3
@@ -65,6 +66,7 @@ SELECT *
 FROM(
     SELECT %s_id, season_id, shot_zone_basic, 'all' AS shot_zone_area,
     COUNT(*) AS attempts,
+    AVG(shot_distance) AS avg_dist,
     SUM(CASE WHEN event_type = "Made Shot" THEN 1 ELSE 0 END) AS makes,
     SUM(CASE WHEN event_type = "Made Shot" AND shot_type = '2PT Field Goal' THEN 2 
         WHEN event_type = "Made Shot" AND shot_type = '3PT Field Goal' THEN 3
@@ -85,6 +87,7 @@ SELECT *
 FROM(
     SELECT %s_id, season_id, 'all' AS shot_zone_basic, 'all' AS shot_zone_area,
     COUNT(*) AS attempts,
+    AVG(shot_distance) AS avg_dist,
     SUM(CASE WHEN event_type = "Made Shot" THEN 1 ELSE 0 END) AS makes,
     SUM(CASE WHEN event_type = "Made Shot" AND shot_type = '2PT Field Goal' THEN 2 
         WHEN event_type = "Made Shot" AND shot_type = '3PT Field Goal' THEN 3
@@ -111,8 +114,8 @@ ORDER BY %s_id ASC, season_id ASC, shot_zone_basic ASC, shot_zone_area ASC
         entries = []
         _id = '%s_id' % (_type.lower())
         for row in res:
-            type_id, season_id, shot_zone_basic, shot_zone_area, attempts, makes, points, games = row
-            entry = {_id:type_id, "season_id":season_id, "shot_zone_basic":shot_zone_basic, "shot_zone_area":shot_zone_area, "attempts":attempts, "makes":makes, "points":points, "games":games}   
+            type_id, season_id, shot_zone_basic, shot_zone_area, attempts, avg_dist, makes, points, games = row
+            entry = {_id:type_id, "season_id":season_id, "shot_zone_basic":shot_zone_basic, "shot_zone_area":shot_zone_area, "attempts":attempts, "avg_dist":avg_dist, "makes":makes, "points":points, "games":games}   
             entries.append(entry)
 
         table = "shots_%s_Breakdown" % (_type)

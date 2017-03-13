@@ -4,6 +4,7 @@ import csv
 import os
 import sys
 from time import time
+from datetime import date, datetime
 sys.path.append('/Users/connordog/Dropbox/Desktop_Files/Work_Things/CodeBase/Python_Scripts/Python_Projects/packages')
 
 from py_data_getter import data_getter
@@ -18,6 +19,7 @@ getter = data_getter()
 base_url = 'http://stats.nba.com/stats/shotchartdetail?CFID=33&CFPARAMS=%s&ContextFilter=&ContextMeasure=FGA&DateFrom=&DateTo=&GameID=&GameSegment=&LastNGames=0&LeagueID=00&Location=&MeasureType=Base&Month=0&OpponentTeamID=0&Outcome=&PaceAdjust=N&PerMode=PerGame&Period=0&PlayerID=0&PlusMinus=N&PlayerPosition=&Rank=N&RookieYear=&Season=%s&SeasonSegment=&SeasonType=Regular+Season&TeamID=0&VsConference=&VsDivision=&mode=Advanced&showDetails=0&showShots=1&showZones=0'
 
 for year in range(2016,2017):
+    print year
     season_start = year
 
     # takes a season (e.g. 2008) and returns the nba ID (e.g. 2008-09)
@@ -48,12 +50,25 @@ for year in range(2016,2017):
         entry["event_type"] = shot[10]
         entry["action_type"] = shot[11]
         entry["shot_type"] = shot[12]
-        entry["shot_zone_basic"] = shot[13]
+        if shot[13] in ('Left Corner 3', 'Right Corner 3'):
+            entry["shot_zone_basic"] = 'Corner 3'
+        else:
+            entry["shot_zone_basic"] = shot[13]
         entry["shot_zone_area"] = shot[14]
         entry["shot_zone_range"] = shot[15]
         entry["shot_distance"] = shot[16]
         entry["LOC_X"] = shot[17]
         entry["LOC_Y"] = shot[18]
+
+        text_date = str(shot[21])
+        year = int(text_date[:4]) 
+        month = int(text_date[4:6])
+        day = int(text_date[6:])
+        _date = date(year, month, day)
+        entry["game_date"] = _date
+
+        entry["home_team"] = shot[22]
+        entry["away_team"] = shot[23]
 
         shot_entries.append(entry)
 
