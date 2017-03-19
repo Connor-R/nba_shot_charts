@@ -60,56 +60,6 @@ if player_entries != []:
         db.conn.commit()
 
 
-path = os.getcwd()
-csv_file = open(path+'/player_list.csv', 'wb')
-append_csv = csv.writer(csv_file)
-header = ['_player_name', '_player_id', '_start_season', '_end_season']
-append_csv.writerow(header)
-
-
-no_shots_list = ['Marqus Blakely', 'Jerrelle Benimon', 'Michael McDonald', 'Trevor Winter', 'Alex Scales', 'Andy Panko', 'JamesOn Curry', 'Magnum Rolle', 'Anthony Bonner', 'Curtis Jerrells', 'Deng Gai', 'Gani Lawal', 'Herbert Hill', 'Kenny Hasbrouck', 'Terrico White', 'Guy Rucker', 'Brian Butch', 'Lionel Simmons', 'Chris Smith', 'Tony Gaffney']
-
-
-player_names = []
-
-player_q = """SELECT player_id, CONCAT(fname, ' ', lname) AS p_name, from_year, to_year
-FROM players
-WHERE games_played_FLAG = 1
-AND to_year >= 1997
-ORDER BY lname ASC, fname ASC, player_id ASC
-"""
-
-players = db.query(player_q)
-
-for player in players:
-    player_id, p_name, from_year, to_year = player
-
-    if p_name not in no_shots_list:
-
-        if p_name.split(' ')[0][1].isupper():
-            temp_name = p_name
-            p_name = ''
-            for i in range(0, len(temp_name.split(' ')[0])):
-                p_name += temp_name.split(' ')[0][i] + '.'
-            for i in range(1, len(temp_name.split(' '))):
-                p_name += ' ' + temp_name.split(' ')[i]
-        if p_name not in player_names:
-            player_names.append(p_name)
-        else:
-            i = 2
-            op = False
-            while op is False:
-                p_name = p_name + '(' + str(i) + ')'
-                if p_name not in player_names:
-                    player_names.append(p_name)
-                    op = True
-                else:
-                    i += 1
-
-        row = [p_name, player_id, from_year, to_year]
-        append_csv.writerow(row)
-
-
 end_time = time()
 elapsed_time = float(end_time - start_time)
 print "scraper_players.py"

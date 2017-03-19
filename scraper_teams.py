@@ -43,6 +43,30 @@ if teams_entries != []:
         db.insertRowDict(teams_entries[i: i + 1000], "teams", insertMany=True, replace=True, rid=0,debug=1)
         db.conn.commit()
 
+#delete duplicate entries
+list_query = """SELECT t1.*
+FROM teams t1
+JOIN teams t2 USING (team_id, end_year)
+WHERE t1.start_year < t2.start_year
+GROUP BY team_id"""
+del_list = db.query(list_query)
+
+for team in del_list:
+    team_id, city, tname, start_year, end_year = team
+    del_temp = """DELETE FROM teams
+    WHERE team_id = %s
+    AND city = '%s'
+    AND tname = '%s'
+    AND start_year = %s
+    AND end_year = %s
+    """
+    del_qry = del_temp % (team_id, city, tname, start_year, end_year)
+
+    db.query(del_qry)
+    db.conn.commit()
+
+db.query("DELETE FROM teams WHERE city = 'New Orleans/Oklahoma City'")
+db.conn.commit()
 
 end_time = time()
 elapsed_time = float(end_time - start_time)
