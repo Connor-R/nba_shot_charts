@@ -71,14 +71,16 @@ def initiate(p_name=None, hardcode_tags=None):
 
 
 def get_random_pic(players, hashtags):
-
     if players == []:
         p_name, p_id = get_rand_player()
         print p_name
         chart_player = p_name.replace(' ','_')
         player_path = base_path+chart_player+'('+str(p_id)+')/'
         charts.gen_charts(p_name)
-        rand_chart = os.listdir(player_path)[random.randint(0,len(os.listdir(player_path))-1)]
+        try:
+            rand_chart = os.listdir(player_path)[random.randint(0,len(os.listdir(player_path))-1)]
+        except OSError:
+            get_random_pic([],hashtags)
         tweet(player_path, rand_chart, hashtags, p_id)
     else:
         for player in players:
@@ -87,7 +89,7 @@ def get_random_pic(players, hashtags):
         # raw_input("READY TO TWEET?")
         for player in players:
             p_id = db.query("SELECT player_id FROM players WHERE CONCAT(fname, ' ', lname) = '%s'" % player.replace("'","\\'")) [0][0]
-            player_path = base_path+player.replace(' ','_')+'('+str(p_id)+')'
+            player_path = base_path+player.replace(' ','_')+'('+str(p_id)+')/'
             # tweets a range of seasons (-1 is career, -2 is current season, -3 is 2 seasons previous, etc.)
             for i in range(max(0, len(os.listdir(player_path))-2), len(os.listdir(player_path))-0):
                 chart = os.listdir(player_path)[i]
@@ -103,6 +105,7 @@ def tweet(player_path, chart, hashtags, p_id):
         tweet_text = tweet_text.rsplit(' #', 1)[0]
     
     print tweet_text, len(tweet_text)
+    # raw_input(pic_path)
     time.sleep(15)
     api.update_with_media(pic_path, status=tweet_text)
 
@@ -129,9 +132,9 @@ def parse_text(pic, hashtags, p_id):
     if twitter is not None:
         tweet += '(' + twitter + ') '
 
-    year = pic.split('_')[-2]
+    year = pic.split('_')[-3]
 
-    if pic.split('_')[-2][:6] == 'CAREER':
+    if pic.split('_')[-3][:6] == 'CAREER':
         tweet += year + ' Shot Chart' 
         teams = get_teams(p_id, year, isCareer=True)
         met_qry = "SELECT ROUND(efg_plus,0), ROUND(paa,0) FROM shots_Player_Relative_Career WHERE shot_zone_basic = 'all' AND player_id = %s" % (p_id)
@@ -144,7 +147,11 @@ def parse_text(pic, hashtags, p_id):
         met_qry = "SELECT ROUND(efg_plus,0), ROUND(paa,0) FROM shots_Player_Relative_Year WHERE shot_zone_basic = 'all' AND player_id = %s AND season_id = %s" % (p_id, year.replace('-',''))
 
     efg, paa = db.query(met_qry)[0]
-    tweet += ' (' + str(efg) + ' EFG+ | ' + str(paa) + ' PAA).' 
+    if paa >= 0:
+        pos = '+'
+    else:
+        pos = ''
+    tweet += ' (' + str(efg) + ' EFG+ | ' + pos + str(paa) + ' PAA).' 
 
     if hashtags != []:
         for tag in hashtags:

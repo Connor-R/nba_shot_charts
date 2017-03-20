@@ -2,6 +2,7 @@
 *.pyc
 *.png
 shot_charts/
+charts_description.md
 total_chart_checker.py
 temp_player_list.csv
 nba_shots_daily_run.sh

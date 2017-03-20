@@ -23,7 +23,7 @@ db = db('nba_shots')
 
 
 # setting the color map we want to use
-mymap = mpb.cm.bwr
+mymap = mpb.cm.YlOrRd
 
 
 # taking in a dictionary of player information and initializing the processes
@@ -92,7 +92,7 @@ def initiate(p_list, list_length, printer=True):
             if printer is True:
                 # we print the season/player combo in order to monitor progress
                 print '\t',
-                print season_id, player_name
+                print season_id, player_name, player_id 
 
             # a DataFrame of the shots a player took in a given season
             year_shots_df = acquire_shootingData(player_id, season_id)
@@ -182,6 +182,7 @@ def shooting_plot(path, shot_df, player_id, season_id, player_title, player_name
     (ShootingPctLocs, shotNumber), shot_count_all = find_shootingPcts(shot_df, gridNum)
 
     all_efg_plus = float(get_metrics(player_id, season_id, isCareer, 'all', 'efg_plus'))
+    paa = float(get_metrics(player_id, season_id, isCareer, 'all', 'paa'))
     color_efg = max(min(((all_efg_plus/100)-0.5),1.0),0.0)
 
     # set the figure for drawing on
@@ -194,7 +195,7 @@ def shooting_plot(path, shot_df, player_id, season_id, player_title, player_name
     ax = plt.axes([0.05, 0.15, 0.81, 0.775]) 
 
     # setting the background color using a hex code (http://www.rapidtables.com/web/color/RGB_Color.htm)
-    ax.set_axis_bgcolor('#404040')
+    ax.set_axis_bgcolor('#0C232E')
 
     # draw the outline of the court
     draw_court(outer_lines=False)
@@ -325,8 +326,8 @@ def shooting_plot(path, shot_df, player_id, season_id, player_title, player_name
     cb.set_ticks([0.0, 0.25, 0.5, 0.75, 1.0])
     cb.set_ticklabels(['$\mathbf{\leq}$50','75', '100','125', '$\mathbf{\geq}$150'])
 
-    figtit = path+'shot_charts_%s(%s)_%s_%s.png' % (player_name, player_id, season_id.replace(' ',''), str(int(round(all_efg_plus))))
-    plt.savefig(figtit, facecolor='#707070', edgecolor='black')
+    figtit = path+'shot_charts_%s(%s)_%s_%s_%s.png' % (player_name, player_id, season_id.replace(' ',''), str(int(round(all_efg_plus))), str(int(round(paa))) )
+    plt.savefig(figtit, facecolor='#26373F', edgecolor='black')
     plt.clf()
 
 
@@ -567,7 +568,7 @@ def get_plist(operator='', filt_value=0, backfill=False):
 
         # Charts for only new players (only for backfilling)
         if backfill is True:
-            if os.path.exists(os.getcwd()+'/shot_charts/'+player_search_name):
+            if os.path.exists(os.getcwd()+'/shot_charts/'+player_search_name+'('+str(player_id)+')'):
                 continue
 
         # If a player doesn't have a start_year or end_year, we set those to the max values
@@ -599,8 +600,12 @@ def get_plist(operator='', filt_value=0, backfill=False):
 def acquire_playerPic(player_id, zoom, offset=(250,370)):
     from matplotlib import  offsetbox as osb
     import urllib
-    pic = urllib.urlretrieve("http://stats.nba.com/media/players/230x185/"+str(player_id)+".png",str(player_id)+".png")
-    player_pic = plt.imread(pic[0])
+    try:
+        pic = urllib.urlretrieve("http://stats.nba.com/media/players/230x185/"+str(player_id)+".png",str(player_id)+".png")
+        player_pic = plt.imread(pic[0])
+    except ValueError:
+        pic = urllib.urlretrieve("http://stats.nba.com/media/players/230x185/0.png")
+        player_pic = plt.imread(pic[0])    
     img = osb.OffsetImage(player_pic, zoom)
     img = osb.AnnotationBbox(img, offset,xycoords='data',pad=0.0, box_alignment=(1,0), frameon=False)
     return img
