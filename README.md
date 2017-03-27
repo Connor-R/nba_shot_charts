@@ -21,9 +21,15 @@ If you would like to report a bug, request a copy of the data, or contact me for
 ### March 4, 2017 Update
 I'm changing the code structure a bit. I've added scrapers and some post-processing scripts so I can store/manipulate the shot data a little bit easier in a MySQL database. I'm leaving the original chart generator (`nba_shot_charts_v1.py`) and chart bot script (`chart_bot_v1.py`), but will eventually add a v2 of both of this scripts, using the MySQL db instead of re-scraping nba.com each time. Part of the reason I'm changing the structure is to help facilitate a few longer term goals of these charts:
 - [x] Speeding up the process of generating a chart (querying the database is faster than scraping the web)
-- [ ] Generating team shot charts similar to how we current generate player charts.
-- [ ] Calculating some form of a similarity score, to see which players/teams have the most similar distribution and shot making ability from some pre-defined zones
 - [x] Creating some form of an era-adjustment, to be able to more accurately compare charts from players from different seasons (think of how a player like Ray Allen's shot chart may differ if his career started in 2015, or how a player like Patrick Beverley's may have differed if his career started in 1990).
+- [x] Generating team shot charts similar to how we current generate player charts.
+- [ ] Generate charts for playoffs.
+- [ ] Calculating some form of a similarity score, to see which players/teams have the most similar distribution and shot making ability from some pre-defined zones.
+- [ ] Filter shots by date (create shot charts for a player/team from date X to date Y).
+- [ ] zEFG% baselines for guards/wings/bigs at each zone
 
 #### March 19, 2017 Update
 `chart_bot_v2.py` and `nba_shot_charts_v2.py` are active. I've changed the color scheme/added new metrics into the v2 charts, and will soon replace the v1 in terms of tweeting. Using the db has been a vast improvement over previous methods, and has allowed me to create some shot/zone-based metrics I didn't have previous access to. Next up will be making team charts and similarity scores.
+
+#### March 26, 2017 Update
+I'm now able to create/post charts at the team level and I also cleaned up the format of the player level charts. 

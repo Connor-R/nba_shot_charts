@@ -5,4 +5,6 @@ shot_charts/
 charts_description.md
 total_chart_checker.py
 temp_player_list.csv
-nba_shots_daily_run.sh
+nba_shots_weekly_run.sh
+nba_team_charts.py
+chart_bot_team.py

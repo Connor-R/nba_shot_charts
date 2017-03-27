@@ -33,7 +33,7 @@ auth.set_access_token(access_key, access_sec)
 api = tweepy.API(auth)
 
 
-base_path = os.getcwd()+"/shot_charts/"
+base_path = os.getcwd()+"/shot_charts_player/"
 
 
 hashtag_file = os.getcwd()+"/team_hashtags.csv"
@@ -79,9 +79,9 @@ def get_random_pic(players, hashtags):
         charts.gen_charts(p_name)
         try:
             rand_chart = os.listdir(player_path)[random.randint(0,len(os.listdir(player_path))-1)]
+            tweet(player_path, rand_chart, hashtags, p_id)
         except OSError:
             get_random_pic([],hashtags)
-        tweet(player_path, rand_chart, hashtags, p_id)
     else:
         for player in players:
             print player
@@ -91,7 +91,7 @@ def get_random_pic(players, hashtags):
             p_id = db.query("SELECT player_id FROM players WHERE CONCAT(fname, ' ', lname) = '%s'" % player.replace("'","\\'")) [0][0]
             player_path = base_path+player.replace(' ','_')+'('+str(p_id)+')/'
             # tweets a range of seasons (-1 is career, -2 is current season, -3 is 2 seasons previous, etc.)
-            for i in range(max(0, len(os.listdir(player_path))-2), len(os.listdir(player_path))-0):
+            for i in range(max(0, len(os.listdir(player_path))-1), len(os.listdir(player_path))-0):
                 chart = os.listdir(player_path)[i]
                 tweet(player_path, chart, hashtags, p_id)
 
@@ -128,7 +128,7 @@ def parse_text(pic, hashtags, p_id):
 
     tweet = full_name+'\'s '
 
-    twitter = get_twitter(fname, lname, full_name)
+    twitter = get_twitter(full_name)
     if twitter is not None:
         tweet += '(' + twitter + ') '
 
@@ -164,7 +164,7 @@ def parse_text(pic, hashtags, p_id):
         if team is not None:
             hashtag = hashtag_list.get(team)
             if hashtag is None:
-                tweet += ' #' + team
+                tweet += ' #' + team.replace(" ","")
             else:
                 tweet += ' #' + hashtag
 
@@ -180,7 +180,9 @@ def get_teams(p_id, year, isCareer=False):
     JOIN teams USING (team_id)
     WHERE player_id = %s
     AND season_id = 201617
-    AND end_year = 2017"""
+    AND start_year <= LEFT(season_id, 4)
+    AND end_year > LEFT(season_id, 4)
+    ORDER BY game_date DESC"""
 
     curr_qry = curr_q % (p_id)
 
@@ -197,7 +199,8 @@ def get_teams(p_id, year, isCareer=False):
     JOIN teams USING (team_id)
     WHERE player_id = %s
     AND season_id = %s
-    AND end_year = 2017"""
+    AND start_year <= LEFT(season_id, 4)
+    AND end_year > LEFT(season_id, 4)"""
 
         team_qry = team_q % (p_id, year.replace('-',''))
 
@@ -206,7 +209,8 @@ def get_teams(p_id, year, isCareer=False):
     FROM shots 
     JOIN teams USING (team_id)
     WHERE player_id = %s
-    AND end_year = 2017"""
+    AND start_year <= LEFT(season_id, 4)
+    AND end_year > LEFT(season_id, 4)"""
 
         team_qry = team_q % (p_id)
 
@@ -219,7 +223,7 @@ def get_teams(p_id, year, isCareer=False):
     return teams
 
 
-def get_twitter(fname, lname, full_name):
+def get_twitter(full_name):
     try:
         twitter_name = hardcode_list.get(full_name)[0]
     except TypeError:
@@ -227,10 +231,6 @@ def get_twitter(fname, lname, full_name):
 
     if twitter_name in (None, ''):
 
-        search_name = fname + ' '
-        for i in range(0,len(lname)-1):
-            search_name += lname[i] + ' '
-        search_name += lname[-1]
         url = "http://www.basketball-reference.com/friv/twitter.html"
         html = urlopen(url)
         soup = BeautifulSoup(html, "lxml")
@@ -242,7 +242,7 @@ def get_twitter(fname, lname, full_name):
             p_data = row.findAll('td')
             p_name = p_data[0].getText()
 
-            if p_name == search_name:
+            if p_name == full_name:
                 twitter_name = p_data[1].getText()
                 break
             else:

@@ -26,6 +26,9 @@ db = db('nba_shots')
 mymap = mpb.cm.YlOrRd
 
 
+whitelist_pngs = ['charts_description.png',]
+
+
 # taking in a dictionary of player information and initializing the processes
 def initiate(p_list, list_length, printer=True):
     # setting our base directory, I have this set to your current working directory (cwd)
@@ -55,7 +58,7 @@ def initiate(p_list, list_length, printer=True):
             continue
 
         # defines a path to a directory for saving the charts of the current player
-        path = base_path+'/shot_charts/'+player_name+'('+str(player_id)+')/'
+        path = base_path+'/shot_charts_player/'+player_name+'('+str(player_id)+')/'
 
         # checks if our desired directory exists, archived the charts if they exist, and (re-)create the directory
         if not os.path.exists(path):
@@ -75,10 +78,6 @@ def initiate(p_list, list_length, printer=True):
             os.unlink(filename)
         os.chdir(base_path)
 
-        # We set a min and max year to later overwrite (for usage in noting a player's career length)
-        min_year = 9999
-        max_year = 0
-
         # we set an empty DataFrame and will append each year's shots, creating a career shot log
         all_shots_df = pd.DataFrame()
 
@@ -95,42 +94,46 @@ def initiate(p_list, list_length, printer=True):
                 print season_id, player_name, player_id 
 
             # a DataFrame of the shots a player took in a given season
-            year_shots_df = acquire_shootingData(player_id, season_id)
+            year_shots_df = acquire_shootingData(player_id, season=season_id, isCareer=False)
 
-            # if the DataFrame isn't empty (i.e., if the player played this season), we make a shot chart for this season as well as append the career DataFrame for the player and overwrite the current min_year and max_year variables
+            # if the DataFrame isn't empty (i.e., if the player played this season), we make a shot chart for this season
             if year_shots_df is not None and len(year_shots_df.index) != 0:
-                
-                if year < min_year:
-                    min_year = year
-
-                if (year+1) > max_year:
-                    max_year = (year+1)
 
                 # plotting the data for the given season/player combination we are iterating through
                 shooting_plot(path, year_shots_df, player_id, season_id, player_title, player_name)
 
-                # appending the career shots DataFrame
-                all_shots_df = all_shots_df.append(year_shots_df, ignore_index=True)
-
-        career_string = "CAREER (%s-%s)" % (min_year, max_year)
+        career_string = "CAREER (%s-%s)" % (start_year, end_year)
         if printer is True:
             print '\t\t\t', career_string, player_name
 
-        # making a shot chart for all shots in the player's career. note that we have to use the option isCareer, min_year, and max_year arguments to properly format this chart
-        shooting_plot(path, all_shots_df, player_id, career_string, player_title, player_name, isCareer=True, min_year=min_year, max_year=max_year)
+        all_shots_df = acquire_shootingData(player_id, isCareer=True)
 
-    # after we finish the script, we remove all the player images that were saved to the directory during the acquire_playerPic function
-    os.chdir(base_path)
-    files=glob.glob('*.png')
-    for filename in files:
-        os.unlink(filename)
+        shooting_plot(path, all_shots_df, player_id, career_string, player_title, player_name, isCareer=True, min_year=start_year, max_year=end_year)
+
+        # after we finish the script, we remove all the player images that were saved to the directory during the acquire_playerPic function
+        os.chdir(base_path)
+        files=glob.glob('*.png')
+        for white in whitelist_pngs:
+            if white in files:
+                files.remove(white)
+        for filename in files:
+            os.unlink(filename)
+
 
 
 #Getting the shot data and returning a DataFrame with every shot for a specific player/season combo
-def acquire_shootingData(player_id,season):
+def acquire_shootingData(player_id,season='',isCareer=True):
 
-    start_season_filt = str(season[:4])+'-08-01'
-    end_season_filt = str(int(season[:4])+1)+'-08-01'
+
+    if isCareer is False:
+        start_season_filt = str(season[:4])+'-08-01'
+        end_season_filt = str(int(season[:4])+1)+'-08-01'
+
+        query_append = """AND season_id = %s
+        AND game_date > '%s'
+        AND game_date < '%s'""" % (season.replace('-',''), start_season_filt, end_season_filt)
+    else:
+        query_append = ''
 
     shot_query = """SELECT
     season_id, game_id, 
@@ -143,11 +146,9 @@ def acquire_shootingData(player_id,season):
     FROM shots
     JOIN shots_Player_Relative_Year USING (season_id, player_id, shot_zone_basic, shot_zone_area)
     WHERE player_id = %s
-    AND season_id = %s
-    AND game_date > '%s'
-    AND game_date < '%s'"""
+    %s"""
 
-    shot_q = shot_query % (player_id, season.replace('-',''), start_season_filt, end_season_filt)
+    shot_q = shot_query % (player_id, query_append)
 
     shots = db.query(shot_q)
 
@@ -306,23 +307,23 @@ def shooting_plot(path, shot_df, player_id, season_id, player_title, player_name
 
     key_text = get_key_text(player_id, season_id, isCareer)
     # adding breakdown of eFG% by shot zone at the bottom of the chart
-    ax.text(300,380, key_text, fontsize=11, horizontalalignment='right', verticalalignment = 'top', family='Bitstream Vera Sans', color='white', linespacing=1.5)
+    ax.text(307,380, key_text, fontsize=12, horizontalalignment='right', verticalalignment = 'top', family='Bitstream Vera Sans', color='white', linespacing=1.5)
 
     teams_text, team_len = get_teams_text(player_id, season_id, isCareer)
     # adding which season the chart is for, as well as what teams the player is on
-    if team_len > 10:
+    if team_len > 12:
         ax.text(-250,380, season_id + ' Regular Season:\n' + teams_text,
-            fontsize=10,  horizontalalignment='left', verticalalignment = 'top', family='Bitstream Vera Sans', color='white', linespacing=1.2)
+            fontsize=10,  horizontalalignment='left', verticalalignment = 'top', family='Bitstream Vera Sans', color='white', linespacing=1.4)
     else:
         ax.text(-250,380,season_id + ' Regular Season:\n' + teams_text,
-            fontsize=12,  horizontalalignment='left', verticalalignment = 'top', family='Bitstream Vera Sans', color='white', linespacing=1.5)
+            fontsize=10,  horizontalalignment='left', verticalalignment = 'top', family='Bitstream Vera Sans', color='white', linespacing=1.6)
 
     # adding a color bar for reference
     ax2 = fig.add_axes([0.875, 0.15, 0.04, 0.775])
     cb = mpb.colorbar.ColorbarBase(ax2,cmap=cmap, orientation='vertical')
     cbytick_obj = plt.getp(cb.ax.axes, 'yticklabels')
     plt.setp(cbytick_obj, color='white', fontweight='bold')
-    cb.set_label('EFG+ (100 is League Average)', family='Bitstream Vera Sans', color='white', fontweight='bold', labelpad=-9, fontsize=14)
+    cb.set_label('EFG+ (100 is League Average)', family='Bitstream Vera Sans', color='white', fontweight='bold', labelpad=-4, fontsize=14)
     cb.set_ticks([0.0, 0.25, 0.5, 0.75, 1.0])
     cb.set_ticklabels(['$\mathbf{\leq}$50','75', '100','125', '$\mathbf{\geq}$150'])
 
@@ -386,20 +387,33 @@ def get_key_text(player_id, season_id, isCareer):
             text += '\n' + 'Arc 3 | '
         elif _type == 'In The Paint (Non-RA)':
             text += '\n' + 'Paint(Non-RA) | '
+        elif _type == 'Restricted Area':
+            text += '\n' + 'Restricted | '
         else:
             text += '\n' + _type + ' | '        
 
-        atts = get_metrics(player_id, season_id, isCareer, _type, 'r.attempts')
-        zone_pct = ("%.2f" % get_metrics(player_id, season_id, isCareer, _type, 'zone_pct*100'))
-        zone_pct_plus = ("%.2f" % get_metrics(player_id, season_id, isCareer, _type, 'zone_pct_plus'))
-        efg_plus = ("%.2f" % get_metrics(player_id, season_id, isCareer, _type, 'efg_plus'))
-        paa = ("%.2f" % get_metrics(player_id, season_id, isCareer, _type, 'paa'))
+        atts = ("%.0f" %get_metrics(player_id, season_id, isCareer, _type, 'r.attempts'))
+        makes = ("%.0f" %get_metrics(player_id, season_id, isCareer, _type, 'b.makes'))
+        zone_pct = ("%.1f" % get_metrics(player_id, season_id, isCareer, _type, 'zone_pct*100'))
+        zone_pct_plus = ("%.1f" % get_metrics(player_id, season_id, isCareer, _type, 'zone_pct_plus'))
+        efg = ("%.1f" % get_metrics(player_id, season_id, isCareer, _type, 'efg*100'))
+        efg_plus = ("%.1f" % get_metrics(player_id, season_id, isCareer, _type, 'efg_plus'))
+        zone_efg_plus = ("%.1f" % get_metrics(player_id, season_id, isCareer, _type, 'zone_efg_plus'))
+        paa = ("%.1f" % get_metrics(player_id, season_id, isCareer, _type, 'paa'))
+        paa_game = ("%.1f" % get_metrics(player_id, season_id, isCareer, _type, 'paa_per_game'))
         
-        text += str(atts) + ' Attempts (' + str(zone_pct) + '%) | '
-        text += str(zone_pct_plus) + ' Zone%+ | '
-        text += str(efg_plus) + ' EFG+ | '
-        text += str(paa) + ' PAA'
-
+        if _type == 'All':
+            text += str(makes) + ' for ' + str(atts) + ' | '
+            text += str(efg) + ' EFG% ('
+            text += str(efg_plus) + ' EFG+ | '
+            text += str(paa) + ' PAA) | '
+            text += str(paa_game) + ' PAA/G'
+        else:
+            text += str(makes) + '/' + str(atts) + ' | '
+            text += str(zone_pct) + '% z% (' + str(zone_pct_plus) + ' z%+) | '
+            text += str(zone_efg_plus) + ' zEFG+ ('
+            text += str(efg_plus) + ' EFG+ | '
+            text += str(paa) + ' PAA)'
     return text
 
 
@@ -408,9 +422,10 @@ def get_metrics(player_id, season_id, isCareer, zone, metric):
 
     if isCareer is False:
         metric_q = """SELECT
-        %s
+        ROUND(%s,1)
         FROM shots_Player_Relative_Year r
         JOIN shots_Player_Distribution_Year d USING (player_id, season_id, shot_zone_basic, shot_zone_area)
+        JOIN shots_Player_Breakdown b USING (player_id, season_id, shot_zone_basic, shot_zone_area)
         WHERE season_id = %s
         AND player_id = %s
         AND shot_zone_area = 'all'
@@ -420,14 +435,25 @@ def get_metrics(player_id, season_id, isCareer, zone, metric):
 
     else:
         metric_q = """SELECT
-        %s
+        ROUND(%s,1)
         FROM shots_Player_Relative_Career r
         JOIN shots_Player_Distribution_Career d USING (player_id, season_id, shot_zone_basic, shot_zone_area)
+        JOIN(
+            SELECT 
+            player_id, shot_zone_basic, shot_zone_area,
+            SUM(games) AS games,
+            SUM(attempts) AS attempts,
+            SUM(makes) AS makes,
+            SUM(points) AS points
+            FROM shots_Player_Breakdown
+            WHERE player_id = %s
+            GROUP BY shot_zone_area, shot_zone_basic
+        ) b USING (player_id, shot_zone_basic, shot_zone_area)
         WHERE player_id = %s
         AND shot_zone_area = 'all'
         AND shot_zone_basic = '%s'
         """
-        metric_qry = metric_q % (metric, player_id, zone)
+        metric_qry = metric_q % (metric, player_id, player_id, zone)
 
     try:
         res = db.query(metric_qry)[0][0]
@@ -568,14 +594,8 @@ def get_plist(operator='', filt_value=0, backfill=False):
 
         # Charts for only new players (only for backfilling)
         if backfill is True:
-            if os.path.exists(os.getcwd()+'/shot_charts/'+player_search_name+'('+str(player_id)+')'):
+            if os.path.exists(os.getcwd()+'/shot_charts_player/'+player_search_name+'('+str(player_id)+')'):
                 continue
-
-        # If a player doesn't have a start_year or end_year, we set those to the max values
-        if start_year == '':
-            start_year = 0
-        if end_year == '':
-            end_year = 9999
 
         # a filter for which players to update
         if operator is '':
@@ -600,12 +620,19 @@ def get_plist(operator='', filt_value=0, backfill=False):
 def acquire_playerPic(player_id, zoom, offset=(250,370)):
     from matplotlib import  offsetbox as osb
     import urllib
+    
     try:
-        pic = urllib.urlretrieve("http://stats.nba.com/media/players/230x185/"+str(player_id)+".png",str(player_id)+".png")
-        player_pic = plt.imread(pic[0])
-    except ValueError:
-        pic = urllib.urlretrieve("http://stats.nba.com/media/players/230x185/0.png")
-        player_pic = plt.imread(pic[0])    
+        img_path = os.getcwd()+'/'+str(player_id)+'.png'
+        player_pic = plt.imread(img_path)
+    except IOError:
+        try:
+            pic = urllib.urlretrieve("http://stats.nba.com/media/players/230x185/"+str(player_id)+".png",str(player_id)+".png")
+            player_pic = plt.imread(pic[0])
+        except ValueError:
+            pic = urllib.urlretrieve("http://stats.nba.com/media/players/230x185/0.png", str(player_id)+'.png')
+            player_pic = plt.imread(pic[0])    
+
+
     img = osb.OffsetImage(player_pic, zoom)
     img = osb.AnnotationBbox(img, offset,xycoords='data',pad=0.0, box_alignment=(1,0), frameon=False)
     return img
