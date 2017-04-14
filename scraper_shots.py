@@ -16,7 +16,9 @@ start_time = time()
 
 getter = data_getter()
 
-base_url = 'http://stats.nba.com/stats/shotchartdetail?CFID=33&CFPARAMS=%s&ContextFilter=&ContextMeasure=FGA&DateFrom=&DateTo=&GameID=&GameSegment=&LastNGames=0&LeagueID=00&Location=&MeasureType=Base&Month=0&OpponentTeamID=0&Outcome=&PaceAdjust=N&PerMode=PerGame&Period=0&PlayerID=0&PlusMinus=N&PlayerPosition=&Rank=N&RookieYear=&Season=%s&SeasonSegment=&SeasonType=Regular+Season&TeamID=0&VsConference=&VsDivision=&mode=Advanced&showDetails=0&showShots=1&showZones=0'
+lastNgames = 1
+
+base_url = 'http://stats.nba.com/stats/shotchartdetail?CFID=33&CFPARAMS=%s&ContextFilter=&ContextMeasure=FGA&DateFrom=&DateTo=&GameID=&GameSegment=&LastNGames=%s&LeagueID=00&Location=&MeasureType=Base&Month=0&OpponentTeamID=0&Outcome=&PaceAdjust=N&PerMode=PerGame&Period=0&PlayerID=0&PlusMinus=N&PlayerPosition=&Rank=N&RookieYear=&Season=%s&SeasonSegment=&SeasonType=Regular+Season&TeamID=0&VsConference=&VsDivision=&mode=Advanced&showDetails=0&showShots=1&showZones=0'
 
 for year in range(2016,2017):
     print year
@@ -27,7 +29,7 @@ for year in range(2016,2017):
 
     db_season_id = str(season_start)+str(season_start%100+1).zfill(2)[-2:]
 
-    season_url = base_url % (season_id, season_id)
+    season_url = base_url % (season_id, lastNgames, season_id)
 
     json = getter.get_url_data(season_url, "json")
 
@@ -69,6 +71,7 @@ for year in range(2016,2017):
 
         entry["home_team"] = shot[22]
         entry["away_team"] = shot[23]
+        entry["season_type"] = "Reg"
 
         shot_entries.append(entry)
 

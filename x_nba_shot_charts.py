@@ -48,7 +48,7 @@ def initiate(p_list, list_length, printer=True):
             os.makedirs(path)
         # if you download this code and re-use it, you'll either have to alter the path in the next line, or delete the following 3 lines
         else:
-            arch_path = '/Users/connordog/Desktop/archived_charts/'+str(date.today())+'_'+str(datetime.now().hour)+'_'+player_name
+            arch_path = base_path+'/shot_charts_archived_charts/'+str(date.today())+'_'+str(datetime.now().hour)+'_'+player_name
             if os.path.exists(arch_path):
                 shutil.rmtree(arch_path)
             os.rename(path, arch_path)
@@ -101,7 +101,7 @@ def initiate(p_list, list_length, printer=True):
         # making a text string for usage in the career shot chart
         # again, if you download and are re-using this code, you'll either have to delete or change the arch_path that I use for archiving old charts
         if min_year == 9999 or max_year == 0:
-            arch_path = '/Users/connordog/Desktop/archived_charts/'+player_name+'_NOGAMES'
+            arch_path = base_path + '/shot_charts_archived_charts/'+player_name+'_NOGAMES'
             os.makedirs(arch_path)
         else:
             career_string = "CAREER (%s-%s)" % (min_year, max_year)

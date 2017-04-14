@@ -14,6 +14,8 @@ import matplotlib.pyplot as plt
 from matplotlib import  offsetbox as osb
 from matplotlib.patches import RegularPolygon
 from datetime import date, datetime, timedelta
+from time import time
+
 
 
 sys.path.append('/Users/connordog/Dropbox/Desktop_Files/Work_Things/CodeBase/Python_Scripts/Python_Projects/packages')
@@ -26,22 +28,23 @@ db = db('nba_shots')
 mymap = mpb.cm.YlOrRd
 
 
-whitelist_pngs = ['charts_description.png',]
+whitelist_pngs = ['charts_description.png', 'nba_logo.png', '0.png', 'chart_icon.png']
 
 
-# taking in a dictionary of player information and initializing the processes
 def initiate(p_list, list_length, printer=True):
-    # setting our base directory, I have this set to your current working directory (cwd)
+    start_time = time()
+
     base_path = os.getcwd()
 
-    # iterating through our player dictionary to grab the player_title and player_id
     counter = 1
+    players_cnt = 0
+    charts_cnt = 0
     for player_title, player_data in p_list.items():
         player_id, start_year, end_year = player_data
         start_year, end_year = int(start_year), int(end_year)
 
         if printer is True:
-            print "\n\nProcessing Player " + str(counter) + " of " + list_length + ': ' + player_title + ' (' + str(start_year) + ' - ' + str(end_year) + ')\n'
+            print "\n\nProcessing Player " + str(counter) + " of " + list_length + ': ' + player_title + ' (' + str(start_year) + ' - ' + str(end_year) + ')'
         counter += 1
 
         if start_year < 1996:
@@ -57,60 +60,50 @@ def initiate(p_list, list_length, printer=True):
             print "\tNo shots, continuing to next player"
             continue
 
-        # defines a path to a directory for saving the charts of the current player
         path = base_path+'/shot_charts_player/'+player_name+'('+str(player_id)+')/'
 
-        # checks if our desired directory exists, archived the charts if they exist, and (re-)create the directory
         if not os.path.exists(path):
             os.makedirs(path)
-        # if you download this code and re-use it, you'll either have to alter the path in the next line, or delete the following 3 lines
         else:
-            arch_path = '/Users/connordog/Desktop/archived_charts/'+str(date.today())+'_'+str(datetime.now().hour)+'_'+player_name+'('+str(player_id)+')/'
+            arch_path = base_path+'/shot_charts_archived_charts/'+str(date.today())+'_'+str(datetime.now().hour)+'_'+player_name+'('+str(player_id)+')/'
             if os.path.exists(arch_path):
                 shutil.rmtree(arch_path)
             os.rename(path, arch_path)
             os.makedirs(path)
 
-        # deletes previous versions of images
         os.chdir(path)
         files=glob.glob('*.png')
         for filename in files:
             os.unlink(filename)
         os.chdir(base_path)
 
-        # we set an empty DataFrame and will append each year's shots, creating a career shot log
         all_shots_df = pd.DataFrame()
 
-        # we iterate through each year of a player's career, creating a shot chart for every year while also adding each season's data to our all_shots_df DataFrame
         for year in range(start_year,end_year):
             season_start = year
 
-            # takes a season (e.g. 2008) and returns the nba ID (e.g. 2008-09)
             season_id = str(season_start)+'-'+str(season_start%100+1).zfill(2)[-2:]
 
-            if printer is True:
-                # we print the season/player combo in order to monitor progress
-                print '\t',
-                print season_id, player_name, player_id 
+            # if printer is True:
+            #     print '\n\t', season_id, player_name, player_id 
 
-            # a DataFrame of the shots a player took in a given season
             year_shots_df = acquire_shootingData(player_id, season=season_id, isCareer=False)
 
-            # if the DataFrame isn't empty (i.e., if the player played this season), we make a shot chart for this season
             if year_shots_df is not None and len(year_shots_df.index) != 0:
 
-                # plotting the data for the given season/player combination we are iterating through
                 shooting_plot(path, year_shots_df, player_id, season_id, player_title, player_name)
+                charts_cnt += 1
 
         career_string = "CAREER (%s-%s)" % (start_year, end_year)
-        if printer is True:
-            print '\t\t\t', career_string, player_name
+        # if printer is True:
+        #     print '\t\t\t', career_string, player_name
 
         all_shots_df = acquire_shootingData(player_id, isCareer=True)
 
         shooting_plot(path, all_shots_df, player_id, career_string, player_title, player_name, isCareer=True, min_year=start_year, max_year=end_year)
+        players_cnt += 1
+        charts_cnt += 1
 
-        # after we finish the script, we remove all the player images that were saved to the directory during the acquire_playerPic function
         os.chdir(base_path)
         files=glob.glob('*.png')
         for white in whitelist_pngs:
@@ -118,6 +111,17 @@ def initiate(p_list, list_length, printer=True):
                 files.remove(white)
         for filename in files:
             os.unlink(filename)
+
+
+        temp_end = time()
+        elapsed_time = float(temp_end - start_time)
+        print "\ntime elapsed (in seconds): \t" + str(elapsed_time)
+        print "time elapsed (in minutes): \t" + str(elapsed_time/60.0)
+        print "players processed: \t\t" + str(players_cnt)
+        print "charts made: \t\t\t" + str(charts_cnt)
+        print "average seconds per chart: \t" + str(elapsed_time/float(charts_cnt))
+        print "average seconds per player: \t" + str(elapsed_time/float(players_cnt))
+        print "\n\n =================================================================================="
 
 
 
@@ -146,6 +150,7 @@ def acquire_shootingData(player_id,season='',isCareer=True):
     FROM shots
     JOIN shots_Player_Relative_Year USING (season_id, player_id, shot_zone_basic, shot_zone_area)
     WHERE player_id = %s
+    AND season_type = 'Reg'
     %s"""
 
     shot_q = shot_query % (player_id, query_append)
@@ -624,13 +629,13 @@ def acquire_playerPic(player_id, zoom, offset=(250,370)):
     try:
         img_path = os.getcwd()+'/'+str(player_id)+'.png'
         player_pic = plt.imread(img_path)
-    except IOError:
+    except (ValueError,IOError):
         try:
             pic = urllib.urlretrieve("http://stats.nba.com/media/players/230x185/"+str(player_id)+".png",str(player_id)+".png")
             player_pic = plt.imread(pic[0])
-        except ValueError:
-            pic = urllib.urlretrieve("http://stats.nba.com/media/players/230x185/0.png", str(player_id)+'.png')
-            player_pic = plt.imread(pic[0])    
+        except (ValueError, IOError):
+            img_path = os.getcwd()+'/nba_logo.png'
+            player_pic = plt.imread(img_path)    
 
 
     img = osb.OffsetImage(player_pic, zoom)
@@ -643,7 +648,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     # call via [python nba_shot_charts.py --player_name "Zach Randolph"]
-    parser.add_argument('--player_name',type=str,   default='')
+    parser.add_argument('--player_name',type=str,   default='Rudy Gobert')
     args = parser.parse_args()
 
     if args.player_name != '':
@@ -656,7 +661,7 @@ if __name__ == "__main__":
         # If we don't have a name, we assume we're trying to backfill
         player_list = get_plist(operator='<=', filt_value=9999, backfill=True)
 
-    print "\nBegin processing " + str(len(player_list)) + " players\n"
+    print "\nBegin processing " + str(len(player_list)) + " players"
 
     initiate(player_list, str(len(player_list)))
 

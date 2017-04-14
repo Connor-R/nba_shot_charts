@@ -52,6 +52,7 @@ FROM(
         ELSE 0 END) AS points
     FROM shots
     WHERE season_id = %s
+    AND season_type = 'Reg'
     GROUP BY %s_id, season_id, shot_zone_basic, shot_zone_area
 ) a
 JOIN(
@@ -59,6 +60,7 @@ JOIN(
     COUNT(DISTINCT game_id) AS games
     FROM shots
     WHERE season_id = %s
+    AND season_type = 'Reg'
     GROUP BY %s_id, season_id
 ) g USING (%s_id, season_id)
 UNION
@@ -73,6 +75,7 @@ FROM(
         ELSE 0 END) AS points
     FROM shots
     WHERE season_id = %s
+    AND season_type = 'Reg'
     GROUP BY %s_id, season_id, shot_zone_basic
 ) a
 JOIN(
@@ -94,6 +97,7 @@ FROM(
         ELSE 0 END) AS points
     FROM shots
     WHERE season_id = %s
+    AND season_type = 'Reg'
     GROUP BY %s_id, season_id
 ) a
 JOIN(
@@ -101,6 +105,7 @@ JOIN(
     COUNT(DISTINCT game_id) AS games
     FROM shots
     WHERE season_id = %s
+    AND season_type = 'Reg'
     GROUP BY %s_id, season_id
 ) g USING (%s_id, season_id)
 ORDER BY %s_id ASC, season_id ASC, shot_zone_basic ASC, shot_zone_area ASC

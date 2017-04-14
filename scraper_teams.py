@@ -19,7 +19,9 @@ getter = data_getter()
 
 team_url = 'http://stats.nba.com/stats/franchisehistory?LeagueID=00'
 
+print "trying"
 json = getter.get_url_data(team_url, "json")
+raw_input("as")
 
 resultSets = json["resultSets"]
 

@@ -23,13 +23,16 @@ I'm changing the code structure a bit. I've added scrapers and some post-process
 - [x] Speeding up the process of generating a chart (querying the database is faster than scraping the web)
 - [x] Creating some form of an era-adjustment, to be able to more accurately compare charts from players from different seasons (think of how a player like Ray Allen's shot chart may differ if his career started in 2015, or how a player like Patrick Beverley's may have differed if his career started in 1990).
 - [x] Generating team shot charts similar to how we current generate player charts.
-- [ ] Generate charts for playoffs.
+- [x] Generate charts for playoffs.
 - [ ] Calculating some form of a similarity score, to see which players/teams have the most similar distribution and shot making ability from some pre-defined zones.
-- [ ] Filter shots by date (create shot charts for a player/team from date X to date Y).
+- [x] Filter shots by date (create shot charts for a player/team from date X to date Y).
 - [ ] zEFG% baselines for guards/wings/bigs at each zone
 
 #### March 19, 2017 Update
-`chart_bot_v2.py` and `nba_shot_charts_v2.py` are active. I've changed the color scheme/added new metrics into the v2 charts, and will soon replace the v1 in terms of tweeting. Using the db has been a vast improvement over previous methods, and has allowed me to create some shot/zone-based metrics I didn't have previous access to. Next up will be making team charts and similarity scores.
+The new `chart_bot.py` and `nba_shot_charts.py` are active. I've changed the color scheme/added new metrics over the old charts (now labeled with an 'x' prefix). Using the db has been a vast improvement over previous methods, and has allowed me to create some shot/zone-based metrics I didn't have previous access to. Next up will be making team charts and similarity scores.
 
 #### March 26, 2017 Update
 I'm now able to create/post charts at the team level and I also cleaned up the format of the player level charts. 
+
+#### April 2, 2017 Update
+Creating custom (filtering by date, playoffs, multiple players, etc.) charts is now possible. Although it is very slow (multiple minutes per chart, as opposed to a few seconds), since it has to re-calculate every metric as opposed to pulling from a database.

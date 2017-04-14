@@ -4,7 +4,7 @@ import sys
 import os
 import random
 import csv
-import nba_shot_charts_v2 as charts
+import nba_shot_charts as charts
 from urllib import urlopen
 from bs4 import BeautifulSoup
 
@@ -153,12 +153,15 @@ def parse_text(pic, hashtags, p_id):
         pos = ''
     tweet += ' (' + str(efg) + ' EFG+ | ' + pos + str(paa) + ' PAA).' 
 
-    if hashtags != []:
-        for tag in hashtags:
-            tweet += ' #' + tag
+    if efg == 0:
+        hashtags.append('Randy')
 
     player_hashtag = full_name.replace(' ','').replace("'","").replace('-','').replace('.','').replace('(2)','').replace('(3)','')
     tweet += ' #' + player_hashtag
+
+    if hashtags != []:
+        for tag in hashtags:
+            tweet += ' #' + tag
 
     for team in teams:
         if team is not None:
@@ -182,6 +185,7 @@ def get_teams(p_id, year, isCareer=False):
     AND season_id = 201617
     AND start_year <= LEFT(season_id, 4)
     AND end_year > LEFT(season_id, 4)
+    AND season_type = 'Reg'
     ORDER BY game_date DESC"""
 
     curr_qry = curr_q % (p_id)
@@ -200,7 +204,8 @@ def get_teams(p_id, year, isCareer=False):
     WHERE player_id = %s
     AND season_id = %s
     AND start_year <= LEFT(season_id, 4)
-    AND end_year > LEFT(season_id, 4)"""
+    AND end_year > LEFT(season_id, 4)
+    AND season_type = 'Reg'"""
 
         team_qry = team_q % (p_id, year.replace('-',''))
 
@@ -210,7 +215,8 @@ def get_teams(p_id, year, isCareer=False):
     JOIN teams USING (team_id)
     WHERE player_id = %s
     AND start_year <= LEFT(season_id, 4)
-    AND end_year > LEFT(season_id, 4)"""
+    AND end_year > LEFT(season_id, 4)
+    AND season_type = 'Reg'"""
 
         team_qry = team_q % (p_id)
 
@@ -232,7 +238,10 @@ def get_twitter(full_name):
     if twitter_name in (None, ''):
 
         url = "http://www.basketball-reference.com/friv/twitter.html"
-        html = urlopen(url)
+        try:
+            html = urlopen(url)
+        except IOError:
+            return None
         soup = BeautifulSoup(html, "lxml")
 
         data_rows = soup.findAll('tr')[2:] 
