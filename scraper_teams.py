@@ -19,9 +19,10 @@ getter = data_getter()
 
 team_url = 'http://stats.nba.com/stats/franchisehistory?LeagueID=00'
 
-print "trying"
+print "-------------------------"
+print "scraper_teams.py"
+
 json = getter.get_url_data(team_url, "json")
-raw_input("as")
 
 resultSets = json["resultSets"]
 
@@ -72,7 +73,7 @@ db.conn.commit()
 
 end_time = time()
 elapsed_time = float(end_time - start_time)
-print "scraper_teams.py"
 print "time elapsed (in seconds): " + str(elapsed_time)
 print "time elapsed (in minutes): " + str(elapsed_time/60.0)
-
+print "scraper_teams.py"
+print "-------------------------"

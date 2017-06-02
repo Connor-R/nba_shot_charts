@@ -148,7 +148,7 @@ def acquire_shootingData(player_id,season='',isCareer=True):
     zone_pct_plus,
     efg_plus
     FROM shots
-    JOIN shots_Player_Relative_Year USING (season_id, player_id, shot_zone_basic, shot_zone_area)
+    JOIN shots_Player_Relative_Year USING (season_id, season_type, player_id, shot_zone_basic, shot_zone_area)
     WHERE player_id = %s
     AND season_type = 'Reg'
     %s"""
@@ -429,12 +429,13 @@ def get_metrics(player_id, season_id, isCareer, zone, metric):
         metric_q = """SELECT
         ROUND(%s,1)
         FROM shots_Player_Relative_Year r
-        JOIN shots_Player_Distribution_Year d USING (player_id, season_id, shot_zone_basic, shot_zone_area)
-        JOIN shots_Player_Breakdown b USING (player_id, season_id, shot_zone_basic, shot_zone_area)
+        JOIN shots_Player_Distribution_Year d USING (player_id, season_id, season_type, shot_zone_basic, shot_zone_area)
+        JOIN shots_Player_Breakdown b USING (player_id, season_id, season_type, shot_zone_basic, shot_zone_area)
         WHERE season_id = %s
         AND player_id = %s
         AND shot_zone_area = 'all'
         AND shot_zone_basic = '%s'
+        AND season_type = 'reg'
         """
         metric_qry = metric_q % (metric, season_id.replace('-',''), player_id, zone)
 
@@ -442,21 +443,23 @@ def get_metrics(player_id, season_id, isCareer, zone, metric):
         metric_q = """SELECT
         ROUND(%s,1)
         FROM shots_Player_Relative_Career r
-        JOIN shots_Player_Distribution_Career d USING (player_id, season_id, shot_zone_basic, shot_zone_area)
+        JOIN shots_Player_Distribution_Career d USING (player_id, season_id, season_type, shot_zone_basic, shot_zone_area)
         JOIN(
             SELECT 
-            player_id, shot_zone_basic, shot_zone_area,
+            player_id, season_type, shot_zone_basic, shot_zone_area,
             SUM(games) AS games,
             SUM(attempts) AS attempts,
             SUM(makes) AS makes,
             SUM(points) AS points
             FROM shots_Player_Breakdown
             WHERE player_id = %s
-            GROUP BY shot_zone_area, shot_zone_basic
-        ) b USING (player_id, shot_zone_basic, shot_zone_area)
+            AND season_type = 'reg'
+            GROUP BY shot_zone_area, shot_zone_basic, season_type
+        ) b USING (player_id, season_type, shot_zone_basic, shot_zone_area)
         WHERE player_id = %s
         AND shot_zone_area = 'all'
         AND shot_zone_basic = '%s'
+        AND season_type = 'reg'
         """
         metric_qry = metric_q % (metric, player_id, player_id, zone)
 
@@ -475,6 +478,7 @@ def get_lg_efg(season_id, isCareer):
         FROM shots_League_Distribution_Year 
         WHERE season_id = %s
         AND shot_zone_basic = 'all'
+        AND season_type = 'reg'
         """
         qry = q % (season_id.replace('-',''))
 
@@ -482,6 +486,7 @@ def get_lg_efg(season_id, isCareer):
         q = """SELECT efg 
         FROM shots_League_Distribution_Career 
         WHERE shot_zone_basic = 'all'
+        AND season_type = 'reg'
         """
         qry = q        
     
@@ -634,7 +639,7 @@ def acquire_playerPic(player_id, zoom, offset=(250,370)):
             pic = urllib.urlretrieve("http://stats.nba.com/media/players/230x185/"+str(player_id)+".png",str(player_id)+".png")
             player_pic = plt.imread(pic[0])
         except (ValueError, IOError):
-            img_path = os.getcwd()+'/nba_logo.png'
+            img_path = os.getcwd()+'/chart_icon.png'
             player_pic = plt.imread(img_path)    
 
 
@@ -648,7 +653,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     # call via [python nba_shot_charts.py --player_name "Zach Randolph"]
-    parser.add_argument('--player_name',type=str,   default='Rudy Gobert')
+    parser.add_argument('--player_name',type=str,   default='')
     args = parser.parse_args()
 
     if args.player_name != '':
@@ -659,6 +664,7 @@ if __name__ == "__main__":
         player_list = {args.player_name:vals}
     else:
         # If we don't have a name, we assume we're trying to backfill
+        # player_list = get_plist(operator='==', filt_value=2017, backfill=False)
         player_list = get_plist(operator='<=', filt_value=9999, backfill=True)
 
     print "\nBegin processing " + str(len(player_list)) + " players"

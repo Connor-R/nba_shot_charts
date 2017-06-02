@@ -19,6 +19,9 @@ getter = data_getter()
 
 url = 'http://stats.nba.com/stats/commonallplayers?IsOnlyCurrentSeason=0&LeagueID=00&Season=2016-17'
 
+print "scraper_players.py"
+print "-------------------------"
+
 json = getter.get_url_data(url, "json")
 
 resultSets = json["resultSets"]
@@ -62,6 +65,7 @@ if player_entries != []:
 
 end_time = time()
 elapsed_time = float(end_time - start_time)
-print "scraper_players.py"
 print "time elapsed (in seconds): " + str(elapsed_time)
 print "time elapsed (in minutes): " + str(elapsed_time/60.0)
+print "scraper_players.py"
+print "-------------------------"

@@ -120,7 +120,7 @@ def parse_text(pic, hashtags):
         tweet += 'Career (' + year + ') Shot Chart' 
         teams = get_reference(fname, lname, year, full_name, isCareer=True)
     else:
-        if year == '2016-17':
+        if year == '2017-18':
             tweet += year + '(in progress) Shot Chart'
         else:
             tweet += year + ' Shot Chart' 

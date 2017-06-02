@@ -16,6 +16,8 @@ db = db('nba_shots')
 
 def initiate():
     start_time = time()
+    print "-------------------------"
+    print "shots_Breakdown.py"
 
     for year in range(2016,2017):
         season_start = year
@@ -26,14 +28,15 @@ def initiate():
 
     end_time = time()
     elapsed_time = float(end_time - start_time)
-    print "shots_Breakdown.py"
     print "time elapsed (in seconds): " + str(elapsed_time)
     print "time elapsed (in minutes): " + str(elapsed_time/60.0)
+    print "shots_Breakdown.py"
+    print "-------------------------"
 
 
 
 def process(season_id):
-    for _type in ('Player', 'Team', 'League'):
+    for _type in ('League', 'Team', 'Player'):
         print '\t' + _type
 
         query_id = _type
@@ -43,7 +46,7 @@ def process(season_id):
 
         query = """SELECT *
 FROM(
-    SELECT %s_id, season_id, shot_zone_basic, shot_zone_area,
+    SELECT %s_id, season_id, season_type, shot_zone_basic, shot_zone_area,
     COUNT(*) AS attempts,
     AVG(shot_distance) AS avg_dist,
     SUM(CASE WHEN event_type = "Made Shot" THEN 1 ELSE 0 END) AS makes,
@@ -52,21 +55,19 @@ FROM(
         ELSE 0 END) AS points
     FROM shots
     WHERE season_id = %s
-    AND season_type = 'Reg'
-    GROUP BY %s_id, season_id, shot_zone_basic, shot_zone_area
+    GROUP BY %s_id, season_id, season_type, shot_zone_basic, shot_zone_area
 ) a
 JOIN(
-    SELECT %s_id, season_id, 
+    SELECT %s_id, season_id, season_type,
     COUNT(DISTINCT game_id) AS games
     FROM shots
     WHERE season_id = %s
-    AND season_type = 'Reg'
-    GROUP BY %s_id, season_id
-) g USING (%s_id, season_id)
+    GROUP BY %s_id, season_id, season_type
+) g USING (%s_id, season_id, season_type)
 UNION
 SELECT *
 FROM(
-    SELECT %s_id, season_id, shot_zone_basic, 'all' AS shot_zone_area,
+    SELECT %s_id, season_id, season_type, shot_zone_basic, 'all' AS shot_zone_area,
     COUNT(*) AS attempts,
     AVG(shot_distance) AS avg_dist,
     SUM(CASE WHEN event_type = "Made Shot" THEN 1 ELSE 0 END) AS makes,
@@ -75,20 +76,19 @@ FROM(
         ELSE 0 END) AS points
     FROM shots
     WHERE season_id = %s
-    AND season_type = 'Reg'
-    GROUP BY %s_id, season_id, shot_zone_basic
+    GROUP BY %s_id, season_id, season_type, shot_zone_basic
 ) a
 JOIN(
-    SELECT %s_id, season_id, 
+    SELECT %s_id, season_id, season_type, 
     COUNT(DISTINCT game_id) AS games
     FROM shots
     WHERE season_id = %s
-    GROUP BY %s_id, season_id
-) g USING (%s_id, season_id)
+    GROUP BY %s_id, season_id, season_type
+) g USING (%s_id, season_id, season_type)
 UNION
 SELECT *
 FROM(
-    SELECT %s_id, season_id, 'all' AS shot_zone_basic, 'all' AS shot_zone_area,
+    SELECT %s_id, season_id, season_type, 'all' AS shot_zone_basic, 'all' AS shot_zone_area,
     COUNT(*) AS attempts,
     AVG(shot_distance) AS avg_dist,
     SUM(CASE WHEN event_type = "Made Shot" THEN 1 ELSE 0 END) AS makes,
@@ -97,30 +97,29 @@ FROM(
         ELSE 0 END) AS points
     FROM shots
     WHERE season_id = %s
-    AND season_type = 'Reg'
-    GROUP BY %s_id, season_id
+    GROUP BY %s_id, season_id, season_type
 ) a
 JOIN(
-    SELECT %s_id, season_id, 
+    SELECT %s_id, season_id, season_type, 
     COUNT(DISTINCT game_id) AS games
     FROM shots
     WHERE season_id = %s
-    AND season_type = 'Reg'
-    GROUP BY %s_id, season_id
-) g USING (%s_id, season_id)
+    GROUP BY %s_id, season_id, season_type
+) g USING (%s_id, season_id, season_type)
 ORDER BY %s_id ASC, season_id ASC, shot_zone_basic ASC, shot_zone_area ASC
 """
 
 
         q = query % (query_id, season_id, _type, query_id, season_id, _type, _type, query_id, season_id, _type, query_id, season_id, _type, _type, query_id, season_id, _type, query_id, season_id, _type, _type, _type)
 
+        # raw_input(q)
         res = db.query(q)
 
         entries = []
         _id = '%s_id' % (_type.lower())
         for row in res:
-            type_id, season_id, shot_zone_basic, shot_zone_area, attempts, avg_dist, makes, points, games = row
-            entry = {_id:type_id, "season_id":season_id, "shot_zone_basic":shot_zone_basic, "shot_zone_area":shot_zone_area, "attempts":attempts, "avg_dist":avg_dist, "makes":makes, "points":points, "games":games}   
+            type_id, season_id, season_type, shot_zone_basic, shot_zone_area, attempts, avg_dist, makes, points, games = row
+            entry = {_id:type_id, "season_id":season_id, "season_type":season_type, "shot_zone_basic":shot_zone_basic, "shot_zone_area":shot_zone_area, "attempts":attempts, "avg_dist":avg_dist, "makes":makes, "points":points, "games":games}   
             entries.append(entry)
 
         table = "shots_%s_Breakdown" % (_type)

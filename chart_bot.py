@@ -36,13 +36,13 @@ api = tweepy.API(auth)
 base_path = os.getcwd()+"/shot_charts_player/"
 
 
-hashtag_file = os.getcwd()+"/team_hashtags.csv"
-hashtag_list = {}
-with open(hashtag_file, 'rU') as f:
-    mycsv = csv.reader(f)
-    for row in mycsv:
-        team, hashtag = row
-        hashtag_list[team]=hashtag
+# hashtag_file = os.getcwd()+"/team_hashtags.csv"
+# hashtag_list = {}
+# with open(hashtag_file, 'rU') as f:
+#     mycsv = csv.reader(f)
+#     for row in mycsv:
+#         team, hashtag = row
+#         hashtag_list[team]=hashtag
 
 
 hardcode_file = os.getcwd()+"/hardcode_players.csv"
@@ -107,8 +107,15 @@ def tweet(player_path, chart, hashtags, p_id):
     print tweet_text, len(tweet_text)
     # raw_input(pic_path)
     time.sleep(15)
-    api.update_with_media(pic_path, status=tweet_text)
-
+    try:
+        api.update_with_media(pic_path, status=tweet_text)
+    except tweepy.error.TweepError:
+        print "\n\n\nNo internet connection....trying again in 10 min"
+        time.sleep(600)
+        try:
+            api.update_with_media(pic_path, status=tweet_text)
+        except tweepy.error.TweepError:
+            print "No internet connection, please try again later\n\n\n"
 
 def get_rand_player():
     p_list = charts.get_plist()
@@ -137,14 +144,14 @@ def parse_text(pic, hashtags, p_id):
     if pic.split('_')[-3][:6] == 'CAREER':
         tweet += year + ' Shot Chart' 
         teams = get_teams(p_id, year, isCareer=True)
-        met_qry = "SELECT ROUND(efg_plus,0), ROUND(paa,0) FROM shots_Player_Relative_Career WHERE shot_zone_basic = 'all' AND player_id = %s" % (p_id)
+        met_qry = "SELECT ROUND(efg_plus,0), ROUND(paa,0) FROM shots_Player_Relative_Career WHERE shot_zone_basic = 'all' AND player_id = %s AND season_type = 'reg'" % (p_id)
     else:
-        if year == '2016-17':
+        if year == '2017-18':
             tweet += year + '(in progress) Shot Chart'
         else:
             tweet += year + ' Shot Chart' 
         teams = get_teams(p_id, year)
-        met_qry = "SELECT ROUND(efg_plus,0), ROUND(paa,0) FROM shots_Player_Relative_Year WHERE shot_zone_basic = 'all' AND player_id = %s AND season_id = %s" % (p_id, year.replace('-',''))
+        met_qry = "SELECT ROUND(efg_plus,0), ROUND(paa,0) FROM shots_Player_Relative_Year WHERE shot_zone_basic = 'all' AND player_id = %s AND season_id = %s AND season_type = 'reg'" % (p_id, year.replace('-',''))
 
     efg, paa = db.query(met_qry)[0]
     if paa >= 0:
@@ -163,13 +170,14 @@ def parse_text(pic, hashtags, p_id):
         for tag in hashtags:
             tweet += ' #' + tag
 
-    for team in teams:
-        if team is not None:
-            hashtag = hashtag_list.get(team)
-            if hashtag is None:
-                tweet += ' #' + team.replace(" ","")
-            else:
-                tweet += ' #' + hashtag
+    for team in teams:        
+        # if team is not None:
+        #     hashtag = hashtag_list.get(team)
+        #     if hashtag is None:
+        #         tweet += ' #' + team.replace(" ","")
+        #     else:
+        #         tweet += ' #' + hashtag
+        tweet += ' #' + team.replace(" ","")
 
     return tweet
 
