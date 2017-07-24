@@ -5,6 +5,7 @@
 
 shot_charts_player/
 shot_charts_team/
+nba_rank/
 
 charts_description.md
 
@@ -17,6 +18,6 @@ nba_shots_weekly_run.sh
 total_chart_checker.py
 scraper_playoff_shots.py
 chart_bot_team.py
-chart_bot_playoffs.py
 nba_team_charts.py
 custom_charts.py
+

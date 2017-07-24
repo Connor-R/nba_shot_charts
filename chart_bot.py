@@ -58,8 +58,8 @@ def initiate(p_name=None, hardcode_tags=None):
 
     players = []
     hashtags = []
-    # players = ['']
-    # hashtags = ['']
+    # players = ['Andre Iguodala','JJ Redick','David West','Amir Johnson','Taj Gibson','Serge Ibaka','Paul Millsap','Kyle Korver','Ben McLemore','Justin Holliday','Joe Ingles','P.J. Tucker','Cristiano Felicio']
+    # hashtags = ['NBAFreeAgencyCharts']
 
     if p_name is not None:
         players = [p_name]
@@ -91,7 +91,7 @@ def get_random_pic(players, hashtags):
             p_id = db.query("SELECT player_id FROM players WHERE CONCAT(fname, ' ', lname) = '%s'" % player.replace("'","\\'")) [0][0]
             player_path = base_path+player.replace(' ','_')+'('+str(p_id)+')/'
             # tweets a range of seasons (-1 is career, -2 is current season, -3 is 2 seasons previous, etc.)
-            for i in range(max(0, len(os.listdir(player_path))-1), len(os.listdir(player_path))-0):
+            for i in range(max(0, len(os.listdir(player_path))-2), len(os.listdir(player_path))-1):
                 chart = os.listdir(player_path)[i]
                 tweet(player_path, chart, hashtags, p_id)
 
@@ -137,7 +137,7 @@ def parse_text(pic, hashtags, p_id):
 
     twitter = get_twitter(full_name)
     if twitter is not None:
-        tweet += '(' + twitter + ') '
+        tweet += '(@' + twitter + ') '
 
     year = pic.split('_')[-3]
 
