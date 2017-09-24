@@ -273,7 +273,11 @@ def get_twitter(full_name):
 
 if __name__ == "__main__":
     tweet_dict = {} 
-    # tweet_dict = {'DeMarcus Cousins':['Pelicans'],}
+    # tweet_dict = {
+    #     'Carmelo Anthony':['Thunder'],
+    #     'Enes Kanter':['Knicks'],
+    #     'Doug McDermott':['Knicks'],
+    #     }
 
 
     if tweet_dict == {}:

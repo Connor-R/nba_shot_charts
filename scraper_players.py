@@ -32,6 +32,7 @@ player_entries = []
 for dbplayer in players:
     entry = {}
     entry["player_id"] = dbplayer[0]
+    print dbplayer[1]
     if dbplayer[1] == "Nene":
         entry["lname"] = "Hilario"
         entry["fname"] = "Nene"
@@ -44,6 +45,9 @@ for dbplayer in players:
     elif dbplayer[1] == "Jones, Jr., Derrick":
         entry["lname"] = "Jones Jr."
         entry["fname"] = "Derrick"
+    elif dbplayer[1] == "Zhou Zhou":
+        entry["lname"] = "Qi"
+        entry["fname"] = "Zhou"
     else:
         entry["lname"] = dbplayer[1].split(', ')[0]
         entry["fname"] = dbplayer[1].split(', ')[1]

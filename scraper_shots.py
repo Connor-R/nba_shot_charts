@@ -16,14 +16,14 @@ start_time = time()
 
 getter = data_getter()
 
-lastNgames = 1
+lastNgames = 25
 
 base_url = 'http://stats.nba.com/stats/shotchartdetail?CFID=33&CFPARAMS=%s&ContextFilter=&ContextMeasure=FGA&DateFrom=&DateTo=&GameID=&GameSegment=&LastNGames=%s&LeagueID=00&Location=&MeasureType=Base&Month=0&OpponentTeamID=0&Outcome=&PaceAdjust=N&PerMode=PerGame&Period=0&PlayerID=0&PlusMinus=N&PlayerPosition=&Rank=N&RookieYear=&Season=%s&SeasonSegment=&SeasonType=Regular+Season&TeamID=0&VsConference=&VsDivision=&mode=Advanced&showDetails=0&showShots=1&showZones=0'
 
 print "-------------------------"
 print "scraper_shots.py"
 
-for year in range(2016,2017):
+for year in range(2017,2018):
     print year
     season_start = year
 
