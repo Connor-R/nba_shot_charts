@@ -19,7 +19,7 @@ getter = data_getter()
 
 url = 'http://stats.nba.com/stats/commonallplayers?IsOnlyCurrentSeason=0&LeagueID=00&Season=2016-17'
 
-print "scraper_players.py"
+print "\n\nscraper_players.py"
 print "-------------------------"
 
 json = getter.get_url_data(url, "json")
@@ -32,7 +32,10 @@ player_entries = []
 for dbplayer in players:
     entry = {}
     entry["player_id"] = dbplayer[0]
-    print dbplayer[1]
+
+    print dbplayer[1] + '\t',
+    sys.stdout.flush()
+
     if dbplayer[1] == "Nene":
         entry["lname"] = "Hilario"
         entry["fname"] = "Nene"
@@ -46,6 +49,9 @@ for dbplayer in players:
         entry["lname"] = "Jones Jr."
         entry["fname"] = "Derrick"
     elif dbplayer[1] == "Zhou Zhou":
+        entry["lname"] = "Qi"
+        entry["fname"] = "Zhou"
+    elif dbplayer[1] == "Zhou Qi":
         entry["lname"] = "Qi"
         entry["fname"] = "Zhou"
     else:
@@ -69,7 +75,7 @@ if player_entries != []:
 
 end_time = time()
 elapsed_time = float(end_time - start_time)
-print "time elapsed (in seconds): " + str(elapsed_time)
+print "\n\ntime elapsed (in seconds): " + str(elapsed_time)
 print "time elapsed (in minutes): " + str(elapsed_time/60.0)
 print "scraper_players.py"
 print "-------------------------"

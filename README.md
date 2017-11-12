@@ -29,7 +29,7 @@ I'm changing the code structure a bit. I've added scrapers and some post-process
 - [ ] zEFG% baselines for guards/wings/bigs at each zone
 
 #### March 19, 2017 Update
-The new `chart_bot.py` and `nba_shot_charts.py` are active. I've changed the color scheme/added new metrics over the old charts (now labeled with an 'x' prefix). Using the db has been a vast improvement over previous methods, and has allowed me to create some shot/zone-based metrics I didn't have previous access to. Next up will be making team charts and similarity scores.
+The new `chart_bot.py` and `nba_shot_charts.py` are active. I've changed the color scheme/added new metrics over the old charts (the old charts are archived in `archive_scripts`). Using the db has been a vast improvement over previous methods, and has allowed me to create some shot/zone-based metrics I didn't have previous access to. Next up will be making team charts and similarity scores.
 
 #### March 26, 2017 Update
 I'm now able to create/post charts at the team level and I also cleaned up the format of the player level charts. 

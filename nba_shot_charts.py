@@ -49,12 +49,12 @@ def initiate(p_list, list_length, printer=True):
 
         if start_year < 1996:
             start_year = 1996
-        if end_year > 2017:
-            end_year = 2017
+        if end_year > 2018:
+            end_year = 2018
 
         player_name = player_title.replace(" ","_")
 
-        checker_q = "SELECT * FROM shots_Player_Distribution_Career WHERE player_id = %s" % (player_id)
+        checker_q = "SELECT * FROM shots_Player_Distribution_Career WHERE player_id = %s  AND season_type = 'reg'" % (player_id)
         checker = db.query(checker_q)
         if checker == ():
             print "\tNo shots, continuing to next player"
@@ -296,7 +296,7 @@ def shooting_plot(path, shot_df, player_id, season_id, player_title, player_name
     ax.text(31.25,-40, chart_title, fontsize=29, horizontalalignment='center', verticalalignment='bottom', family='Bitstream Vera Sans', color=cmap(color_efg), fontweight='bold')
 
     # Add user text
-    ax.text(-250,-31,'CHARTS BY CONNOR REED',
+    ax.text(-250,-31,'CHARTS BY @NBAChartBot',
         fontsize=10,  horizontalalignment='left', verticalalignment = 'bottom', family='Bitstream Vera Sans', color='white', fontweight='bold')
 
     # Add data source text
@@ -355,6 +355,7 @@ def get_teams_text(player_id, season_id, isCareer):
     """
 
     team_qry = team_q % (player_id, season_q)
+    # raw_input(team_qry)
 
     teams = db.query(team_qry)
 
@@ -375,6 +376,7 @@ def get_teams_text(player_id, season_id, isCareer):
             i += 1
         if i%2 == 0:
             team_text += '\n'
+        # raw_input(team_list)
         team_text += str(team_list[-1])
 
     return team_text, len(team_list)
@@ -570,6 +572,7 @@ def draw_court(ax=None, color='white', lw=2, outer_lines=False):
 def gen_charts(player_name):
     p_list = get_plist()
     vals = p_list.get(player_name)
+    # raw_input(p_list)
     if vals is None:
         sys.exit('Need a valid player (check spelling)')
     player_list = {player_name:vals}
@@ -592,7 +595,7 @@ def get_plist(operator='', filt_value=0, backfill=False):
     for row in res:
         player_id, player_title, start_year, end_year = row
 
-        if player_title.split(' ')[0][1].isupper():
+        if player_title.split(' ')[0][1].isupper() and player_title not in ('OG Anunoby',):
             temp_name = player_title
             player_title = ''
             for i in range(0, len(temp_name.split(' ')[0])):
@@ -664,7 +667,7 @@ if __name__ == "__main__":
         player_list = {args.player_name:vals}
     else:
         # If we don't have a name, we assume we're trying to backfill
-        # player_list = get_plist(operator='==', filt_value=2017, backfill=False)
+        # player_list = get_plist(operator='==', filt_value=2018, backfill=False)
         player_list = get_plist(operator='<=', filt_value=9999, backfill=True)
 
     print "\nBegin processing " + str(len(player_list)) + " players"

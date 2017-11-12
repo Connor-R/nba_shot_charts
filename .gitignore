@@ -8,16 +8,11 @@ shot_charts_team/
 nba_rank/
 
 charts_description.md
-
-temp_player_list.csv
 team_twitter_accts.csv
-
-nba_shots_daily_run.sh
-nba_shots_weekly_run.sh
-
 total_chart_checker.py
-scraper_playoff_shots.py
-chart_bot_team.py
-nba_team_charts.py
-custom_charts.py
+
+
+
+
+scraper_g*
 

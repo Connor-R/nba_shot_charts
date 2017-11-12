@@ -17,7 +17,7 @@ def initiate():
     print "-------------------------"
     print "shots_Distribution_Year.py"
 
-    for year in range(2016,2017):
+    for year in range(2017,2018):
         season_start = year
         season_id = str(season_start)+str(season_start%100+1).zfill(2)[-2:]
         print season_id
