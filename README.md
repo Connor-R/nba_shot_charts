@@ -40,4 +40,4 @@ I'm now able to create/post charts at the team level and I also cleaned up the f
 Creating custom (filtering by date, playoffs, multiple players, etc.) charts is now possible. Although it is very slow (multiple minutes per chart, as opposed to a few seconds), since it has to re-calculate every metric as opposed to pulling from a database.
 
 #### November, 2017 Update
-The random chart selector has been improved for the bots, as well as capacity to tweet 280 character tweets and the option to thread tweets together.
+Slowly getting back into this after the offseason; the random chart selector has been improved for the bots, as well as capacity to tweet 280 character tweets and the option to thread tweets together.
