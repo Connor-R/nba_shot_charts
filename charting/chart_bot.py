@@ -29,7 +29,6 @@ consumer_sec = key_list.get('consumer_sec')
 access_key = key_list.get('access_key')
 access_sec = key_list.get('access_sec')
 
-
 auth = tweepy.OAuthHandler(consumer_key, consumer_sec)
 auth.set_access_token(access_key, access_sec)
 api = tweepy.API(auth)
@@ -96,7 +95,7 @@ def get_random_pic(players, hashtags, thread):
         print p_name
         chart_player = p_name.replace(' ','_')
         player_path = base_path+chart_player+'('+str(p_id)+')/'
-        charts.gen_charts(p_name)
+        charts.gen_charts(p_id)
         try:
             rand_chart = os.listdir(player_path)[random.randint(0,len(os.listdir(player_path))-1)]
             tweet(player_path, rand_chart, hashtags, p_id, thread)
@@ -105,12 +104,18 @@ def get_random_pic(players, hashtags, thread):
     else:
         for player in players:
             print player
-            charts.gen_charts(player)
+            p_id = db.query("SELECT player_id FROM players WHERE CONCAT(fname, ' ', lname) = '%s'" % player.replace("'","\\'")) [0][0]
+            if player == 'Mike James':
+                p_id = 1628455
+
+            charts.gen_charts(p_id)
         raw_input("READY TO TWEET?")
+
         for player in players:
             p_id = db.query("SELECT player_id FROM players WHERE CONCAT(fname, ' ', lname) = '%s'" % player.replace("'","\\'")) [0][0]
             if player == 'Mike James':
                 p_id = 1628455
+                
             player_path = base_path+player.replace(' ','_')+'('+str(p_id)+')/'
             # tweets a range of seasons (-1 is career, -2 is current season, -3 is 2 seasons previous, etc.)
             for i in range(max(0, len(os.listdir(player_path))-2), len(os.listdir(player_path))-1):
@@ -130,6 +135,7 @@ def tweet(player_path, chart, hashtags, p_id, thread):
     print tweet_text, len(tweet_text)
     # raw_input(pic_path)
     time.sleep(15)
+
     try:
         # putting tweets in a thread
         if thread is not None:

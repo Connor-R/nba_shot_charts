@@ -39,8 +39,8 @@ def initiate(p_list, list_length, printer=True):
     counter = 1
     players_cnt = 0
     charts_cnt = 0
-    for player_title, player_data in p_list.items():
-        player_id, start_year, end_year = player_data
+    for player_id, player_data in p_list.items():
+        player_title, start_year, end_year = player_data
         start_year, end_year = int(start_year), int(end_year)
 
         if printer is True:
@@ -569,15 +569,15 @@ def draw_court(ax=None, color='white', lw=2, outer_lines=False):
     return ax
 
 #for usage with shot_chart_bot
-def gen_charts(player_name):
+def gen_charts(player_id):
     p_list = get_plist()
-    vals = p_list.get(player_name)
-    # raw_input(vals)
-    # raw_input(p_list)
+    
+    vals = p_list.get(player_id)
+
     if vals is None:
         sys.exit('Need a valid player (check spelling)')
-    player_list = {player_name:vals}
 
+    player_list = {player_id:vals}
     # raw_input(player_list)
 
     initiate(player_list, str(len(player_list)), printer=False)
@@ -615,18 +615,18 @@ def get_plist(operator='', filt_value=0, backfill=False):
 
         # a filter for which players to update
         if operator is '':
-            p_list[player_title]=[int(player_id), int(start_year), int(end_year)]
+            p_list[player_id]=[str(player_title), int(start_year), int(end_year)]
         else:
             if operator == '>=':
                 if int(end_year) >= filt_value:
-                    p_list[player_title]=[int(player_id), int(start_year), int(end_year)]
+                    p_list[player_id]=[str(player_title), int(start_year), int(end_year)]
             elif operator == '<=':
                 if int(end_year) <= filt_value:
-                    p_list[player_title]=[int(player_id), int(start_year), int(end_year)]
+                    p_list[player_id]=[str(player_title), int(start_year), int(end_year)]
             else:
                 print 'unknown operator, using =='
                 if int(end_year) == filt_value:
-                    p_list[player_title]=[int(player_id), int(start_year), int(end_year)]
+                    p_list[player_id]=[str(player_title), int(start_year), int(end_year)]
 
     return p_list
 
@@ -659,15 +659,18 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     # call via [python nba_shot_charts.py --player_name "Zach Randolph"]
-    parser.add_argument('--player_name',type=str,   default='')
+    parser.add_argument('--player_name',type=str,   default='Jordan Bell')
     args = parser.parse_args()
 
     if args.player_name != '':
         p_list = get_plist()
-        vals = p_list.get(args.player_name)
+        for k,vs in p_list.items():
+            if args.player_name == vs[0]:
+                vals = vs
+                p_key = k
         if vals is None:
             sys.exit('Need a valid player name')
-        player_list = {args.player_name:vals}
+        player_list = {p_key:vals}
     else:
         # If we don't have a name, we assume we're trying to backfill
         # player_list = get_plist(operator='==', filt_value=2018, backfill=False)
