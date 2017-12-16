@@ -13,9 +13,7 @@ import matplotlib as mpb
 import matplotlib.pyplot as plt
 from matplotlib import  offsetbox as osb
 from matplotlib.patches import RegularPolygon
-from datetime import date, datetime, timedelta
-from time import time
-
+from datetime import date, datetime, timedelta, time
 
 
 sys.path.append('/Users/connordog/Dropbox/Desktop_Files/Work_Things/CodeBase/Python_Scripts/Python_Projects/packages')
@@ -24,48 +22,45 @@ from py_db import db
 db = db('nba_shots')
 
 
-# setting the color map we want to use
 mymap = mpb.cm.YlOrRd
 
 
 whitelist_pngs = ['charts_description.png', 'nba_logo.png', '0.png', 'chart_icon.png']
 
 
-def initiate(p_list, list_length, printer=True):
-    start_time = time()
+abb_file = os.getcwd()+"/../csvs/team_abbreviations.csv"
+abb_list = {}
+with open(abb_file, 'rU') as f:
+    mycsv = csv.reader(f)
+    for row in mycsv:
+        team, abb, imgurl = row
+        abb_list[team] = [abb, imgurl]
 
+
+
+def initiate(p_list, list_length, printer=True):
     base_path = os.getcwd()
 
     counter = 1
-    players_cnt = 0
-    charts_cnt = 0
-    for player_title, player_data in p_list.items():
-        player_id, start_year, end_year = player_data
+    for team_identifier, team_data in p_list.items():
+        team_id, city, tname, start_year, end_year = team_data
         start_year, end_year = int(start_year), int(end_year)
 
         if printer is True:
-            print "\n\nProcessing Player " + str(counter) + " of " + list_length + ': ' + player_title + ' (' + str(start_year) + ' - ' + str(end_year) + ')'
+            print "\n\nProcessing Team " + str(counter) + " of " + list_length + ': ' + team_identifier + ' (' + str(start_year) + ' - ' + str(end_year) + ')\n'
         counter += 1
 
         if start_year < 1996:
             start_year = 1996
-        if end_year > 2018:
-            end_year = 2018
+        if end_year > 2017:
+            end_year = 2017
 
-        player_name = player_title.replace(" ","_")
-
-        checker_q = "SELECT * FROM shots_Player_Distribution_Career WHERE player_id = %s  AND season_type = 'reg'" % (player_id)
-        checker = db.query(checker_q)
-        if checker == ():
-            print "\tNo shots, continuing to next player"
-            continue
-
-        path = base_path+'/shot_charts_player/'+player_name+'('+str(player_id)+')/'
+        path = base_path+'/shot_charts_team/'+str(city.replace(' ','_'))+'_'+str(tname.replace(' ','_'))+'('+str(team_id)+')/'
 
         if not os.path.exists(path):
             os.makedirs(path)
         else:
-            arch_path = base_path+'/shot_charts_archived_charts/'+str(date.today())+'_'+str(datetime.now().hour)+'_'+player_name+'('+str(player_id)+')/'
+            arch_path = base_path+'/shot_charts_archived_charts/'+str(date.today())+'_'+str(datetime.now().hour)+'_'+str(city.replace(' ','_'))+'_'+str(tname.replace(' ','_'))+'('+str(team_id)+')/'
             if os.path.exists(arch_path):
                 shutil.rmtree(arch_path)
             os.rename(path, arch_path)
@@ -77,32 +72,20 @@ def initiate(p_list, list_length, printer=True):
             os.unlink(filename)
         os.chdir(base_path)
 
-        all_shots_df = pd.DataFrame()
-
         for year in range(start_year,end_year):
             season_start = year
 
             season_id = str(season_start)+'-'+str(season_start%100+1).zfill(2)[-2:]
 
-            # if printer is True:
-            #     print '\n\t', season_id, player_name, player_id 
+            if printer is True:
+                print '\t',
+                print season_id, city, tname, team_id 
 
-            year_shots_df = acquire_shootingData(player_id, season=season_id, isCareer=False)
+            year_shots_df = acquire_shootingData(team_id, season=season_id, isCareer=False)
 
             if year_shots_df is not None and len(year_shots_df.index) != 0:
+                shooting_plot(path, year_shots_df, team_id, season_id, city, tname)
 
-                shooting_plot(path, year_shots_df, player_id, season_id, player_title, player_name)
-                charts_cnt += 1
-
-        career_string = "CAREER (%s-%s)" % (start_year, end_year)
-        # if printer is True:
-        #     print '\t\t\t', career_string, player_name
-
-        all_shots_df = acquire_shootingData(player_id, isCareer=True)
-
-        shooting_plot(path, all_shots_df, player_id, career_string, player_title, player_name, isCareer=True, min_year=start_year, max_year=end_year)
-        players_cnt += 1
-        charts_cnt += 1
 
         os.chdir(base_path)
         files=glob.glob('*.png')
@@ -113,20 +96,7 @@ def initiate(p_list, list_length, printer=True):
             os.unlink(filename)
 
 
-        temp_end = time()
-        elapsed_time = float(temp_end - start_time)
-        print "\ntime elapsed (in seconds): \t" + str(elapsed_time)
-        print "time elapsed (in minutes): \t" + str(elapsed_time/60.0)
-        print "players processed: \t\t" + str(players_cnt)
-        print "charts made: \t\t\t" + str(charts_cnt)
-        print "average seconds per chart: \t" + str(elapsed_time/float(charts_cnt))
-        print "average seconds per player: \t" + str(elapsed_time/float(players_cnt))
-        print "\n\n =================================================================================="
-
-
-
-#Getting the shot data and returning a DataFrame with every shot for a specific player/season combo
-def acquire_shootingData(player_id,season='',isCareer=True):
+def acquire_shootingData(team_id, season='', isCareer=True):
 
 
     if isCareer is False:
@@ -148,12 +118,12 @@ def acquire_shootingData(player_id,season='',isCareer=True):
     zone_pct_plus,
     efg_plus
     FROM shots
-    JOIN shots_Player_Relative_Year USING (season_id, season_type, player_id, shot_zone_basic, shot_zone_area)
-    WHERE player_id = %s
+    JOIN shots_Team_Relative_Year USING (season_id, season_type, team_id, shot_zone_basic, shot_zone_area)
+    WHERE team_id = %s
     AND season_type = 'Reg'
     %s"""
 
-    shot_q = shot_query % (player_id, query_append)
+    shot_q = shot_query % (team_id, query_append)
 
     shots = db.query(shot_q)
 
@@ -182,13 +152,15 @@ def acquire_shootingData(player_id,season='',isCareer=True):
 
 
 # we set gridNum to be 30 (basically a grid of 30x30 hexagons)
-def shooting_plot(path, shot_df, player_id, season_id, player_title, player_name, isCareer=False, min_year = 0, max_year = 0, plot_size=(12,12), gridNum=30):
+def shooting_plot(path, shot_df, team_id, season_id, city, tname, isCareer=False, min_year = 0, max_year = 0, plot_size=(12,12), gridNum=30):
+
+    team_title = city + ' ' + tname
 
     # get the shooting percentage and number of shots for all bins, all shots, and a subset of some shots
     (ShootingPctLocs, shotNumber), shot_count_all = find_shootingPcts(shot_df, gridNum)
 
-    all_efg_plus = float(get_metrics(player_id, season_id, isCareer, 'all', 'efg_plus'))
-    paa = float(get_metrics(player_id, season_id, isCareer, 'all', 'paa'))
+    all_efg_plus = float(get_metrics(team_id, season_id, isCareer, 'all', 'efg_plus'))
+    paa = float(get_metrics(team_id, season_id, isCareer, 'all', 'paa'))
     color_efg = max(min(((all_efg_plus/100)-0.5),1.0),0.0)
 
     # set the figure for drawing on
@@ -212,7 +184,7 @@ def shooting_plot(path, shot_df, player_id, season_id, player_title, player_name
     
     # draw player image
     zoom = 1 # we don't need to zoom the image at all
-    img = acquire_playerPic(player_id, zoom)
+    img = acquire_teamPic(season_id, city, tname, team_id, zoom)
     ax.add_artist(img)
              
     # specify the % a zone that we want to correspond to a maximum sized hexagon [I have this set to any zone with >= 1% of all shots will have a maximum radius, but it's free to be changed based on personal preferences]
@@ -292,7 +264,7 @@ def shooting_plot(path, shot_df, player_id, season_id, player_title, player_name
     ax.text(-235, 310, 'Zone Frequencies', fontsize = 15, horizontalalignment='left', verticalalignment='bottom', family='Bitstream Vera Sans', color=cmap(color_efg), fontweight='bold')
 
     # Add a title to our chart (just the player's name)
-    chart_title = "%s" % (player_title.upper())
+    chart_title = "%s" % (team_title.upper())
     ax.text(31.25,-40, chart_title, fontsize=29, horizontalalignment='center', verticalalignment='bottom', family='Bitstream Vera Sans', color=cmap(color_efg), fontweight='bold')
 
     # Add user text
@@ -310,18 +282,14 @@ def shooting_plot(path, shot_df, player_id, season_id, player_title, player_name
         fontsize=10,  horizontalalignment='right', verticalalignment = 'bottom', family='Bitstream Vera Sans', color='white', fontweight='bold')
 
 
-    key_text = get_key_text(player_id, season_id, isCareer)
+    key_text = get_key_text(team_id, season_id, isCareer)
     # adding breakdown of eFG% by shot zone at the bottom of the chart
     ax.text(307,380, key_text, fontsize=12, horizontalalignment='right', verticalalignment = 'top', family='Bitstream Vera Sans', color='white', linespacing=1.5)
 
-    teams_text, team_len = get_teams_text(player_id, season_id, isCareer)
+    teams_text = city + ' ' + tname
     # adding which season the chart is for, as well as what teams the player is on
-    if team_len > 12:
-        ax.text(-250,380, season_id + ' Regular Season:\n' + teams_text,
-            fontsize=10,  horizontalalignment='left', verticalalignment = 'top', family='Bitstream Vera Sans', color='white', linespacing=1.4)
-    else:
-        ax.text(-250,380,season_id + ' Regular Season:\n' + teams_text,
-            fontsize=10,  horizontalalignment='left', verticalalignment = 'top', family='Bitstream Vera Sans', color='white', linespacing=1.6)
+    ax.text(-250,380,season_id + ' Regular Season:\n' + teams_text,
+        fontsize=12,  horizontalalignment='left', verticalalignment = 'top', family='Bitstream Vera Sans', color='white', linespacing=1.6)
 
     # adding a color bar for reference
     ax2 = fig.add_axes([0.875, 0.15, 0.04, 0.775])
@@ -332,58 +300,13 @@ def shooting_plot(path, shot_df, player_id, season_id, player_title, player_name
     cb.set_ticks([0.0, 0.25, 0.5, 0.75, 1.0])
     cb.set_ticklabels(['$\mathbf{\leq}$50','75', '100','125', '$\mathbf{\geq}$150'])
 
-    figtit = path+'shot_charts_%s(%s)_%s_%s_%s.png' % (player_name, player_id, season_id.replace(' ',''), str(int(round(all_efg_plus))), str(int(round(paa))) )
+    figtit = path+'shot_charts_%s(%s_%s)_%s_%s_%s.png' % (team_id, city, tname, season_id.replace(' ',''), str(int(round(all_efg_plus))), str(int(round(paa))) )
     plt.savefig(figtit, facecolor='#26373F', edgecolor='black')
     plt.clf()
 
 
 #Producing the text for the bottom of the shot chart
-def get_teams_text(player_id, season_id, isCareer):
-
-    if isCareer is True:
-        season_q = ''
-    else:
-        season_q = '\nAND season_id = %s' % (season_id.replace('-',''))
-
-    team_q = """SELECT
-    DISTINCT CONCAT(city, ' ', tname)
-    FROM shots s
-    JOIN teams t USING (team_id)
-    WHERE player_id = %s%s
-    AND LEFT(season_id, 4) >= t.start_year
-    AND LEFT(season_id, 4) < t.end_year;
-    """
-
-    team_qry = team_q % (player_id, season_q)
-    # raw_input(team_qry)
-
-    teams = db.query(team_qry)
-
-    team_list = []
-    for team in teams:
-        team_list.append(team[0])
-
-    team_text = ""
-    if len(team_list) == 1:
-        team_text = str(team_list[0])
-    else:
-        i = 0
-        for team in team_list[0:-1]:
-            if i%2 == 0 and i > 0:
-                team_text += '\n'
-            text_add = '%s, ' % str(team)
-            team_text += text_add
-            i += 1
-        if i%2 == 0:
-            team_text += '\n'
-        # raw_input(team_list)
-        team_text += str(team_list[-1])
-
-    return team_text, len(team_list)
-
-
-#Producing the text for the bottom of the shot chart
-def get_key_text(player_id, season_id, isCareer):
+def get_key_text(team_id, season_id, isCareer):
 
     text = ''
 
@@ -399,15 +322,15 @@ def get_key_text(player_id, season_id, isCareer):
         else:
             text += '\n' + _type + ' | '        
 
-        atts = ("%.0f" %get_metrics(player_id, season_id, isCareer, _type, 'r.attempts'))
-        makes = ("%.0f" %get_metrics(player_id, season_id, isCareer, _type, 'b.makes'))
-        zone_pct = ("%.1f" % get_metrics(player_id, season_id, isCareer, _type, 'zone_pct*100'))
-        zone_pct_plus = ("%.1f" % get_metrics(player_id, season_id, isCareer, _type, 'zone_pct_plus'))
-        efg = ("%.1f" % get_metrics(player_id, season_id, isCareer, _type, 'efg*100'))
-        efg_plus = ("%.1f" % get_metrics(player_id, season_id, isCareer, _type, 'efg_plus'))
-        zone_efg_plus = ("%.1f" % get_metrics(player_id, season_id, isCareer, _type, 'zone_efg_plus'))
-        paa = ("%.1f" % get_metrics(player_id, season_id, isCareer, _type, 'paa'))
-        paa_game = ("%.1f" % get_metrics(player_id, season_id, isCareer, _type, 'paa_per_game'))
+        atts = ("%.0f" %get_metrics(team_id, season_id, isCareer, _type, 'r.attempts'))
+        makes = ("%.0f" %get_metrics(team_id, season_id, isCareer, _type, 'b.makes'))
+        zone_pct = ("%.1f" % get_metrics(team_id, season_id, isCareer, _type, 'zone_pct*100'))
+        zone_pct_plus = ("%.1f" % get_metrics(team_id, season_id, isCareer, _type, 'zone_pct_plus'))
+        efg = ("%.1f" % get_metrics(team_id, season_id, isCareer, _type, 'efg*100'))
+        efg_plus = ("%.1f" % get_metrics(team_id, season_id, isCareer, _type, 'efg_plus'))
+        zone_efg_plus = ("%.1f" % get_metrics(team_id, season_id, isCareer, _type, 'zone_efg_plus'))
+        paa = ("%.1f" % get_metrics(team_id, season_id, isCareer, _type, 'paa'))
+        paa_game = ("%.1f" % get_metrics(team_id, season_id, isCareer, _type, 'paa_per_game'))
         
         if _type == 'All':
             text += str(makes) + ' for ' + str(atts) + ' | '
@@ -425,45 +348,45 @@ def get_key_text(player_id, season_id, isCareer):
 
 
 #Getting the player's metrics for the given season
-def get_metrics(player_id, season_id, isCareer, zone, metric):
+def get_metrics(team_id, season_id, isCareer, zone, metric):
 
     if isCareer is False:
         metric_q = """SELECT
         ROUND(%s,1)
-        FROM shots_Player_Relative_Year r
-        JOIN shots_Player_Distribution_Year d USING (player_id, season_id, season_type, shot_zone_basic, shot_zone_area)
-        JOIN shots_Player_Breakdown b USING (player_id, season_id, season_type, shot_zone_basic, shot_zone_area)
+        FROM shots_Team_Relative_Year r
+        JOIN shots_Team_Distribution_Year d USING (team_id, season_id, season_type, shot_zone_basic, shot_zone_area)
+        JOIN shots_Team_Breakdown b USING (team_id, season_id, season_type, shot_zone_basic, shot_zone_area)
         WHERE season_id = %s
-        AND player_id = %s
+        AND team_id = %s
         AND shot_zone_area = 'all'
         AND shot_zone_basic = '%s'
         AND season_type = 'reg'
         """
-        metric_qry = metric_q % (metric, season_id.replace('-',''), player_id, zone)
+        metric_qry = metric_q % (metric, season_id.replace('-',''), team_id, zone)
 
     else:
         metric_q = """SELECT
         ROUND(%s,1)
-        FROM shots_Player_Relative_Career r
-        JOIN shots_Player_Distribution_Career d USING (player_id, season_id, season_type, shot_zone_basic, shot_zone_area)
+        FROM shots_Team_Relative_Career r
+        JOIN shots_Team_Distribution_Career d USING (team_id, season_id, season_type, shot_zone_basic, shot_zone_area)
         JOIN(
             SELECT 
-            player_id, season_type, shot_zone_basic, shot_zone_area,
+            team_id, season_type, shot_zone_basic, shot_zone_area,
             SUM(games) AS games,
             SUM(attempts) AS attempts,
             SUM(makes) AS makes,
             SUM(points) AS points
             FROM shots_Player_Breakdown
-            WHERE player_id = %s
+            WHERE team_id = %s
             AND season_type = 'reg'
-            GROUP BY shot_zone_area, shot_zone_basic, season_type
-        ) b USING (player_id, season_type, shot_zone_basic, shot_zone_area)
-        WHERE player_id = %s
+            GROUP BY season_type, shot_zone_area, shot_zone_basic
+        ) b USING (team_id, season_type, shot_zone_basic, shot_zone_area)
+        WHERE team_id = %s
         AND shot_zone_area = 'all'
         AND shot_zone_basic = '%s'
         AND season_type = 'reg'
         """
-        metric_qry = metric_q % (metric, player_id, player_id, zone)
+        metric_qry = metric_q % (metric, team_id, team_id, zone)
 
     try:
         res = db.query(metric_qry)[0][0]
@@ -568,109 +491,75 @@ def draw_court(ax=None, color='white', lw=2, outer_lines=False):
     ax.set_yticks([])
     return ax
 
+
 #for usage with shot_chart_bot
-def gen_charts(player_name):
+def gen_charts(team_string):
     p_list = get_plist()
-    vals = p_list.get(player_name)
-    # raw_input(p_list)
+    vals = p_list.get(team_string)
     if vals is None:
-        sys.exit('Need a valid player (check spelling)')
-    player_list = {player_name:vals}
+        sys.exit('Need a valid team (check spelling)')
+    player_list = {team_string:vals}
 
     initiate(player_list, str(len(player_list)), printer=False)
 
 
-#player_list generation
-def get_plist(operator='', filt_value=0, backfill=False):
-    p_list = {}
-
-
-    query = """SELECT player_id, CONCAT(fname, ' ', lname), from_year, to_year
-    FROM players
-    WHERE games_played_FLAG = 1
-    AND to_year >= 1997
-    ORDER BY lname ASC, fname ASC, player_id ASC"""
-    res = db.query(query)
-
-    for row in res:
-        player_id, player_title, start_year, end_year = row
-
-        if player_title.split(' ')[0][1].isupper() and player_title not in ('OG Anunoby',):
-            temp_name = player_title
-            player_title = ''
-            for i in range(0, len(temp_name.split(' ')[0])):
-                player_title += temp_name.split(' ')[0][i] + '.'
-            for i in range(1, len(temp_name.split(' '))):
-                player_title += ' ' + temp_name.split(' ')[i]
-
-        player_search_name = player_title.replace(" ","_")
-
-        # Charts for only new players (only for backfilling)
-        if backfill is True:
-            if os.path.exists(os.getcwd()+'/shot_charts_player/'+player_search_name+'('+str(player_id)+')'):
-                continue
-
-        # a filter for which players to update
-        if operator is '':
-            p_list[player_title]=[int(player_id), int(start_year), int(end_year)]
-        else:
-            if operator == '>=':
-                if int(end_year) >= filt_value:
-                    p_list[player_title]=[int(player_id), int(start_year), int(end_year)]
-            elif operator == '<=':
-                if int(end_year) <= filt_value:
-                    p_list[player_title]=[int(player_id), int(start_year), int(end_year)]
-            else:
-                print 'unknown operator, using =='
-                if int(end_year) == filt_value:
-                    p_list[player_title]=[int(player_id), int(start_year), int(end_year)]
-
-    return p_list
-
-
 #Getting the player picture that we will later place in the chart
 #Most of this code was recycled from Savvas Tjortjoglou [http://savvastjortjoglou.com] 
-def acquire_playerPic(player_id, zoom, offset=(250,370)):
+def acquire_teamPic(season_id, city, tname, team_id, zoom, offset=(250,370)):
     from matplotlib import  offsetbox as osb
     import urllib
     
+    search_name = city + ' ' + tname
+    img_url = abb_list.get(search_name)[1]
     try:
-        img_path = os.getcwd()+'/'+str(player_id)+'.png'
-        player_pic = plt.imread(img_path)
-    except (ValueError,IOError):
+        img_path = os.getcwd()+'/'+str(team_id)+'.png'
+        team_pic = plt.imread(img_path)
+    except IOError:
         try:
-            pic = urllib.urlretrieve("http://stats.nba.com/media/players/230x185/"+str(player_id)+".png",str(player_id)+".png")
-            player_pic = plt.imread(pic[0])
+            pic = urllib.urlretrieve(img_url,str(team_id)+'.png')
+            team_pic = plt.imread(pic[0])
         except (ValueError, IOError):
-            img_path = os.getcwd()+'/chart_icon.png'
+            img_path = os.getcwd()+'/nba_logo.png'
             player_pic = plt.imread(img_path)    
 
 
-    img = osb.OffsetImage(player_pic, zoom)
+    img = osb.OffsetImage(team_pic, zoom)
     img = osb.AnnotationBbox(img, offset,xycoords='data',pad=0.0, box_alignment=(1,0), frameon=False)
     return img
 
 
+#teams_list generation
+def get_plist(backfill=False):
+    p_list = {}
+ 
+ 
+    query = """SELECT team_id, city, tname, start_year, end_year, end_year-GREATEST(1996,start_year) AS seasons_cnt
+    FROM teams
+    WHERE end_year >= 1997
+    ORDER BY team_id ASC, end_year DESC"""
+    res = db.query(query)
+ 
+    for row in res:
+        team_id, city, team_name, start_year, end_year, seasons_cnt = row
+ 
+        team_search_name = city.replace(" ","_") + "_" + team_name.replace(" ","_")
+
+ 
+        if backfill is True:
+            if os.path.exists(os.getcwd()+'/team_shot_charts/'+str(team_id)+'('+team_search_name+')'):
+                continue
+ 
+        # a filter for which players to update
+        p_list[city.replace(' ','_')+'_'+team_name.replace(' ','_')+'('+str(team_id)+')'] = [team_id, city, team_name, start_year, end_year]
+ 
+    return p_list
+
+
 if __name__ == "__main__": 
 
-    parser = argparse.ArgumentParser()
+    team_list = get_plist(backfill=True)
 
-    # call via [python nba_shot_charts.py --player_name "Zach Randolph"]
-    parser.add_argument('--player_name',type=str,   default='')
-    args = parser.parse_args()
+    print "\nBegin processing " + str(len(team_list)) + " players\n"
 
-    if args.player_name != '':
-        p_list = get_plist()
-        vals = p_list.get(args.player_name)
-        if vals is None:
-            sys.exit('Need a valid player name')
-        player_list = {args.player_name:vals}
-    else:
-        # If we don't have a name, we assume we're trying to backfill
-        # player_list = get_plist(operator='==', filt_value=2018, backfill=False)
-        player_list = get_plist(operator='<=', filt_value=9999, backfill=True)
-
-    print "\nBegin processing " + str(len(player_list)) + " players"
-
-    initiate(player_list, str(len(player_list)))
+    initiate(team_list, str(len(team_list)))
 

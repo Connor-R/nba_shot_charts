@@ -15,7 +15,7 @@ from py_db import db
 db = db('nba_shots')
 
 
-key_file = os.getcwd()+"/twitter_keys.csv"
+key_file = os.getcwd()+"/../csvs/twitter_keys.csv"
 key_list = {}
 with open(key_file, 'rU') as f:
     mycsv = csv.reader(f)
@@ -36,7 +36,7 @@ api = tweepy.API(auth)
 base_path = os.getcwd()+"/shot_charts_team/"
 
 
-hashtag_file = os.getcwd()+"/team_hashtags.csv"
+hashtag_file = os.getcwd()+"/../csvs/team_hashtags.csv"
 hashtag_list = {}
 with open(hashtag_file, 'rU') as f:
     mycsv = csv.reader(f)
@@ -44,7 +44,7 @@ with open(hashtag_file, 'rU') as f:
         team, hashtag = row
         hashtag_list[team]=hashtag
 
-twitter_file = os.getcwd()+"/team_twitter.csv"
+twitter_file = os.getcwd()+"/../csvs/team_twitter.csv"
 twitter_list = {}
 with open(twitter_file, 'rU') as f:
     mycsv = csv.reader(f)
@@ -174,7 +174,7 @@ def parse_text(pic, hashtags, t_id, city, tname):
                 tweet += ' '
 
     tweet += '\n'
-    tweet += '#NBATwitter\n'
+    # tweet += '#NBATwitter\n'
 
     hashtag = hashtag_list.get(tname)
     if (hashtag is not None and hashtag != tname):

@@ -17,7 +17,7 @@ start_time = time()
 
 getter = data_getter()
 
-url = 'http://stats.nba.com/stats/commonallplayers?IsOnlyCurrentSeason=0&LeagueID=00&Season=2016-17'
+url = 'http://stats.nba.com/stats/commonallplayers?IsOnlyCurrentSeason=0&LeagueID=00&Season=2017-18'
 
 print "\n\nscraper_players.py"
 print "-------------------------"

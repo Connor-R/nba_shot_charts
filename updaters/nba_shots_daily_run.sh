@@ -1,9 +1,11 @@
 
+cd ../scrapers
 # python scraper_playoff_shots.py
 python scraper_shots.py
 
 wait
 
+cd ../processing
 python shots_Breakdown.py
 
 wait

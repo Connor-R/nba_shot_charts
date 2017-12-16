@@ -15,7 +15,9 @@ from py_db import db
 db = db('nba_shots')
 
 
-key_file = os.getcwd()+"/twitter_keys.csv"
+base_path = os.getcwd()+"/shot_charts_player/"
+
+key_file = os.getcwd()+"/../csvs/twitter_keys.csv"
 key_list = {}
 with open(key_file, 'rU') as f:
     mycsv = csv.reader(f)
@@ -32,11 +34,7 @@ auth = tweepy.OAuthHandler(consumer_key, consumer_sec)
 auth.set_access_token(access_key, access_sec)
 api = tweepy.API(auth)
 
-
-base_path = os.getcwd()+"/shot_charts_player/"
-
-
-hashtag_file = os.getcwd()+"/team_hashtags.csv"
+hashtag_file = os.getcwd()+"/../csvs/team_hashtags.csv"
 hashtag_list = {}
 with open(hashtag_file, 'rU') as f:
     mycsv = csv.reader(f)
@@ -44,8 +42,7 @@ with open(hashtag_file, 'rU') as f:
         team, hashtag = row
         hashtag_list[team]=hashtag
 
-
-hardcode_file = os.getcwd()+"/hardcode_players.csv"
+hardcode_file = os.getcwd()+"/../csvs/hardcode_players.csv"
 hardcode_list = {}
 with open(hardcode_file, 'rU') as f:
     mycsv = csv.reader(f)
@@ -62,25 +59,25 @@ def initiate(p_name=None, hardcode_tags=None):
 
     ######################
 
-    # """Inspired by @presidual's post (https://fansided.com/2017/11/09/nylon-calculus-early-look-rookie-shot-charts/) at @NylonCalculus giving an early look at rookie shot charts, I'll be tweeting my version of shot charts for every rookie with >200 shot attempts this year.
+    # """Once, again, inspired by @presidual's post (https://fansided.com/2017/11/09/nylon-calculus-early-look-rookie-shot-charts/) at @NylonCalculus giving an early look at rookie shot charts, I'm posting updating versions of my shot charts for every rookie with >200 shot attempts this year. (THREAD)
 
     #NBARookieCharts"""
 
-    # p_q = db.query("SELECT CONCAT(fname, ' ', lname) AS p_name FROM shots_player_relative_year p1 LEFT JOIN shots_player_relative_year p2 ON (p1.player_id = p2.player_id AND p1.season_type = p2.season_type AND p1.season_id != p2.season_id) JOIN players ON (p1.player_id = players.player_id) WHERE p1.shot_zone_basic = 'ALL' AND p1.season_id = 201718 AND p1.season_type = 'reg' AND p2.games IS NULL AND p1.attempts > 50 ORDER BY p1.attempts DESC;")
+    # p_q = db.query("SELECT CONCAT(fname, ' ', lname) AS p_name FROM shots_player_relative_year p1 LEFT JOIN shots_player_relative_year p2 ON (p1.player_id = p2.player_id AND p1.season_type = p2.season_type AND p1.season_id != p2.season_id) JOIN players ON (p1.player_id = players.player_id) WHERE p1.shot_zone_basic = 'ALL' AND p1.season_id = 201718 AND p1.season_type = 'reg' AND p2.games IS NULL AND p1.attempts > 200 ORDER BY p1.attempts DESC;")
     # for row in p_q:
     #     players.append(row[0])
     # hashtags = ['NBARookieCharts']
-    # thread = 929153212749197313
+    # thread = 936336714993344512
 
     ######################
 
-    # """Using @bball_ref's MVP Tracker (https://www.basketball-reference.com/friv/mvp.html), I'll be tweeting my shot charts for their top 10 players under their methodology.
+    # """Using @bball_ref's MVP Tracker (https://www.basketball-reference.com/friv/mvp.html), I'll be tweeting my shot charts for their top 10 players under their methodology. (Thread)
 
     #NBAMVPTracker"""
 
-    # players = ['James Harden', 'Stephen Curry', 'Anthony Davis', 'Kevin Durant', 'Kyrie Irving', 'LeBron James', 'Al Horford', 'Andre Drummond', 'Giannis Antetokounmpo', 'Damian Lillard']
+    # players = ['James Harden', 'LeBron James', 'Stephen Curry', 'Giannis Antetokounmpo', 'Anthony Davis', 'Kyrie Irving', 'Damian Lillard', 'Kevin Durant', 'Al Horford', 'Clint Capela']
     # hashtags = ['NBAMVPTracker']
-    # thread = INSERT THREAD NUMBER
+    # thread = ENTER
 
     ######################
 
@@ -113,7 +110,7 @@ def get_random_pic(players, hashtags, thread):
         for player in players:
             p_id = db.query("SELECT player_id FROM players WHERE CONCAT(fname, ' ', lname) = '%s'" % player.replace("'","\\'")) [0][0]
             if player == 'Mike James':
-                p_id == 1628455
+                p_id = 1628455
             player_path = base_path+player.replace(' ','_')+'('+str(p_id)+')/'
             # tweets a range of seasons (-1 is career, -2 is current season, -3 is 2 seasons previous, etc.)
             for i in range(max(0, len(os.listdir(player_path))-2), len(os.listdir(player_path))-1):
@@ -221,7 +218,7 @@ def parse_text(pic, hashtags, p_id):
                 tweet += ' '
 
     tweet += '\n'
-    tweet += '#NBATwitter\n'
+    # tweet += '#NBATwitter\n'
 
     for j, team in enumerate(teams):
         if team is not None:
