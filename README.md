@@ -18,7 +18,7 @@ If you're interested in seeing more charts, I created a twitter bot ([@NBAChartB
 If you would like to report a bug, request a copy of the data, or contact me for any other reason, my contact information is at the bottom of [my personal github.io page](http://connor-r.github.io/).
 
 
-### March 4, 2017 Update
+#### March 2017 Update
 I'm changing the code structure a bit. I've added scrapers and some post-processing scripts so I can store/manipulate the shot data a little bit easier in a MySQL database. I'm leaving the original chart generator (`nba_shot_charts_v1.py`) and chart bot script (`chart_bot_v1.py`), but will eventually add a v2 of both of this scripts, using the MySQL db instead of re-scraping nba.com each time. Part of the reason I'm changing the structure is to help facilitate a few longer term goals of these charts:
 - [x] Speeding up the process of generating a chart (querying the database is faster than scraping the web)
 - [x] Creating some form of an era-adjustment, to be able to more accurately compare charts from players from different seasons (think of how a player like Ray Allen's shot chart may differ if his career started in 2015, or how a player like Patrick Beverley's may have differed if his career started in 1990).
@@ -30,19 +30,19 @@ I'm changing the code structure a bit. I've added scrapers and some post-process
 - [ ] attempt to create a Points above Replacement for players based on position.
 - [ ] Generate G-League and WNBA charts.
 
-#### March 19, 2017 Update
+#### March (v2) 2017 Update
 The new `chart_bot.py` and `nba_shot_charts.py` are active. I've changed the color scheme/added new metrics over the old charts (the old charts are archived in `archive_scripts`). Using the db has been a vast improvement over previous methods, and has allowed me to create some shot/zone-based metrics I didn't have previous access to. Next up will be making team charts and similarity scores.
 
-#### March 26, 2017 Update
+#### March (v3) 2017 Update
 I'm now able to create/post charts at the team level and I also cleaned up the format of the player level charts. 
 
-#### April 2, 2017 Update
+#### April 2017 Update
 Creating custom (filtering by date, playoffs, multiple players, etc.) charts is now possible. Although it is very slow (multiple minutes per chart, as opposed to a few seconds), since it has to re-calculate every metric as opposed to pulling from a database.
 
-#### November, 2017 Update
+#### November 2017 Update
 Slowly getting back into this after the offseason; the random chart selector has been improved for the bots, as well as capacity to tweet 280 character tweets and the option to thread tweets together.
 
-#### December, 2017 Update
+#### December 2017 Update
 I’ve again decided to put my to-do list from last March on hold, and have instead focused on re-building some key features of the charts including:
 - [x] Restructuring the codebase (so it’s not such a mess).
 - [ ] Separating heaves from regular 3pt shots.
