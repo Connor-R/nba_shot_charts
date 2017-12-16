@@ -13,7 +13,7 @@ Two lesser noticed features of these charts are the following:
 * Each chart’s name will save under the template `shot_charts_Firstname_Lastname_Season_eFG.png`
 * The color of the Player Name and Zone Frequencies key is the corresponding color to their overall eFG% for the season (e.g., if a player’s eFG% for a year was 100%, their name and key would be dark red, while if their eFG% was 0%, then those colors would be light yellow).
 
-If you're interested in seeing more charts, I created a twitter bot ([@NBAChartBot](https://twitter.com/NBAChartBot)) that posts a pseudo-random player/season shot chart every few hours.
+If you're interested in seeing more charts, I created a twitter bot ([@NBAChartBot](https://twitter.com/NBAChartBot)) that posts a pseudo-random player/season shot chart as a scheduled cronjob.
 
 If you would like to report a bug, request a copy of the data, or contact me for any other reason, my contact information is at the bottom of [my personal github.io page](http://connor-r.github.io/).
 
@@ -41,3 +41,17 @@ Creating custom (filtering by date, playoffs, multiple players, etc.) charts is 
 
 #### November, 2017 Update
 Slowly getting back into this after the offseason; the random chart selector has been improved for the bots, as well as capacity to tweet 280 character tweets and the option to thread tweets together.
+
+#### December, 2017 Update
+I’ve again decided to put my to-do list from last March on hold, and have instead focused on re-building some key features of the charts including:
+- [x] Restructuring the codebase (so it’s not such a mess).
+- [ ] Separating heaves from regular 3pt shots.
+- [ ] Adding other details to tweet text, including binned text descriptions for Volume, Shot Making, and Efficiency.
+- [ ] Adding player pictures to the custom_charts script.
+- [ ] Then ideally I would write an article better explaining the charts/metrics/methodology that I could post to my website and make my pinned tweet, making it easier for new followers to understand the charts.
+
+Finally, after I’ve completed this, I will return to my original to-do list, and finish the following items:
+- [ ] Calculating some form of a similarity score, to see which players/teams have the most similar distribution and shot making ability from some pre-defined zones.
+- [ ] zEFG% baselines for guards/wings/bigs at each zone.
+- [ ] attempt to create a Points above Replacement for players based on position.
+- [ ] Generate G-League and WNBA charts.
