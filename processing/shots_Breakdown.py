@@ -106,7 +106,7 @@ JOIN(
     WHERE season_id = %s
     GROUP BY %s_id, season_id, season_type
 ) g USING (%s_id, season_id, season_type)
-ORDER BY %s_id ASC, season_id ASC, shot_zone_basic ASC, shot_zone_area ASC
+ORDER BY %s_id ASC, season_type ASC, season_id ASC, shot_zone_basic ASC, shot_zone_area ASC;
 """
 
 

@@ -45,7 +45,6 @@ Slowly getting back into this after the offseason; the random chart selector has
 #### December 2017 Update
 I’ve again decided to put my to-do list from last March on hold, and have instead focused on re-building some key features of the charts including:
 - [x] Restructuring the codebase (so it’s not such a mess).
-- [ ] Separating heaves from regular 3pt shots.
 - [ ] Adding other details to tweet text, including binned text descriptions for Volume, Shot Making, and Efficiency.
 - [ ] Adding player pictures to the custom_charts script.
 - [ ] Then ideally I would write an article better explaining the charts/metrics/methodology that I could post to my website and make my pinned tweet, making it easier for new followers to understand the charts.
