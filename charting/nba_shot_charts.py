@@ -296,7 +296,7 @@ def shooting_plot(path, shot_df, player_id, season_id, player_title, player_name
     ax.text(31.25,-40, chart_title, fontsize=29, horizontalalignment='center', verticalalignment='bottom', family='Bitstream Vera Sans', color=cmap(color_efg), fontweight='bold')
 
     # Add user text
-    ax.text(-250,-31,'CHARTS BY @NBAChartBot',
+    ax.text(-250,-31,'CHARTS BY CONNOR REED (@NBAChartBot)',
         fontsize=10,  horizontalalignment='left', verticalalignment = 'bottom', family='Bitstream Vera Sans', color='white', fontweight='bold')
 
     # Add data source text
@@ -387,9 +387,12 @@ def get_key_text(player_id, season_id, isCareer):
 
     text = ''
 
+    games_text = get_metrics(player_id, season_id, isCareer, 'All', 'r.games')
+    all_zone_plus = ("%.1f" % get_overall_zone_pct(player_id, season_id, isCareer))
+
     for _type in ('All', 'Above The Break 3', 'Corner 3', 'Mid-Range', 'In The Paint (Non-RA)', 'Restricted Area'):
         if _type == 'All':
-            text += 'All Shots | '
+            text += 'All Shots | %s Games | ' % games_text
         elif _type == 'Above The Break 3':
             text += '\n' + 'Arc 3 | '
         elif _type == 'In The Paint (Non-RA)':
@@ -410,11 +413,11 @@ def get_key_text(player_id, season_id, isCareer):
         paa_game = ("%.1f" % get_metrics(player_id, season_id, isCareer, _type, 'paa_per_game'))
         
         if _type == 'All':
-            text += str(makes) + ' for ' + str(atts) + ' | '
+            text += str(makes) + ' for ' + str(atts)
+            text += ' (' + str(all_zone_plus) + ' AllZone+ | '
             text += str(efg) + ' EFG% ('
             text += str(efg_plus) + ' EFG+ | '
-            text += str(paa) + ' PAA) | '
-            text += str(paa_game) + ' PAA/G'
+            text += str(paa) + ' PAA)'
         else:
             text += str(makes) + '/' + str(atts) + ' | '
             text += str(zone_pct) + '% z% (' + str(zone_pct_plus) + ' z%+) | '
@@ -465,6 +468,7 @@ def get_metrics(player_id, season_id, isCareer, zone, metric):
         """
         metric_qry = metric_q % (metric, player_id, player_id, zone)
 
+    # raw_input(metric_qry)
     try:
         res = db.query(metric_qry)[0][0]
     except IndexError:
@@ -472,6 +476,60 @@ def get_metrics(player_id, season_id, isCareer, zone, metric):
 
     return res
 
+
+#Getting the player's overall zone percentage
+def get_overall_zone_pct(player_id, season_id, isCareer):
+    if isCareer is False:
+        metric_q = """SELECT sum_efg_plus/attempts
+        FROM(
+            SELECT SUM(attempts*zone_efg_plus) AS sum_efg_plus
+            FROM shots_Player_Relative_Year r
+            WHERE season_id = %s
+            AND player_id = %s
+            AND season_type = 'reg'
+            AND shot_zone_area = 'all'
+            AND shot_zone_basic != 'all'
+        ) a
+        JOIN(
+            SELECT attempts
+            FROM shots_Player_Relative_Year r
+            WHERE season_id = %s
+            AND player_id = %s
+            AND season_type = 'reg'
+            AND shot_zone_area = 'all'
+            AND shot_zone_basic = 'all'
+        ) b;
+        """
+        metric_qry = metric_q % (season_id.replace('-',''), player_id, season_id.replace('-',''), player_id)
+
+    else:
+        metric_q = """SELECT sum_efg_plus/attempts
+        FROM(
+            SELECT SUM(attempts*zone_efg_plus) AS sum_efg_plus
+            FROM shots_Player_Relative_Career r
+            WHERE player_id = %s
+            AND season_type = 'reg'
+            AND shot_zone_area = 'all'
+            AND shot_zone_basic != 'all'
+        ) a
+        JOIN(
+            SELECT attempts
+            FROM shots_Player_Relative_Career r
+            WHERE player_id = %s
+            AND season_type = 'reg'
+            AND shot_zone_area = 'all'
+            AND shot_zone_basic = 'all'
+        ) b;
+        """
+        metric_qry = metric_q % (player_id, player_id)
+
+    # raw_input(metric_qry)
+    try:
+        res = db.query(metric_qry)[0][0]
+    except IndexError:
+        res = 0
+
+    return res
 
 #Getting the league efg for the season. If we're looking at a career, we naively use the league efg of all shots since 1996
 def get_lg_efg(season_id, isCareer):
@@ -645,8 +703,12 @@ def acquire_playerPic(player_id, zoom, offset=(250,370)):
             pic = urllib.urlretrieve("http://stats.nba.com/media/players/230x185/"+str(player_id)+".png",str(player_id)+".png")
             player_pic = plt.imread(pic[0])
         except (ValueError, IOError):
-            img_path = os.getcwd()+'/chart_icon.png'
-            player_pic = plt.imread(img_path)    
+            try:
+                pic = urllib.urlretrieve("https://ak-static.cms.nba.com/wp-content/uploads/headshots/nba/latest/260x190/"+str(player_id)+".png",str(player_id)+".png")
+                player_pic = plt.imread(pic[0])
+            except (ValueError, IOError):
+                img_path = os.getcwd()+'/chart_icon.png'
+                player_pic = plt.imread(img_path)      
 
 
     img = osb.OffsetImage(player_pic, zoom)
