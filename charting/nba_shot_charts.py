@@ -414,7 +414,7 @@ def get_key_text(player_id, season_id, isCareer):
         
         if _type == 'All':
             text += str(makes) + ' for ' + str(atts)
-            text += ' (' + str(all_zone_plus) + ' AllZone+ | '
+            text += ' (' + str(all_zone_plus) + ' ShotSkill+ | '
             text += str(efg) + ' EFG% ('
             text += str(efg_plus) + ' EFG+ | '
             text += str(paa) + ' PAA)'
@@ -721,7 +721,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     # call via [python nba_shot_charts.py --player_name "Zach Randolph"]
-    parser.add_argument('--player_name',type=str,   default='Jordan Bell')
+    parser.add_argument('--player_name',type=str,   default='')
     args = parser.parse_args()
 
     if args.player_name != '':

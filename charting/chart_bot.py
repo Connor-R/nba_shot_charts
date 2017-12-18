@@ -162,9 +162,16 @@ def get_rand_player():
 
     player = random.choice(p_list.items())
 
-
-    p_name = player[1][0]
     p_id = player[1][1]
+    p_name = player[1][0]
+
+    if p_name.split(' ')[0][1].isupper() and p_name not in ('OG Anunoby',):
+        temp_name = p_name
+        p_name = ''
+        for i in range(0, len(temp_name.split(' ')[0])):
+            p_name += temp_name.split(' ')[0][i] + '.'
+        for i in range(1, len(temp_name.split(' '))):
+            p_name += ' ' + temp_name.split(' ')[i]
 
     return p_name, p_id
 
@@ -173,7 +180,6 @@ def parse_text(pic, hashtags, p_id):
     tweet = ''
 
     fname, lname, full_name = db.query("SELECT fname, lname, CONCAT(fname, ' ', lname) FROM players WHERE player_id = "+str(p_id))[0]
-
 
     tweet = full_name+'\'s '
 
@@ -186,21 +192,37 @@ def parse_text(pic, hashtags, p_id):
     if pic.split('_')[-3][:6] == 'CAREER':
         tweet += year + ' Shot Chart' 
         teams = get_teams(p_id, year, isCareer=True)
-        met_qry = "SELECT attempts, ROUND(efg_plus,0), ROUND(paa,0) FROM shots_Player_Relative_Career WHERE shot_zone_basic = 'all' AND player_id = %s AND season_type = 'reg'" % (p_id)
+        met_qry = "SELECT games, attempts, ROUND(attempts/games,1), ROUND(efg_plus,0), ROUND(paa,0), ROUND(paa_per_game,1) FROM shots_Player_Relative_Career WHERE shot_zone_basic = 'all' AND player_id = %s AND season_type = 'reg'" % (p_id)
+        ShotSkill = get_ShotSkillPlus(p_id, year.replace('-',''), isCareer=True)
     else:
         if year == '2017-18':
             tweet += year + '(in progress) Shot Chart'
         else:
             tweet += year + ' Shot Chart' 
         teams = get_teams(p_id, year)
-        met_qry = "SELECT attempts, ROUND(efg_plus,0), ROUND(paa,0) FROM shots_Player_Relative_Year WHERE shot_zone_basic = 'all' AND player_id = %s AND season_id = %s AND season_type = 'reg'" % (p_id, year.replace('-',''))
+        met_qry = "SELECT games, attempts, ROUND(attempts/games,1), ROUND(efg_plus,0), ROUND(paa,0), ROUND(paa_per_game,1) FROM shots_Player_Relative_Year WHERE shot_zone_basic = 'all' AND player_id = %s AND season_id = %s AND season_type = 'reg'" % (p_id, year.replace('-',''))
+        ShotSkill = get_ShotSkillPlus(p_id, year.replace('-',''), isCareer=False)
 
-    atts, efg, paa = db.query(met_qry)[0]
+    # raw_input(met_qry)
+    games, atts, volume, efg, paa, paag = db.query(met_qry)[0]
+
     if paa >= 0:
         pos = '+'
     else:
         pos = ''
-    tweet += ' (' + str(atts) + ' attempts | ' + str(efg) + ' EFG+ | ' + pos + str(paa) + ' PAA)\n\n' 
+
+    vol_grade = get_descriptor('volume', volume)
+    eff_grade = get_descriptor('efficiency', efg)
+    shot_grade = get_descriptor('shot_making', ShotSkill)
+    ev_grade = get_descriptor('efficiency_value', paag)
+
+
+    tweet += ':\nVolume: %s | %s Attempts per Game (%s attempts in %s games)' % (vol_grade, volume, atts, games)
+    tweet += '\nEfficiency: %s | %s EFG+' % (eff_grade, efg)
+    tweet += '\nShot Making: %s | %s ShotSkill+' % (shot_grade, ShotSkill)
+    tweet += '\nEfficiency Value: %s | %s%s PAA/G (%s%s PAA)' % (ev_grade, pos, paag, pos, paa)
+
+    tweet += '\n\n'
 
     if efg == 0:
         hashtags.append('Randy')
@@ -235,6 +257,93 @@ def parse_text(pic, hashtags, p_id):
                     tweet += ' '
 
     return tweet
+
+#Getting the player's overall zone percentage
+def get_ShotSkillPlus(player_id, season_id, isCareer):
+    if isCareer is False:
+        metric_q = """SELECT ROUND(sum_efg_plus/attempts,0)
+        FROM(
+            SELECT SUM(attempts*zone_efg_plus) AS sum_efg_plus
+            FROM shots_Player_Relative_Year r
+            WHERE season_id = %s
+            AND player_id = %s
+            AND season_type = 'reg'
+            AND shot_zone_area = 'all'
+            AND shot_zone_basic != 'all'
+        ) a
+        JOIN(
+            SELECT attempts
+            FROM shots_Player_Relative_Year r
+            WHERE season_id = %s
+            AND player_id = %s
+            AND season_type = 'reg'
+            AND shot_zone_area = 'all'
+            AND shot_zone_basic = 'all'
+        ) b;
+        """
+        metric_qry = metric_q % (season_id.replace('-',''), player_id, season_id.replace('-',''), player_id)
+
+    else:
+        metric_q = """SELECT ROUND(sum_efg_plus/attempts,0)
+        FROM(
+            SELECT SUM(attempts*zone_efg_plus) AS sum_efg_plus
+            FROM shots_Player_Relative_Career r
+            WHERE player_id = %s
+            AND season_type = 'reg'
+            AND shot_zone_area = 'all'
+            AND shot_zone_basic != 'all'
+        ) a
+        JOIN(
+            SELECT attempts
+            FROM shots_Player_Relative_Career r
+            WHERE player_id = %s
+            AND season_type = 'reg'
+            AND shot_zone_area = 'all'
+            AND shot_zone_basic = 'all'
+        ) b;
+        """
+        metric_qry = metric_q % (player_id, player_id)
+
+    # raw_input(metric_qry)
+    try:
+        res = db.query(metric_qry)[0][0]
+    except IndexError:
+        res = 0
+
+    return res
+
+
+def get_descriptor(category, metric):
+
+    # from the bot_percentiles.py scripte
+    # < 15 percentile group for lowest group
+    # 15-35 for 2nd lowest
+    # 35-65 for middle
+    # 65-85 for 2nd highest
+    # > 85 for highest
+
+    vol_dict = {"Extreme":[1000,13.9], "High":[13.9,10.0], "Average":[10.0,6.6], "Low":[6.6,4.9], "Miniscule":[4.9,-1]}
+    shot_dict = {"Excellent":[1000,108.3], "Good":[108.3,102.8], "Average":[102.8,96.5], "Poor":[96.5,90.8], "Bad":[90.8,-1]}
+    eff_dict = {"Excellent":[1000,109.2], "Good":[109.2,103.2], "Average":[103.2,96.8], "Poor":[96.8,91.7], "Bad":[91.7,-1]}
+    ev_dict = {"Excellent":[1000,0.7], "Good":[0.7,0.3], "Average":[0.3,-0.2], "Poor":[-0.2,-0.6], "Bad":[-0.6,-1000]}
+
+
+    descriptor = ''
+    if category == 'volume':
+        desc_dict = vol_dict
+    elif category == 'shot_making':
+        desc_dict = shot_dict
+    elif category == 'efficiency':
+        desc_dict = eff_dict
+    elif category == 'efficiency_value':
+        desc_dict = ev_dict
+
+    for k,v in desc_dict.items():
+        high, low = v
+        if (metric > low and metric <= high):
+            descriptor = k.upper()
+
+    return descriptor
 
 
 def get_teams(p_id, year, isCareer=False):

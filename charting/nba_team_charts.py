@@ -52,8 +52,8 @@ def initiate(p_list, list_length, printer=True):
 
         if start_year < 1996:
             start_year = 1996
-        if end_year > 2017:
-            end_year = 2017
+        if end_year > 2018:
+            end_year = 2018
 
         path = base_path+'/shot_charts_team/'+str(city.replace(' ','_'))+'_'+str(tname.replace(' ','_'))+'('+str(team_id)+')/'
 
@@ -337,7 +337,7 @@ def get_key_text(team_id, season_id, isCareer):
         
         if _type == 'All':
             text += str(makes) + ' for ' + str(atts)
-            text += ' (' + str(all_zone_plus) + ' AllZone+ | '
+            text += ' (' + str(all_zone_plus) + ' ShotSkill+ | '
             text += str(efg) + ' EFG% ('
             text += str(efg_plus) + ' EFG+ | '
             text += str(paa) + ' PAA)'
