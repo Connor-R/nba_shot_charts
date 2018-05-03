@@ -5,7 +5,7 @@ import os
 import sys
 from time import time, sleep
 from datetime import date, datetime
-sys.path.append('/Users/connordog/Dropbox/Desktop_Files/Work_Things/CodeBase/Python_Scripts/Python_Projects/packages')
+
 
 from py_data_getter import data_getter
 from py_db import db
@@ -19,7 +19,7 @@ getter = data_getter()
 type_dict = {'Pre':'Pre+Season','Post':'Playoffs', 'AS':'All+Star'}
 
 lastNgames = 10
-short_type = 'Pre'
+short_type = 'Post'
 
 season_type = type_dict.get(short_type)
 

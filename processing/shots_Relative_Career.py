@@ -6,8 +6,6 @@ import sys
 from time import time
 
 
-sys.path.append('/Users/connordog/Dropbox/Desktop_Files/Work_Things/CodeBase/Python_Scripts/Python_Projects/packages')
-
 from py_data_getter import data_getter
 from py_db import db
 
@@ -76,7 +74,8 @@ GROUP BY %s_id, season_type, shot_zone_basic, shot_zone_area
         _id = '%s_id' % (_type.lower())
         for row in res:
             type_id, season_id, season_type, z_basic, z_area, games, attempts, z_plus, ZONE_efg, ZONE_paa, ZONE_paag, efg, paa, paag = row
-            entry = {_id:type_id, "season_id":season_id, "season_type":season_type, "shot_zone_basic":z_basic, "shot_zone_area":z_area, "games":games, "attempts":attempts, "zone_pct_plus":z_plus, "ZONE_efg_plus":ZONE_efg, "ZONE_paa":ZONE_paa, "ZONE_paa_per_game":ZONE_paag, "efg_plus":efg, "paa":paa, "paa_per_game":paag}   
+            entry = {_id:type_id, "season_id":season_id, "season_type":season_type, "shot_zone_basic":z_basic, "shot_zone_area":z_area, "games":games, "attempts":attempts, "zone_pct_plus":z_plus, "ZONE_efg_plus":ZONE_efg, "ZONE_paa":ZONE_paa, "ZONE_paa_per_game":ZONE_paag, "efg_plus":efg, "paa":paa, "paa_per_game":paag}
+
             entries.append(entry)
 
         table = "shots_%s_Relative_Career" % (_type)

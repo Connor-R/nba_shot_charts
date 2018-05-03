@@ -1,7 +1,9 @@
+SHELL=/bin/bash
+source "/Users/connordog/.bash_profile"
 
 cd ../scrapers
-# python scraper_playoff_shots.py
-python scraper_shots.py
+python scraper_playoff_shots.py
+# python scraper_shots.py
 
 wait
 
@@ -20,3 +22,7 @@ python shots_Relative_Year.py
 wait
 
 python shots_Relative_Career.py
+
+wait
+
+python shot_skill_plus.py

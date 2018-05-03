@@ -5,7 +5,6 @@ import os
 import sys
 from time import time
 
-sys.path.append('/Users/connordog/Dropbox/Desktop_Files/Work_Things/CodeBase/Python_Scripts/Python_Projects/packages')
 
 from py_data_getter import data_getter
 from py_db import db
@@ -17,7 +16,7 @@ start_time = time()
 
 getter = data_getter()
 
-url = 'http://stats.nba.com/stats/commonallplayers?IsOnlyCurrentSeason=0&LeagueID=00&Season=2017-18'
+url = 'http://stats.nba.com/stats/commonallplayers?IsOnlyCurrentSeason=0&LeagueID=00&Season=0000-00'
 
 print "\n\nscraper_players.py"
 print "-------------------------"
@@ -33,8 +32,8 @@ for dbplayer in players:
     entry = {}
     entry["player_id"] = dbplayer[0]
 
-    print dbplayer[1] + '\t',
-    sys.stdout.flush()
+    # print dbplayer[1] + '\t',
+    # sys.stdout.flush()
 
     if dbplayer[1] == "Nene":
         entry["lname"] = "Hilario"

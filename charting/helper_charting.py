@@ -1,0 +1,401 @@
+# A set of helper functions for the nba_shot_chart codebase
+
+import urllib
+import os
+import csv
+import sys
+import math
+import pandas as pd
+import numpy as np
+import matplotlib as mpb
+import matplotlib.pyplot as plt
+from matplotlib import offsetbox as osb
+from matplotlib.patches import RegularPolygon
+from datetime import date
+
+
+from py_data_getter import data_getter
+from py_db import db
+
+import helper_data
+db = db('nba_shots')
+
+# setting the color map we want to use
+mymap = mpb.cm.YlOrRd
+
+
+#Drawing the outline of the court
+#Most of this code was recycled from Savvas Tjortjoglou [http://savvastjortjoglou.com] 
+def draw_court(ax=None, color='white', lw=2, outer_lines=False):
+    from matplotlib.patches import Circle, Rectangle, Arc
+    if ax is None:
+        ax = plt.gca()
+    hoop = Circle((0, 0), radius=7.5, linewidth=lw, color=color, fill=False)
+    backboard = Rectangle((-30, -7.5), 60, -1, linewidth=lw, color=color)
+    outer_box = Rectangle((-80, -47.5), 160, 190, linewidth=lw, color=color,
+                          fill=False)
+    inner_box = Rectangle((-60, -47.5), 120, 190, linewidth=lw, color=color,
+                          fill=False)
+    top_free_throw = Arc((0, 142.5), 120, 120, theta1=0, theta2=180,
+                         linewidth=lw, color=color, fill=False)
+    bottom_free_throw = Arc((0, 142.5), 120, 120, theta1=180, theta2=0,
+                            linewidth=lw, color=color, linestyle='dashed')
+    restricted = Arc((0, 0), 80, 80, theta1=0, theta2=180, linewidth=lw,
+                     color=color)
+    corner_three_a = Rectangle((-220, -50.0), 0, 140, linewidth=lw,
+                               color=color)
+    corner_three_b = Rectangle((219.75, -50.0), 0, 140, linewidth=lw, color=color)
+    three_arc = Arc((0, 0), 475, 475, theta1=22, theta2=158, linewidth=lw,
+                    color=color)
+    center_outer_arc = Arc((0, 422.5), 120, 120, theta1=180, theta2=0,
+                           linewidth=lw, color=color)
+    center_inner_arc = Arc((0, 422.5), 40, 40, theta1=180, theta2=0,
+                           linewidth=lw, color=color)
+    court_elements = [hoop, backboard, outer_box, inner_box, top_free_throw,
+                      bottom_free_throw, restricted, corner_three_a,
+                      corner_three_b, three_arc, center_outer_arc,
+                      center_inner_arc]
+    if outer_lines:
+        outer_lines = Rectangle((-250, -47.5), 500, 470, linewidth=lw,
+                                color=color, fill=False)
+        court_elements.append(outer_lines)
+
+    for element in court_elements:
+        ax.add_patch(element)
+    
+    ax.set_xticklabels([])
+    ax.set_yticklabels([])
+    ax.set_xticks([])
+    ax.set_yticks([])
+    return ax
+
+
+# we set gridNum to be 30 (basically a grid of 30x30 hexagons)
+def shooting_plot(dataType, path, shot_df, _id, season_id, _title, _name, isCareer=False, min_year = 0, max_year = 0, plot_size=(12,12), gridNum=30):
+
+    # get the shooting percentage and number of shots for all bins, all shots, and a subset of some shots
+    (ShootingPctLocs, shotNumber), shot_count_all = find_shootingPcts(shot_df, gridNum)
+
+    all_efg_plus = float(helper_data.get_metrics(dataType, _id, season_id, isCareer, 'all', 'efg_plus'))
+    paa = float(helper_data.get_metrics(dataType, _id, season_id, isCareer, 'all', 'paa'))
+    color_efg = max(min(((all_efg_plus/100)-0.5),1.0),0.0)
+
+    # set the figure for drawing on
+    fig = plt.figure(figsize=(12,12))
+
+    # cmap will be used as our color map going forward
+    cmap = mymap
+
+    # where to place the plot within the figure, first two attributes are the x_min and y_min, and the next 2 are the % of the figure that is covered in the x_direction and y_direction (so in this case, our plot will go from (0.05, 0.15) at the bottom left, and stretches to (0.85,0.925) at the top right)
+    ax = plt.axes([0.05, 0.15, 0.81, 0.775]) 
+
+    # setting the background color using a hex code (http://www.rapidtables.com/web/color/RGB_Color.htm)
+    ax.set_axis_bgcolor('#0C232E')
+
+    # draw the outline of the court
+    draw_court(outer_lines=False)
+
+    # specify the dimensions of the court we draw
+    plt.xlim(-250,250)
+    plt.ylim(370, -30)
+    
+    # drawing the bottom right image
+    zoom = 1 # we don't need to zoom the image at all
+    if dataType == 'player':
+        img = acquire_playerPic(_id, zoom)
+    else:
+        img = acquire_teamPic(season_id, _title, _id, zoom)
+    ax.add_artist(img)
+             
+    # specify the % a zone that we want to correspond to a maximum sized hexagon [I have this set to any zone with >= 1% of all shots will have a maximum radius, but it's free to be changed based on personal preferences]
+    max_radius_perc = 1.0
+    max_rad_multiplier = 100.0/max_radius_perc
+
+    # changing to what power we want to scale the area of the hexagons as we increase/decrease the radius. This value can also be changed for personal preferences.
+    area_multiplier = (3./4.)
+
+    lg_efg = float(helper_data.get_lg_efg(season_id, isCareer))
+
+    # draw hexagons
+    # i is the bin#, and shots is the shooting% for that bin
+    for i, shots in enumerate(ShootingPctLocs): 
+        x,y = shotNumber.get_offsets()[i]
+
+        # we check the distance from the hoop the bin is. If it in 3pt territory, we add a multiplier of 1.5 to the shooting% to properly encapsulate eFG%
+        dist = math.sqrt(x**2 + y**2)
+        mult = 1.0
+        if abs(x) >= 220:
+            mult = 1.5
+        elif dist/10 >= 23.75:
+            mult = 1.5
+        else:
+            mult = 1.0
+
+        # Setting the eFG% for a bin, making sure it's never over 1 (our maximum color value)
+        color_pct = ((shots*mult)/lg_efg)-0.5
+        bin_pct = max(min(color_pct, 1.0), 0.0)
+        hexes = RegularPolygon(
+            shotNumber.get_offsets()[i], #x/y coords
+            numVertices=6, 
+            radius=(295/gridNum)*((max_rad_multiplier*((shotNumber.get_array()[i]))/shot_count_all)**(area_multiplier)), 
+            color=cmap(bin_pct),
+            alpha=0.95, 
+            fill=True)
+
+        # setting a maximum radius for our bins at 295 (personal preference)
+        if hexes.radius > 295/gridNum: 
+            hexes.radius = 295/gridNum
+        ax.add_patch(hexes)
+
+    # creating the frequency legend
+    # we want to have 4 ticks in this legend so we iterate through 4 items
+    for i in range(0,4):
+        base_rad = max_radius_perc/4
+
+        # the x,y coords for our patch (the first coordinate is (-205,415), and then we move up and left for each addition coordinate)
+        patch_x = -205-(10*i)
+        patch_y = 365-(14*i)
+
+        # specifying the size of our hexagon in the frequency legend
+        patch_rad = (299.9/gridNum)*((base_rad+(base_rad*i))**(area_multiplier))
+        patch_perc = base_rad+(i*base_rad)
+
+        # the x,y coords for our text
+        text_x = patch_x + patch_rad + 2
+        text_y = patch_y
+
+        patch_axes = (patch_x, patch_y)
+
+        # the text will be slightly different for our maximum sized hexagon,
+        if i < 3:
+            text_text = ' %s%% of Attempted Shots' % ('%.2f' % patch_perc)
+        else:
+            text_text = '$\geq$%s%% of Attempted Shots' %(str(patch_perc))
+        
+        # draw the hexagon. the color=map(eff_fg_all_float/100) makes the hexagons in the legend the same color as the player's overall eFG%
+        patch = RegularPolygon(patch_axes, numVertices=6, radius=patch_rad, color=cmap(color_efg), alpha=0.95, fill=True)
+        ax.add_patch(patch)
+
+        # add the text for the hexagon
+        ax.text(text_x, text_y, text_text, fontsize=12, horizontalalignment='left', verticalalignment='center', family='Bitstream Vera Sans', color='white', fontweight='bold')
+
+    # Add a title to our frequency legend (the x/y coords are hardcoded).
+    # Again, the color=map(eff_fg_all_float/100) makes the hexagons in the legend the same color as the player's overall eFG%
+    ax.text(-235, 310, 'Zone Frequencies', fontsize = 15, horizontalalignment='left', verticalalignment='bottom', family='Bitstream Vera Sans', color=cmap(color_efg), fontweight='bold')
+
+    # Add a title to our chart (just the player's name)
+    chart_title = "%s | %s" % (_title.upper(), season_id)
+    ax.text(31.25,-40, chart_title, fontsize=29, horizontalalignment='center', verticalalignment='bottom', family='Bitstream Vera Sans', color=cmap(color_efg), fontweight='bold')
+
+    # Add user text
+    ax.text(-250,-31,'CHARTS BY CONNOR REED (@NBAChartBot)',
+        fontsize=10,  horizontalalignment='left', verticalalignment = 'bottom', family='Bitstream Vera Sans', color='white', fontweight='bold')
+
+    # Add data source text
+    ax.text(31.25,-31,'DATA FROM STATS.NBA.COM',
+        fontsize=10,  horizontalalignment='center', verticalalignment = 'bottom', family='Bitstream Vera Sans', color='white', fontweight='bold')
+
+    # Add date text
+    _date = date.today()
+
+    ax.text(250,-31,'AS OF %s' % (str(_date)),
+        fontsize=10,  horizontalalignment='right', verticalalignment = 'bottom', family='Bitstream Vera Sans', color='white', fontweight='bold')
+
+
+    key_text = get_key_text(dataType, _id, season_id, isCareer)
+    # adding breakdown of eFG% by shot zone at the bottom of the chart
+    ax.text(307,380, key_text, fontsize=12, horizontalalignment='right', verticalalignment = 'top', family='Bitstream Vera Sans', color='white', linespacing=1.5)
+
+    if dataType == 'player':
+        teams_text, team_len = get_teams_text(_id, season_id, isCareer)
+    else:
+        teams_text = _title + ' ' + _name
+        team_len = 0
+
+    # adding which season the chart is for, as well as what teams the player is on
+    if team_len > 12:
+        ax.text(-250,380, season_id + ' Regular Season:\n' + teams_text,
+            fontsize=10,  horizontalalignment='left', verticalalignment = 'top', family='Bitstream Vera Sans', color='white', linespacing=1.4)
+    else:
+        ax.text(-250,380,season_id + ' Regular Season:\n' + teams_text,
+            fontsize=10,  horizontalalignment='left', verticalalignment = 'top', family='Bitstream Vera Sans', color='white', linespacing=1.6)
+
+    # adding a color bar for reference
+    ax2 = fig.add_axes([0.875, 0.15, 0.04, 0.775])
+    cb = mpb.colorbar.ColorbarBase(ax2,cmap=cmap, orientation='vertical')
+    cbytick_obj = plt.getp(cb.ax.axes, 'yticklabels')
+    plt.setp(cbytick_obj, color='white', fontweight='bold')
+    cb.set_label('EFG+ (100 is League Average)', family='Bitstream Vera Sans', color='white', fontweight='bold', labelpad=-4, fontsize=14)
+    cb.set_ticks([0.0, 0.25, 0.5, 0.75, 1.0])
+    cb.set_ticklabels(['$\mathbf{\leq}$50','75', '100','125', '$\mathbf{\geq}$150'])
+
+    figtit = path+'shot_charts_%s(%s)_%s_%s_%s.png' % (_name, _id, season_id.replace(' ',''), str(int(round(all_efg_plus))), str(int(round(paa))) )
+    plt.savefig(figtit, facecolor='#26373F', edgecolor='black')
+    plt.clf()
+
+
+#Producing the text for the bottom of the shot chart
+def get_key_text(dataType, _id, season_id, isCareer):
+
+    text = ''
+
+    games_text = helper_data.get_metrics(dataType, _id, season_id, isCareer, 'All', 'r.games')
+    shotSkillPlus = ("%.1f" % helper_data.get_metrics(dataType, _id, season_id, isCareer, 'All', 's.ShotSkillPlus'))
+
+    for _type in ('All', 'Above The Break 3', 'Corner 3', 'Mid-Range', 'In The Paint (Non-RA)', 'Restricted Area'):
+        if _type == 'All':
+            text += 'All Shots | %s Games | ' % games_text
+        elif _type == 'Above The Break 3':
+            text += '\n' + 'Arc 3 | '
+        elif _type == 'In The Paint (Non-RA)':
+            text += '\n' + 'Paint(Non-RA) | '
+        elif _type == 'Restricted Area':
+            text += '\n' + 'Restricted | '
+        else:
+            text += '\n' + _type + ' | '        
+
+        atts = ("%.0f" % helper_data.get_metrics(dataType, _id, season_id, isCareer, _type, 'r.attempts'))
+        makes = ("%.0f" % helper_data.get_metrics(dataType, _id, season_id, isCareer, _type, 'b.makes'))
+        zone_pct = ("%.1f" % helper_data.get_metrics(dataType, _id, season_id, isCareer, _type, 'zone_pct*100'))
+        zone_pct_plus = ("%.1f" % helper_data.get_metrics(dataType, _id, season_id, isCareer, _type, 'zone_pct_plus'))
+        efg = ("%.1f" % helper_data.get_metrics(dataType, _id, season_id, isCareer, _type, 'efg*100'))
+        efg_plus = ("%.1f" % helper_data.get_metrics(dataType, _id, season_id, isCareer, _type, 'efg_plus'))
+        zone_efg_plus = ("%.1f" % helper_data.get_metrics(dataType, _id, season_id, isCareer, _type, 'zone_efg_plus'))
+        paa = ("%.1f" % helper_data.get_metrics(dataType, _id, season_id, isCareer, _type, 'paa'))
+        paa_game = ("%.1f" % helper_data.get_metrics(dataType, _id, season_id, isCareer, _type, 'paa_per_game'))
+        
+        if _type == 'All':
+            text += str(makes) + ' for ' + str(atts)
+            text += ' (' + str(shotSkillPlus) + ' ShotSkill+ | '
+            text += str(efg) + ' EFG% ('
+            text += str(efg_plus) + ' EFG+ | '
+            text += str(paa) + ' PAA)'
+        else:
+            text += str(makes) + '/' + str(atts) + ' | '
+            text += str(zone_pct) + '% z% (' + str(zone_pct_plus) + ' z%+) | '
+            text += str(zone_efg_plus) + ' zEFG+ ('
+            text += str(efg_plus) + ' EFG+ | '
+            text += str(paa) + ' PAA)'
+    return text
+
+
+#Getting the shooting percentages for each grid.
+#The general idea of this function, as well as a substantial block of the actual code was recycled from Dan Vatterott [http://www.danvatterott.com/]
+def find_shootingPcts(shot_df, gridNum):
+    x = shot_df.LOC_X[shot_df['LOC_Y']<425.1]
+    y = shot_df.LOC_Y[shot_df['LOC_Y']<425.1]
+    
+    # Grabbing the x and y coords, for all made shots
+    x_made = shot_df.LOC_X[(shot_df['SHOT_MADE_FLAG']==1) & (shot_df['LOC_Y']<425.1)]
+    y_made = shot_df.LOC_Y[(shot_df['SHOT_MADE_FLAG']==1) & (shot_df['LOC_Y']<425.1)]
+    
+    #compute number of shots made and taken from each hexbin location
+    hb_shot = plt.hexbin(x, y, gridsize=gridNum, extent=(-250,250,425,-50));
+    plt.close()
+    hb_made = plt.hexbin(x_made, y_made, gridsize=gridNum, extent=(-250,250,425,-50));
+    plt.close()
+    
+    #compute shooting percentage
+    ShootingPctLocs = hb_made.get_array() / hb_shot.get_array()
+    ShootingPctLocs[np.isnan(ShootingPctLocs)] = 0 #makes 0/0s=0
+
+    shot_count_all = len(shot_df.index)
+
+    # Returning all values
+    return (ShootingPctLocs, hb_shot), shot_count_all
+
+
+#Getting the player picture that we will later place in the chart
+#Most of this code was recycled from Savvas Tjortjoglou [http://savvastjortjoglou.com] 
+def acquire_playerPic(player_id, zoom, offset=(250,370)):
+    try:
+        img_path = os.getcwd()+'/'+str(player_id)+'.png'
+        player_pic = plt.imread(img_path)
+    except (ValueError,IOError):
+        try:
+            pic = urllib.urlretrieve("http://stats.nba.com/media/players/230x185/"+str(player_id)+".png",str(player_id)+".png")
+            player_pic = plt.imread(pic[0])
+        except (ValueError, IOError):
+            try:
+                pic = urllib.urlretrieve("https://ak-static.cms.nba.com/wp-content/uploads/headshots/nba/latest/260x190/"+str(player_id)+".png",str(player_id)+".png")
+                player_pic = plt.imread(pic[0])
+            except (ValueError, IOError):
+                img_path = os.getcwd()+'/chart_icon.png'
+                player_pic = plt.imread(img_path)      
+
+
+    img = osb.OffsetImage(player_pic, zoom)
+    img = osb.AnnotationBbox(img, offset,xycoords='data',pad=0.0, box_alignment=(1,0), frameon=False)
+    return img
+
+
+#Getting the team picture that we will later place in the chart
+def acquire_teamPic(season_id, team_title, team_id, zoom, offset=(250,370)):
+    abb_file = os.getcwd()+"/../csvs/team_abbreviations.csv"
+    abb_list = {}
+    with open(abb_file, 'rU') as f:
+        mycsv = csv.reader(f)
+        for row in mycsv:
+            team, abb, imgurl = row
+            abb_list[team] = [abb, imgurl]
+
+    img_url = abb_list.get(team_title)[1]
+    try:
+        img_path = os.getcwd()+'/'+str(team_id)+'.png'
+        team_pic = plt.imread(img_path)
+    except IOError:
+        try:
+            pic = urllib.urlretrieve(img_url,str(team_id)+'.png')
+            team_pic = plt.imread(pic[0])
+        except (ValueError, IOError):
+            img_path = os.getcwd()+'/nba_logo.png'
+            player_pic = plt.imread(img_path)    
+
+    img = osb.OffsetImage(team_pic, zoom)
+    img = osb.AnnotationBbox(img, offset,xycoords='data',pad=0.0, box_alignment=(1,0), frameon=False)
+    return img
+
+
+#Producing the text for the bottom of the shot chart
+def get_teams_text(player_id, season_id, isCareer):
+
+    if isCareer is True:
+        season_q = ''
+    else:
+        season_q = '\nAND season_id = %s' % (season_id.replace('-',''))
+
+    team_q = """SELECT
+    DISTINCT CONCAT(city, ' ', tname)
+    FROM shots s
+    JOIN teams t USING (team_id)
+    WHERE player_id = %s%s
+    AND LEFT(season_id, 4) >= t.start_year
+    AND LEFT(season_id, 4) < t.end_year;
+    """
+
+    team_qry = team_q % (player_id, season_q)
+    # raw_input(team_qry)
+
+    teams = db.query(team_qry)
+
+    team_list = []
+    for team in teams:
+        team_list.append(team[0])
+
+    team_text = ""
+    if len(team_list) == 1:
+        team_text = str(team_list[0])
+    else:
+        i = 0
+        for team in team_list[0:-1]:
+            if i%2 == 0 and i > 0:
+                team_text += '\n'
+            text_add = '%s, ' % str(team)
+            team_text += text_add
+            i += 1
+        if i%2 == 0:
+            team_text += '\n'
+        # raw_input(team_list)
+        team_text += str(team_list[-1])
+
+    return team_text, len(team_list)

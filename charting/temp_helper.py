@@ -1,19 +1,16 @@
-# CURRENT VERSION AS temp_helper.py
-
-import requests
 import urllib
 import os
 import shutil
-import csv
 import sys
 import glob
 import math
 import pandas as pd
-import numpy as np
 import argparse
+from datetime import date, datetime
+from time import time
 import matplotlib as mpb
 import matplotlib.pyplot as plt
-from matplotlib import  offsetbox as osb
+from matplotlib import offsetbox as osb
 from matplotlib.patches import RegularPolygon
 from datetime import date, datetime, timedelta
 from time import time
@@ -21,14 +18,18 @@ from time import time
 
 from py_data_getter import data_getter
 from py_db import db
-db = db('nba_shots')
+import helper_charting
+import helper_data
 
+
+db = db('nba_shots')
 
 # setting the color map we want to use
 mymap = mpb.cm.YlOrRd
 
 
 whitelist_pngs = ['charts_description.png', 'nba_logo.png', '0.png', 'chart_icon.png']
+
 
 base_path = os.getcwd()+"/shot_charts_custom_charts/"
 
@@ -105,6 +106,7 @@ def initiate(_type, _names, season_type, start_date, end_date, custom_title=None
     print "time elapsed (in minutes): \t" + str(elapsed_time/60.0)
     print "\n\n =================================================================================="
 
+
 def acquire_shootingData(ids, start_date, end_date, _type='Player', season_type='Reg'):
 
     shot_query = """SELECT
@@ -155,11 +157,11 @@ def acquire_shootingData(ids, start_date, end_date, _type='Player', season_type=
 def shooting_plot(path, _type, shot_df, ids, _names, season_type, start_date, end_date, custom_title, custom_text, custom_img, start2, end2, plot_size=(12,12), gridNum=30):
 
     print '\t\tgetting shooting percentages in each zone.....'
-    (ShootingPctLocs, shotNumber), shot_count_all = find_shootingPcts(shot_df, gridNum)
+    (ShootingPctLocs, shotNumber), shot_count_all = helper_charting.find_shootingPcts(shot_df, gridNum)
     print '\t\t\tDONE'
 
-    print '\t\tcalculating metrics.....'
-    metrics = calculate_metrics(_type, ids, start_date, end_date, season_type)
+    print '\t\tcalculating metrics.....' 
+    metrics = calculate_metrics(_type, ids, start_date, end_date, season_type) #TODO
     print '\t\t\tDONE'
 
     all_efg_plus = float(get_metrics(metrics, 'all', 'efg_plus'))
@@ -174,13 +176,13 @@ def shooting_plot(path, _type, shot_df, ids, _names, season_type, start_date, en
 
     ax.set_axis_bgcolor('#0C232E')
 
-    draw_court(outer_lines=False)
+    helper_charting.draw_court(outer_lines=False)
 
     plt.xlim(-250,250)
     plt.ylim(370, -30)
     
-    print '\t\tgetting icon.....'
-    img = acquire_custom_pic(custom_img)
+    print '\t\tgetting icon.....'  
+    img = acquire_custom_pic(custom_img) #TODO
     ax.add_artist(img)
     print '\t\t\tDONE'
              
@@ -267,7 +269,7 @@ def shooting_plot(path, _type, shot_df, ids, _names, season_type, start_date, en
     ax.text(31.25,-40, chart_title, fontsize=29, horizontalalignment='center', verticalalignment='bottom', family='Bitstream Vera Sans', color=cmap(color_efg), fontweight='bold')
 
     # Add user text
-    ax.text(-250,-31,'CHARTS BY @NBAChartBot',
+    ax.text(-250,-31,'CHARTS BY CONNOR REED (@NBAChartBot)',
         fontsize=10,  horizontalalignment='left', verticalalignment = 'bottom', family='Bitstream Vera Sans', color='white', fontweight='bold')
 
     # Add data source text
@@ -281,7 +283,7 @@ def shooting_plot(path, _type, shot_df, ids, _names, season_type, start_date, en
         fontsize=10,  horizontalalignment='right', verticalalignment = 'bottom', family='Bitstream Vera Sans', color='white', fontweight='bold')
 
 
-    key_text = get_key_text(_type, ids, start_date, end_date, metrics)
+    key_text = get_key_text(_type, ids, start_date, end_date, metrics) #TODO
     # adding breakdown of eFG% by shot zone at the bottom of the chart
     ax.text(307,380, key_text, fontsize=12, horizontalalignment='right', verticalalignment = 'top', family='Bitstream Vera Sans', color='white', linespacing=1.5)
 
@@ -344,30 +346,6 @@ def shooting_plot(path, _type, shot_df, ids, _names, season_type, start_date, en
     figtit = path
     plt.savefig(figtit, facecolor='#26373F', edgecolor='black')
     plt.clf()
-
-
-def find_shootingPcts(shot_df, gridNum):
-    x = shot_df.LOC_X[shot_df['LOC_Y']<425.1]
-    y = shot_df.LOC_Y[shot_df['LOC_Y']<425.1]
-    
-    # Grabbing the x and y coords, for all made shots
-    x_made = shot_df.LOC_X[(shot_df['SHOT_MADE_FLAG']==1) & (shot_df['LOC_Y']<425.1)]
-    y_made = shot_df.LOC_Y[(shot_df['SHOT_MADE_FLAG']==1) & (shot_df['LOC_Y']<425.1)]
-    
-    #compute number of shots made and taken from each hexbin location
-    hb_shot = plt.hexbin(x, y, gridsize=gridNum, extent=(-250,250,425,-50));
-    plt.close()
-    hb_made = plt.hexbin(x_made, y_made, gridsize=gridNum, extent=(-250,250,425,-50));
-    plt.close()
-    
-    #compute shooting percentage
-    ShootingPctLocs = hb_made.get_array() / hb_shot.get_array()
-    ShootingPctLocs[np.isnan(ShootingPctLocs)] = 0 #makes 0/0s=0
-
-    shot_count_all = len(shot_df.index)
-
-    # Returning all values
-    return (ShootingPctLocs, hb_shot), shot_count_all
 
 
 def calculate_metrics(_type, ids, start_date, end_date, season_type):
@@ -495,50 +473,6 @@ def get_metrics(metrics, zone, target):
     return 0
 
 
-def draw_court(ax=None, color='white', lw=2, outer_lines=False):
-    from matplotlib.patches import Circle, Rectangle, Arc
-    if ax is None:
-        ax = plt.gca()
-    hoop = Circle((0, 0), radius=7.5, linewidth=lw, color=color, fill=False)
-    backboard = Rectangle((-30, -7.5), 60, -1, linewidth=lw, color=color)
-    outer_box = Rectangle((-80, -47.5), 160, 190, linewidth=lw, color=color,
-                          fill=False)
-    inner_box = Rectangle((-60, -47.5), 120, 190, linewidth=lw, color=color,
-                          fill=False)
-    top_free_throw = Arc((0, 142.5), 120, 120, theta1=0, theta2=180,
-                         linewidth=lw, color=color, fill=False)
-    bottom_free_throw = Arc((0, 142.5), 120, 120, theta1=180, theta2=0,
-                            linewidth=lw, color=color, linestyle='dashed')
-    restricted = Arc((0, 0), 80, 80, theta1=0, theta2=180, linewidth=lw,
-                     color=color)
-    corner_three_a = Rectangle((-220, -50.0), 0, 140, linewidth=lw,
-                               color=color)
-    corner_three_b = Rectangle((219.75, -50.0), 0, 140, linewidth=lw, color=color)
-    three_arc = Arc((0, 0), 475, 475, theta1=22, theta2=158, linewidth=lw,
-                    color=color)
-    center_outer_arc = Arc((0, 422.5), 120, 120, theta1=180, theta2=0,
-                           linewidth=lw, color=color)
-    center_inner_arc = Arc((0, 422.5), 40, 40, theta1=180, theta2=0,
-                           linewidth=lw, color=color)
-    court_elements = [hoop, backboard, outer_box, inner_box, top_free_throw,
-                      bottom_free_throw, restricted, corner_three_a,
-                      corner_three_b, three_arc, center_outer_arc,
-                      center_inner_arc]
-    if outer_lines:
-        outer_lines = Rectangle((-250, -47.5), 500, 470, linewidth=lw,
-                                color=color, fill=False)
-        court_elements.append(outer_lines)
-
-    for element in court_elements:
-        ax.add_patch(element)
-    
-    ax.set_xticklabels([])
-    ax.set_yticklabels([])
-    ax.set_xticks([])
-    ax.set_yticks([])
-    return ax
-
-
 def get_teams_text(ids, start_date, end_date, custom_text, season_type):
 
     if custom_text is None:
@@ -624,6 +558,7 @@ def get_key_text(_type, ids, start_date, end_date, metrics):
             text += str(paa) + ' PAA)'
     return text
 
+
 def get_dates(_type, ids, start_date, end_date, season_type):
     q = """SELECT MIN(game_date), MAX(game_date)
     FROM shots
@@ -640,10 +575,8 @@ def get_dates(_type, ids, start_date, end_date, season_type):
 
     return dates
 
-def acquire_custom_pic(custom_img, offset=(250,370)):
-    from matplotlib import offsetbox as osb
-    import urllib
-    
+
+def acquire_custom_pic(custom_img, offset=(250,370)):    
     if custom_img is not None:
         try:
             img_path = os.getcwd()+'/'+custom_img+'.png'
@@ -658,9 +591,6 @@ def acquire_custom_pic(custom_img, offset=(250,370)):
     img = osb.OffsetImage(player_pic)
     img = osb.AnnotationBbox(img, offset,xycoords='data',pad=0.0, box_alignment=(1,0), frameon=False)
     return img
-
-
-# def gen_charts():
 
 
 if __name__ == "__main__": 
@@ -690,14 +620,14 @@ if __name__ == "__main__":
 
 
     parser.add_argument('--_type',          default = 'Player')
-    parser.add_argument('--_names',         default = ["Blake Griffin"])
+    parser.add_argument('--_names',         default = ["Stephen Curry"])
     parser.add_argument('--season_type',    default = 'Reg')
     parser.add_argument('--start_date',     default = '2017-06-01')
     parser.add_argument('--end_date',       default = '2018-06-01')
-    parser.add_argument('--custom_title',   default = 'Blake Griffin - 2017/18')
+    parser.add_argument('--custom_title',   default = 'Stephen Curry - 2017/18')
     parser.add_argument('--custom_text',    default = None)    
     parser.add_argument('--custom_img',     default =  None) 
-    parser.add_argument('--custom_file',    default =  'Blake Griffin_201718') 
+    parser.add_argument('--custom_file',    default =  'Stephen Curry_201718') 
 
 
 

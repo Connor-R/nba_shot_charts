@@ -9,7 +9,6 @@ from urllib import urlopen
 from bs4 import BeautifulSoup
 
 
-sys.path.append('/Users/connordog/Dropbox/Desktop_Files/Work_Things/CodeBase/Python_Scripts/Python_Projects/packages')
 from py_data_getter import data_getter
 from py_db import db
 db = db('nba_shots')

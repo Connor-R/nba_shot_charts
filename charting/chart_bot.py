@@ -9,7 +9,6 @@ from urllib import urlopen
 from bs4 import BeautifulSoup
 
 
-sys.path.append('/Users/connordog/Dropbox/Desktop_Files/Work_Things/CodeBase/Python_Scripts/Python_Projects/packages')
 from py_data_getter import data_getter
 from py_db import db
 db = db('nba_shots')
@@ -58,25 +57,25 @@ def initiate(p_name=None, hardcode_tags=None):
 
     ######################
 
-    # """Once, again, inspired by @presidual's post (https://fansided.com/2017/11/09/nylon-calculus-early-look-rookie-shot-charts/) at @NylonCalculus giving an early look at rookie shot charts, I'm posting updating versions of my shot charts for every rookie with >200 shot attempts this year. (THREAD)
+    # """Once, again, inspired by @presidual's post (https://twitter.com/presidual/status/948343815559000065) at @NylonCalculus giving a look at rookie shot charts, I'm posting updating versions of my shot charts for every rookie with >250 shot attempts this year. (THREAD)
 
     #NBARookieCharts"""
 
-    # p_q = db.query("SELECT CONCAT(fname, ' ', lname) AS p_name FROM shots_player_relative_year p1 LEFT JOIN shots_player_relative_year p2 ON (p1.player_id = p2.player_id AND p1.season_type = p2.season_type AND p1.season_id != p2.season_id) JOIN players ON (p1.player_id = players.player_id) WHERE p1.shot_zone_basic = 'ALL' AND p1.season_id = 201718 AND p1.season_type = 'reg' AND p2.games IS NULL AND p1.attempts > 200 ORDER BY p1.attempts DESC;")
+    # p_q = db.query("SELECT CONCAT(fname, ' ', lname) AS p_name FROM shots_player_relative_year p1 LEFT JOIN shots_player_relative_year p2 ON (p1.player_id = p2.player_id AND p1.season_type = p2.season_type AND p1.season_id != p2.season_id) JOIN players ON (p1.player_id = players.player_id) WHERE p1.shot_zone_basic = 'ALL' AND p1.season_id = 201718 AND p1.season_type = 'reg' AND p2.games IS NULL AND p1.attempts > 250 ORDER BY p1.attempts DESC;")
     # for row in p_q:
     #     players.append(row[0])
     # hashtags = ['NBARookieCharts']
-    # thread = 936336714993344512
+    # thread = 948599163708571648
 
     ######################
 
-    # """Using @bball_ref's MVP Tracker (https://www.basketball-reference.com/friv/mvp.html), I'll be tweeting my shot charts for their top 10 players under their methodology. (Thread)
+    # """Using @bball_ref's MVP Tracker (https://www.basketball-reference.com/friv/mvp.html), I'm posting updating versions of my shot charts for their current top 10 MVP candidates. (Thread)
 
     #NBAMVPTracker"""
 
-    # players = ['James Harden', 'LeBron James', 'Stephen Curry', 'Giannis Antetokounmpo', 'Anthony Davis', 'Kyrie Irving', 'Damian Lillard', 'Kevin Durant', 'Al Horford', 'Clint Capela']
+    # players = ['James Harden', 'LeBron James', 'Kevin Durant', 'Giannis Antetokounmpo', 'DeMar DeRozan', 'Russell Westbrook', 'Kyrie Irving', 'Anthony Davis', 'Karl-Anthony Towns', 'Kyle Lowry']
     # hashtags = ['NBAMVPTracker']
-    # thread = ENTER
+    # thread = 950847068297347072
 
     ######################
 
@@ -104,17 +103,30 @@ def get_random_pic(players, hashtags, thread):
     else:
         for player in players:
             print player
-            p_id = db.query("SELECT player_id FROM players WHERE CONCAT(fname, ' ', lname) = '%s'" % player.replace("'","\\'")) [0][0]
-            if player == 'Mike James':
-                p_id = 1628455
+            try:
+                p_id = db.query("SELECT player_id FROM players WHERE CONCAT(fname, ' ', lname) = '%s'" % player.replace("'","\\'")) [0][0]
+            except (OSError, IndexError):
+                if player == 'Mike James':
+                    p_id = 1628455
+                elif player == 'J.J. Redick':
+                    p_id = 200755
+                elif player == 'C.J. McCollum':
+                    p_id = 203468
+
 
             charts.gen_charts(p_id)
         raw_input("READY TO TWEET?")
 
         for player in players:
-            p_id = db.query("SELECT player_id FROM players WHERE CONCAT(fname, ' ', lname) = '%s'" % player.replace("'","\\'")) [0][0]
-            if player == 'Mike James':
-                p_id = 1628455
+            try:
+                p_id = db.query("SELECT player_id FROM players WHERE CONCAT(fname, ' ', lname) = '%s'" % player.replace("'","\\'")) [0][0]
+            except (OSError, IndexError):
+                if player == 'Mike James':
+                    p_id = 1628455
+                elif player == 'J.J. Redick':
+                    p_id = 200755
+                elif player == 'C.J. McCollum':
+                    p_id = 203468
                 
             player_path = base_path+player.replace(' ','_')+'('+str(p_id)+')/'
             # tweets a range of seasons (-1 is career, -2 is current season, -3 is 2 seasons previous, etc.)
@@ -134,6 +146,8 @@ def tweet(player_path, chart, hashtags, p_id, thread):
     
     print tweet_text, len(tweet_text)
     # raw_input(pic_path)
+
+
     time.sleep(15)
 
     try:
@@ -315,7 +329,7 @@ def get_ShotSkillPlus(player_id, season_id, isCareer):
 
 def get_descriptor(category, metric):
 
-    # from the bot_percentiles.py scripte
+    # from the bot_percentiles.py scripte\
     # < 15 percentile group for lowest group
     # 15-35 for 2nd lowest
     # 35-65 for middle
@@ -350,23 +364,23 @@ def get_teams(p_id, year, isCareer=False):
     
     teams = []
 
-    curr_q = """SELECT DISTINCT tname 
-    FROM shots 
-    JOIN teams USING (team_id)
-    WHERE player_id = %s
-    AND season_id = 201718
-    AND start_year <= LEFT(season_id, 4)
-    AND end_year > LEFT(season_id, 4)
-    AND season_type = 'Reg'
-    ORDER BY game_date DESC"""
+    # curr_q = """SELECT DISTINCT tname 
+    # FROM shots 
+    # JOIN teams USING (team_id)
+    # WHERE player_id = %s
+    # AND season_id = 201718
+    # AND start_year <= LEFT(season_id, 4)
+    # AND end_year > LEFT(season_id, 4)
+    # AND season_type = 'Reg'
+    # ORDER BY game_date DESC"""
 
-    curr_qry = curr_q % (p_id)
+    # curr_qry = curr_q % (p_id)
 
-    curr_team = db.query(curr_qry)
+    # curr_team = db.query(curr_qry)
 
-    if curr_team != ():
-        curr_team = curr_team[0][0]
-        teams.append(curr_team)
+    # if curr_team != ():
+    #     curr_team = curr_team[0][0]
+    #     teams.append(curr_team)
 
 
     if isCareer is False:

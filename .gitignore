@@ -2,10 +2,12 @@
 *.pyc
 *.png
 *.psd
+*.jpg
 
 shot_charts_player/
 shot_charts_team/
 nba_rank/
+ad_hoc/
 
 charts_description.md
 team_twitter_accts.csv

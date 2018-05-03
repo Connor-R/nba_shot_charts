@@ -5,7 +5,6 @@ import os
 import sys
 from time import time
 
-sys.path.append('/Users/connordog/Dropbox/Desktop_Files/Work_Things/CodeBase/Python_Scripts/Python_Projects/packages')
 
 from py_data_getter import data_getter
 from py_db import db

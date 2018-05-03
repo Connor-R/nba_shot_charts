@@ -1,3 +1,5 @@
+SHELL=/bin/bash
+source "/Users/connordog/.bash_profile"
 
 cd ../scrapers
 python scraper_players.py
