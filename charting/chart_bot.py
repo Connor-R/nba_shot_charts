@@ -209,7 +209,7 @@ def parse_text(pic, hashtags, p_id):
         met_qry = "SELECT games, attempts, ROUND(attempts/games,1), ROUND(efg_plus,0), ROUND(paa,0), ROUND(paa_per_game,1) FROM shots_Player_Relative_Career WHERE shot_zone_basic = 'all' AND player_id = %s AND season_type = 'reg'" % (p_id)
         ShotSkill = get_ShotSkillPlus(p_id, year.replace('-',''), isCareer=True)
     else:
-        if year == '2017-18':
+        if year == '2018-19':
             tweet += year + '(in progress) Shot Chart'
         else:
             tweet += year + ' Shot Chart' 

@@ -148,8 +148,9 @@ def parse_text(pic, hashtags, t_id, city, tname):
 
     year = pic.split('_')[-3]
 
-    if year == '2017-18':
-        tweet += year + '(in progress) Shot Chart'
+    if year == '2018-19':
+        tweet += year + ' Shot Chart' 
+        # tweet += year + '(in progress) Shot Chart'
     else:
         tweet += year + ' Shot Chart' 
 
