@@ -54,3 +54,11 @@ Finally, after I’ve completed this, I will return to my original to-do list, a
 - [ ] zEFG% baselines for guards/wings/bigs at each zone.
 - [ ] attempt to create a Points above Replacement for players based on position.
 - [ ] Generate G-League and WNBA charts.
+
+#### June 2018 Update
+Well I didn't get much done from the to-do list in December. Oh well, so it goes sometimes. Unfortunately, I will be putting this project on hold for the summer, as I will be out of the country and won't have time to tinker with these features. Hopefully when I get back I'll have some more time to work on the features I wanted to back in December. In the meantime, I wanted to jot down a few lessons I've learned over the past year-plus working on this project:
+- Start small, and focus on writing good code. On this project I dove in too deep at the beginning, and now there is a somewhat intimidating amount of ugly code that I have to sift through to change anything.
+- Write better comments that explain why you chose to do something a certain way.
+- The "Never Write the Same Code Twice" rule is *important*. I ignored this when I started the project and it's created a spidery mess in the codesbass
+- Functions should be robust. My earlier functions served a single purpose, and thus if I wanted anything slightly different I would have to write a new function, instead of just adding an argument call into the function.
+- Overall, this project has been great and I hope to return to it after the summer. It's greatly helped my skills as a data scientist, and I've learned a ton regarding data visualization, negotiating API calls, web scraping, text parsing, and sql database management.

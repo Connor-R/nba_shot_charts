@@ -113,7 +113,6 @@ def get_random_pic(players, hashtags, thread):
                 elif player == 'C.J. McCollum':
                     p_id = 203468
 
-
             charts.gen_charts(p_id)
         raw_input("READY TO TWEET?")
 
@@ -130,7 +129,7 @@ def get_random_pic(players, hashtags, thread):
                 
             player_path = base_path+player.replace(' ','_')+'('+str(p_id)+')/'
             # tweets a range of seasons (-1 is career, -2 is current season, -3 is 2 seasons previous, etc.)
-            for i in range(max(0, len(os.listdir(player_path))-2), len(os.listdir(player_path))-1):
+            for i in range(max(0, len(os.listdir(player_path))-1), len(os.listdir(player_path))-0):
                 chart = os.listdir(player_path)[i]
                 # print chart
                 tweet(player_path, chart, hashtags, p_id, thread)
@@ -201,9 +200,10 @@ def parse_text(pic, hashtags, p_id):
     if twitter is not None:
         tweet += '(@' + twitter + ') '
 
-    year = pic.split('_')[-3]
+    year = pic.split('.png')[0].split('_')[-1]
 
-    if pic.split('_')[-3][:6] == 'CAREER':
+    print year
+    if year[:6] == 'CAREER':
         tweet += year + ' Shot Chart' 
         teams = get_teams(p_id, year, isCareer=True)
         met_qry = "SELECT games, attempts, ROUND(attempts/games,1), ROUND(efg_plus,0), ROUND(paa,0), ROUND(paa_per_game,1) FROM shots_Player_Relative_Career WHERE shot_zone_basic = 'all' AND player_id = %s AND season_type = 'reg'" % (p_id)
@@ -217,7 +217,6 @@ def parse_text(pic, hashtags, p_id):
         met_qry = "SELECT games, attempts, ROUND(attempts/games,1), ROUND(efg_plus,0), ROUND(paa,0), ROUND(paa_per_game,1) FROM shots_Player_Relative_Year WHERE shot_zone_basic = 'all' AND player_id = %s AND season_id = %s AND season_type = 'reg'" % (p_id, year.replace('-',''))
         ShotSkill = get_ShotSkillPlus(p_id, year.replace('-',''), isCareer=False)
 
-    # raw_input(met_qry)
     games, atts, volume, efg, paa, paag = db.query(met_qry)[0]
 
     if paa >= 0:
@@ -329,7 +328,7 @@ def get_ShotSkillPlus(player_id, season_id, isCareer):
 
 def get_descriptor(category, metric):
 
-    # from the bot_percentiles.py scripte\
+    # from the bot_percentiles.py script
     # < 15 percentile group for lowest group
     # 15-35 for 2nd lowest
     # 35-65 for middle

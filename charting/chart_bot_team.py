@@ -86,7 +86,7 @@ def get_random_pic(teams, hashtags):
             print tname
             t_id, city = db.query("SELECT team_id, city FROM teams WHERE tname = '%s' ORDER BY start_year DESC" % tname.replace("'","\\'")) [0]
             team_string = city.replace(' ','_')+'_'+tname.replace(' ','_')+'('+str(t_id)+')'
-            charts.gen_charts(team_string)
+            # charts.gen_charts(team_string)
         # raw_input("READY TO TWEET?")
         for team in teams:
             t_id, city = db.query("SELECT team_id, city FROM teams WHERE tname = '%s' ORDER BY start_year DESC" % tname.replace("'","\\'")) [0]
@@ -146,7 +146,7 @@ def parse_text(pic, hashtags, t_id, city, tname):
     if twitter is not None:
         tweet += '(@' + twitter + ') '
 
-    year = pic.split('_')[-3]
+    year = pic.split('.png')[0].split('_')[-1]
 
     if year == '2018-19':
         tweet += year + ' Shot Chart' 

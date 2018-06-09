@@ -37,7 +37,7 @@ def initiate(p_list, list_length, printer=True):
         counter += 1
 
         start_year = max(1996, start_year)
-        end_year = min(2018, end_year)
+        end_year = min(2019, end_year)
 
         player_name = player_title.replace(" ","_")
 
@@ -50,12 +50,6 @@ def initiate(p_list, list_length, printer=True):
         path = base_path+'/shot_charts_player/'+player_name+'('+str(player_id)+')/'
 
         if not os.path.exists(path):
-            os.makedirs(path)
-        else:
-            arch_path = base_path+'/shot_charts_archived_charts/'+str(date.today())+'_'+str(datetime.now().hour)+'_'+player_name+'('+str(player_id)+')/'
-            if os.path.exists(arch_path):
-                shutil.rmtree(arch_path)
-            os.rename(path, arch_path)
             os.makedirs(path)
 
         os.chdir(path)

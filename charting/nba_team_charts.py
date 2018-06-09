@@ -46,12 +46,6 @@ def initiate(p_list, list_length, printer=True):
 
         if not os.path.exists(path):
             os.makedirs(path)
-        else:
-            arch_path = base_path+'/shot_charts_archived_charts/'+str(date.today())+'_'+str(datetime.now().hour)+'_'+str(city.replace(' ','_'))+'_'+str(tname.replace(' ','_'))+'('+str(team_id)+')/'
-            if os.path.exists(arch_path):
-                shutil.rmtree(arch_path)
-            os.rename(path, arch_path)
-            os.makedirs(path)
 
         os.chdir(path)
         files=glob.glob('*.png')

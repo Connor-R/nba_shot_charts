@@ -277,30 +277,30 @@ def shooting_plot(path, shot_df, player_id, season_id, player_title, player_name
         ax.add_patch(patch)
 
         # add the text for the hexagon
-        ax.text(text_x, text_y, text_text, fontsize=12, horizontalalignment='left', verticalalignment='center', family='Bitstream Vera Sans', color='white', fontweight='bold')
+        ax.text(text_x, text_y, text_text, fontsize=12, horizontalalignment='left', verticalalignment='center', family='DejaVu Sans', color='white', fontweight='bold')
 
     # Add a title to our frequency legend (the x/y coords are hardcoded).
     # Again, the color=map(eff_fg_all_float/100) makes the hexagons in the legend the same color as the player's overall eFG%
-    ax.text(-235, 310, 'Zone Frequencies', fontsize = 15, horizontalalignment='left', verticalalignment='bottom', family='Bitstream Vera Sans', color=cmap(eff_fg_all_float/100), fontweight='bold')
+    ax.text(-235, 310, 'Zone Frequencies', fontsize = 15, horizontalalignment='left', verticalalignment='bottom', family='DejaVu Sans', color=cmap(eff_fg_all_float/100), fontweight='bold')
 
     # Add a title to our chart (just the player's name)
 
     chart_title = "%s" % (player_title.upper())
-    ax.text(31.25,-40, chart_title, fontsize=29, horizontalalignment='center', verticalalignment='bottom', family='Bitstream Vera Sans', color=cmap(eff_fg_all_float/100), fontweight='bold')
+    ax.text(31.25,-40, chart_title, fontsize=29, horizontalalignment='center', verticalalignment='bottom', family='DejaVu Sans', color=cmap(eff_fg_all_float/100), fontweight='bold')
 
     # Add user text
     ax.text(-250,-31,'CHARTS BY @NBAChartBot',
-        fontsize=10,  horizontalalignment='left', verticalalignment = 'bottom', family='Bitstream Vera Sans', color='white', fontweight='bold')
+        fontsize=10,  horizontalalignment='left', verticalalignment = 'bottom', family='DejaVu Sans', color='white', fontweight='bold')
 
     # Add data source text
     ax.text(31.25,-31,'DATA FROM STATS.NBA.COM',
-        fontsize=10,  horizontalalignment='center', verticalalignment = 'bottom', family='Bitstream Vera Sans', color='white', fontweight='bold')
+        fontsize=10,  horizontalalignment='center', verticalalignment = 'bottom', family='DejaVu Sans', color='white', fontweight='bold')
 
     # Add date text
     _date = date.today()
 
     ax.text(250,-31,'AS OF %s' % (str(_date)),
-        fontsize=10,  horizontalalignment='right', verticalalignment = 'bottom', family='Bitstream Vera Sans', color='white', fontweight='bold')
+        fontsize=10,  horizontalalignment='right', verticalalignment = 'bottom', family='DejaVu Sans', color='white', fontweight='bold')
 
 
     # adding breakdown of eFG% by shot zone at the bottom of the chart
@@ -310,24 +310,24 @@ def shooting_plot(path, shot_df, player_id, season_id, player_title, player_name
         '\n%s Points - %s Shots [Mid-Range (%s%%)] (%s eFG%%)'
         '\n%s Points - %s Shots [Paint (Non-Restricted) (%s%%)] (%s eFG%%)'
         '\n%s Points - %s Shots [Paint (Restricted) (%s%%)] (%s eFG%%)' % (shot_pts_all, shot_count_all, pct_all, eff_fg_all, shot_pts_3, shot_count_3, pct_3, eff_fg_3, shot_pts_2, shot_count_2, pct_2, eff_fg_2, shot_pts_mid, shot_count_mid, pct_mid, eff_fg_mid, shot_pts_NONres, shot_count_NONres, pct_NONres, eff_fg_NONres, shot_pts_res, shot_count_res, pct_res, eff_fg_res),
-        fontsize=12, horizontalalignment='right', verticalalignment = 'top', family='Bitstream Vera Sans', color='white', linespacing=1.5)
+        fontsize=12, horizontalalignment='right', verticalalignment = 'top', family='DejaVu Sans', color='white', linespacing=1.5)
 
     # adding which season the chart is for, as well as what teams the player is on
     if len(team_list) > 10:
         ax.text(-250,380,'%s Regular Season'
             '\n%s' % (season_id, team_text),
-            fontsize=10,  horizontalalignment='left', verticalalignment = 'top', family='Bitstream Vera Sans', color='white', linespacing=1.3)
+            fontsize=10,  horizontalalignment='left', verticalalignment = 'top', family='DejaVu Sans', color='white', linespacing=1.3)
     else:
         ax.text(-250,380,'%s Regular Season'
             '\n%s' % (season_id, team_text),
-            fontsize=12,  horizontalalignment='left', verticalalignment = 'top', family='Bitstream Vera Sans', color='white', linespacing=1.5)
+            fontsize=12,  horizontalalignment='left', verticalalignment = 'top', family='DejaVu Sans', color='white', linespacing=1.5)
 
     # adding a color bar for reference
     ax2 = fig.add_axes([0.875, 0.15, 0.04, 0.775])
     cb = mpb.colorbar.ColorbarBase(ax2,cmap=cmap, orientation='vertical')
     cbytick_obj = plt.getp(cb.ax.axes, 'yticklabels')
     plt.setp(cbytick_obj, color='white', fontweight='bold')
-    cb.set_label('Effective Field Goal %', family='Bitstream Vera Sans', color='white', fontweight='bold', labelpad=-9, fontsize=14)
+    cb.set_label('Effective Field Goal %', family='DejaVu Sans', color='white', fontweight='bold', labelpad=-9, fontsize=14)
     cb.set_ticks([0.0, 0.25, 0.5, 0.75, 1.0])
     cb.set_ticklabels(['0%','25%', '50%','75%', '$\mathbf{\geq}$100%'])
     
