@@ -4,7 +4,7 @@ import csv
 import os
 import sys
 from time import time
-
+import argparse
 
 from py_data_getter import data_getter
 from py_db import db
@@ -12,12 +12,12 @@ from py_db import db
 db = db('nba_shots')
 
 
-def initiate():
+def initiate(start_year, end_year):
     start_time = time()
     print "-------------------------"
     print "shots_Breakdown.py"
 
-    for year in range(2017,2018):
+    for year in range(start_year,end_year+1):
         season_start = year
         season_id = str(season_start)+str(season_start%100+1).zfill(2)[-2:]
         print season_id
@@ -30,7 +30,6 @@ def initiate():
     print "time elapsed (in minutes): " + str(elapsed_time/60.0)
     print "shots_Breakdown.py"
     print "-------------------------"
-
 
 
 def process(season_id):
@@ -129,7 +128,12 @@ ORDER BY %s_id ASC, season_type ASC, season_id ASC, shot_zone_basic ASC, shot_zo
 
 
 if __name__ == "__main__":     
-    initiate()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--start_year',type=int,default=2018)
+    parser.add_argument('--end_year',type=int,default=2018)
 
+    args = parser.parse_args()
+    
+    initiate(args.start_year, args.end_year)
 
 

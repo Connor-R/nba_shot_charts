@@ -62,3 +62,7 @@ Well I didn't get much done from the to-do list in December. Oh well, so it goes
 - The "Never Write the Same Code Twice" rule is *important*. I ignored this when I started the project and it's created a spidery mess in the codebase
 - Functions should be robust. My early functions served a single purpose, and then if I wanted anything slightly different I would have to write a new function instead of being able to specify the data I wanted via an argument call in the function.
 - Overall, this project has been great and I hope to return to it after the summer. It's greatly helped my skills as a data scientist; I've learned a ton regarding data visualization, negotiating API calls, web scraping, text parsing, and sql database management.
+
+#### October 2018 (Final-ish) Update
+I gave the charts a much needed update, and [wrote about it too](http://connor-r.github.io/Posts/nba_shot_charts_2018update.html).
+Additionally, I’m moving all future updates to [my personal website/blog](http://connor-r.github.io/cr_archive.html), but will leave this README file up for historical purposes and will try to post links to any updates here as well.

@@ -42,13 +42,13 @@ def process():
 %s_id, %s AS career, season_type, c.shot_zone_basic, c.shot_zone_area,
 all_games AS games,
 SUM(a.attempts) AS attempts,
-100*(SUM(b.attempts*b.zone_pct/c.zone_pct)/SUM(b.attempts)) AS zone_pct_plus,
-100*(SUM(b.attempts*b.efg/c.efg)/SUM(b.attempts)) AS ZONE_efg_plus,
-SUM(ZONE_paa) as ZONE_paa,
-SUM(ZONE_paa)/all_games as ZONE_paa_per_game,
-100*(SUM(b.attempts*b.efg/d.efg)/SUM(b.attempts)) AS efg_plus,
-SUM(paa) AS paa,
-SUM(paa)/all_games AS paa_per_game
+IFNULL(100*(SUM(b.attempts*b.zone_pct/c.zone_pct)/SUM(b.attempts)),0) AS zone_pct_plus,
+IFNULL(100*(SUM(b.attempts*b.efg/c.efg)/SUM(b.attempts)),0) AS ZONE_efg_plus,
+IFNULL(SUM(ZONE_paa),0) as ZONE_paa,
+IFNULL(SUM(ZONE_paa)/all_games,0) as ZONE_paa_per_game,
+IFNULL(100*(SUM(b.attempts*b.efg/d.efg)/SUM(b.attempts)),0) AS efg_plus,
+IFNULL(SUM(paa),0) AS paa,
+IFNULL(SUM(paa)/all_games,0) AS paa_per_game
 FROM shots_%s_Relative_Year a
 %sJOIN shots_%s_Distribution_Year b USING (%s_id, season_id, season_type, shot_zone_basic, shot_zone_area)
 JOIN shots_League_Distribution_Year c USING (season_id, season_type, shot_zone_basic, shot_zone_area)

@@ -55,7 +55,8 @@ def initiate(p_list, list_length, printer=True):
         os.chdir(path)
         files=glob.glob('*.png')
         for filename in files:
-            os.unlink(filename)
+            if 'CAREER' in filename:
+                os.unlink(filename)
         os.chdir(base_path)
 
         all_shots_df = pd.DataFrame()
@@ -75,13 +76,15 @@ def initiate(p_list, list_length, printer=True):
                 helper_charting.shooting_plot('player', path, year_shots_df, player_id, season_id, player_title, player_name)
                 charts_cnt += 1
 
-        career_string = "CAREER (%s-%s)" % (start_year, end_year)
+        career_qry = "SELECT GREATEST(from_year,1996), to_year FROM players WHERE player_id = %s;" % (player_id)
+        career_start, career_end = db.query(career_qry)[0]
+        career_string = "CAREER (%s-%s)" % (career_start, career_end)
         # if printer is True:
         #     print '\t\t\t', career_string, player_name
 
         all_shots_df = helper_data.acquire_shootingData('player', player_id, isCareer=True)
 
-        helper_charting.shooting_plot('player', path, all_shots_df, player_id, career_string, player_title, player_name, isCareer=True, min_year=start_year, max_year=end_year)
+        helper_charting.shooting_plot('player', path, all_shots_df, player_id, career_string, player_title, player_name, isCareer=True, min_year=career_start, max_year=career_end)
         players_cnt += 1
         charts_cnt += 1
 
@@ -166,6 +169,31 @@ def get_plist(operator='', filt_value=0, backfill=False):
     return p_list
 
 
+#player_list generation for past N days
+def get_yesterdaysPlayers(days=1):
+    player_list = {}
+
+    qry = """SELECT 
+    player_id, 
+    CONCAT(fname, ' ', lname) as 'player_name', 
+    LEFT(MIN(season_id),4) as 'start_year', 
+    LEFT(MAX(season_id),4)+1 as 'end_year',
+    COUNT(*) as shot_attempts
+    FROM (SELECT player_id, season_id FROM shots WHERE season_type = 'Reg' AND game_date >= (CURDATE() - INTERVAL %s DAY)) yesterdays_players
+    JOIN players USING (player_id)
+    GROUP BY player_id
+    ORDER BY shot_attempts DESC;"""
+
+    query = qry % (days)
+
+    res = db.query(query)
+    if res == ((None, None, None, None, None),):
+        return None
+
+    for row in res:
+        p_id, p_name, start_year, end_year, shot_attempts = row
+        player_list[p_id] = [str(p_name), int(start_year), int(end_year)]
+
 if __name__ == "__main__": 
 
     parser = argparse.ArgumentParser()
@@ -174,8 +202,18 @@ if __name__ == "__main__":
     parser.add_argument('--player_name',type=str,   default='')
     args = parser.parse_args()
 
-    if args.player_name != '':
+    print args.player_name
+
+    if args.player_name == 'YESTERDAY':
+        player_list = get_yesterdaysPlayers(days=1)
+        if player_list is None:
+            sys.exit("No Players to Chart")
+    if args.player_name == 'LASTYEAR':
+        player_list = get_yesterdaysPlayers(days=365)
+    elif args.player_name != '':
         p_list = get_plist()
+        vals = None
+        p_key = None
         for k,vs in p_list.items():
             if args.player_name == vs[0]:
                 vals = vs
@@ -185,8 +223,11 @@ if __name__ == "__main__":
         player_list = {p_key:vals}
     else:
         # If we don't have a name, we assume we're trying to backfill
-        # player_list = get_plist(operator='==', filt_value=2018, backfill=False)
+        # player_list = get_plist(operator='==', filt_value=2018, backfill=False)\
+        # A full backfill takes ~40 hours
         player_list = get_plist(operator='<=', filt_value=9999, backfill=True)
+
+
 
     print "\nBegin processing " + str(len(player_list)) + " players"
 

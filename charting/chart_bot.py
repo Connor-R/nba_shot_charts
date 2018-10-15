@@ -8,7 +8,7 @@ import nba_shot_charts as charts
 from urllib import urlopen
 from bs4 import BeautifulSoup
 
-
+import helper_charting
 from py_data_getter import data_getter
 from py_db import db
 db = db('nba_shots')
@@ -55,30 +55,6 @@ def initiate(p_name=None, hardcode_tags=None):
     hashtags = []
     thread = None
 
-    ######################
-
-    # """Once, again, inspired by @presidual's post (https://twitter.com/presidual/status/948343815559000065) at @NylonCalculus giving a look at rookie shot charts, I'm posting updating versions of my shot charts for every rookie with >250 shot attempts this year. (THREAD)
-
-    #NBARookieCharts"""
-
-    # p_q = db.query("SELECT CONCAT(fname, ' ', lname) AS p_name FROM shots_player_relative_year p1 LEFT JOIN shots_player_relative_year p2 ON (p1.player_id = p2.player_id AND p1.season_type = p2.season_type AND p1.season_id != p2.season_id) JOIN players ON (p1.player_id = players.player_id) WHERE p1.shot_zone_basic = 'ALL' AND p1.season_id = 201718 AND p1.season_type = 'reg' AND p2.games IS NULL AND p1.attempts > 250 ORDER BY p1.attempts DESC;")
-    # for row in p_q:
-    #     players.append(row[0])
-    # hashtags = ['NBARookieCharts']
-    # thread = 948599163708571648
-
-    ######################
-
-    # """Using @bball_ref's MVP Tracker (https://www.basketball-reference.com/friv/mvp.html), I'm posting updating versions of my shot charts for their current top 10 MVP candidates. (Thread)
-
-    #NBAMVPTracker"""
-
-    # players = ['James Harden', 'LeBron James', 'Kevin Durant', 'Giannis Antetokounmpo', 'DeMar DeRozan', 'Russell Westbrook', 'Kyrie Irving', 'Anthony Davis', 'Karl-Anthony Towns', 'Kyle Lowry']
-    # hashtags = ['NBAMVPTracker']
-    # thread = 950847068297347072
-
-    ######################
-
     if p_name is not None:
         players = [p_name]
     if hardcode_tags is not None:
@@ -114,7 +90,7 @@ def get_random_pic(players, hashtags, thread):
                     p_id = 203468
 
             charts.gen_charts(p_id)
-        raw_input("READY TO TWEET?")
+        # raw_input("READY TO TWEET?")
 
         for player in players:
             try:
@@ -146,7 +122,6 @@ def tweet(player_path, chart, hashtags, p_id, thread):
     print tweet_text, len(tweet_text)
     # raw_input(pic_path)
 
-
     time.sleep(15)
 
     try:
@@ -156,8 +131,8 @@ def tweet(player_path, chart, hashtags, p_id, thread):
         else:
             api.update_with_media(pic_path, status=tweet_text)
     except tweepy.error.TweepError:
-        print "\n\n\nNo internet connection....trying again in 10 min"
-        time.sleep(600)
+        print "\n\n\nNo internet connection....trying again in 2 minutes"
+        time.sleep(120)
         try:
             # putting tweets in a thread
             if thread is not None:
@@ -202,47 +177,29 @@ def parse_text(pic, hashtags, p_id):
 
     year = pic.split('.png')[0].split('_')[-1]
 
-    print year
     if year[:6] == 'CAREER':
         tweet += year + ' Shot Chart' 
-        teams = get_teams(p_id, year, isCareer=True)
-        met_qry = "SELECT games, attempts, ROUND(attempts/games,1), ROUND(efg_plus,0), ROUND(paa,0), ROUND(paa_per_game,1) FROM shots_Player_Relative_Career WHERE shot_zone_basic = 'all' AND player_id = %s AND season_type = 'reg'" % (p_id)
-        ShotSkill = get_ShotSkillPlus(p_id, year.replace('-',''), isCareer=True)
+        isCareer = True
+        teams = get_teams(p_id, year, isCareer=isCareer)
     else:
         if year == '2018-19':
             tweet += year + '(in progress) Shot Chart'
         else:
             tweet += year + ' Shot Chart' 
-        teams = get_teams(p_id, year)
-        met_qry = "SELECT games, attempts, ROUND(attempts/games,1), ROUND(efg_plus,0), ROUND(paa,0), ROUND(paa_per_game,1) FROM shots_Player_Relative_Year WHERE shot_zone_basic = 'all' AND player_id = %s AND season_id = %s AND season_type = 'reg'" % (p_id, year.replace('-',''))
-        ShotSkill = get_ShotSkillPlus(p_id, year.replace('-',''), isCareer=False)
+        isCareer = False
+        teams = get_teams(p_id, year, isCareer)
 
-    games, atts, volume, efg, paa, paag = db.query(met_qry)[0]
+    season_id = year.replace('-','')
 
-    if paa >= 0:
-        pos = '+'
-    else:
-        pos = ''
-
-    vol_grade = get_descriptor('volume', volume)
-    eff_grade = get_descriptor('efficiency', efg)
-    shot_grade = get_descriptor('shot_making', ShotSkill)
-    ev_grade = get_descriptor('efficiency_value', paag)
-
-
-    tweet += ':\nVolume: %s | %s Attempts per Game (%s attempts in %s games)' % (vol_grade, volume, atts, games)
-    tweet += '\nEfficiency: %s | %s EFG+' % (eff_grade, efg)
-    tweet += '\nShot Making: %s | %s ShotSkill+' % (shot_grade, ShotSkill)
-    tweet += '\nEfficiency Value: %s | %s%s PAA/G (%s%s PAA)' % (ev_grade, pos, paag, pos, paa)
+    tweet += helper_charting.get_key_text('Player', p_id, season_id, isCareer, isTwitter=True)
 
     tweet += '\n\n'
 
-    if efg == 0:
-        hashtags.append('Randy')
-
+    # Player name hashtag
     player_hashtag = full_name.replace(' ','').replace("'","").replace('-','').replace('.','').replace('(2)','').replace('(3)','')
     tweet += '#' + player_hashtag
 
+    # Custom hashtag
     if hashtags != []:
         tweet += '\n\n'
         for i, tag in enumerate(hashtags):
@@ -250,17 +207,16 @@ def parse_text(pic, hashtags, p_id):
             if i < (len(hashtags)-1):
                 tweet += ' '
 
+    # Team name hashtag
     tweet += '\n'
-
     for i, team in enumerate(teams):
         if team is not None:
             tweet += '#' + team.replace(" ","")
             if i < (len(teams)-1):
                 tweet += ' '
 
+    # Team emoji hashtag
     tweet += '\n'
-    # tweet += '#NBATwitter\n'
-
     for j, team in enumerate(teams):
         if team is not None:
             hashtag = hashtag_list.get(team)
@@ -270,93 +226,6 @@ def parse_text(pic, hashtags, p_id):
                     tweet += ' '
 
     return tweet
-
-#Getting the player's overall zone percentage
-def get_ShotSkillPlus(player_id, season_id, isCareer):
-    if isCareer is False:
-        metric_q = """SELECT ROUND(sum_efg_plus/attempts,0)
-        FROM(
-            SELECT SUM(attempts*zone_efg_plus) AS sum_efg_plus
-            FROM shots_Player_Relative_Year r
-            WHERE season_id = %s
-            AND player_id = %s
-            AND season_type = 'reg'
-            AND shot_zone_area = 'all'
-            AND shot_zone_basic != 'all'
-        ) a
-        JOIN(
-            SELECT attempts
-            FROM shots_Player_Relative_Year r
-            WHERE season_id = %s
-            AND player_id = %s
-            AND season_type = 'reg'
-            AND shot_zone_area = 'all'
-            AND shot_zone_basic = 'all'
-        ) b;
-        """
-        metric_qry = metric_q % (season_id.replace('-',''), player_id, season_id.replace('-',''), player_id)
-
-    else:
-        metric_q = """SELECT ROUND(sum_efg_plus/attempts,0)
-        FROM(
-            SELECT SUM(attempts*zone_efg_plus) AS sum_efg_plus
-            FROM shots_Player_Relative_Career r
-            WHERE player_id = %s
-            AND season_type = 'reg'
-            AND shot_zone_area = 'all'
-            AND shot_zone_basic != 'all'
-        ) a
-        JOIN(
-            SELECT attempts
-            FROM shots_Player_Relative_Career r
-            WHERE player_id = %s
-            AND season_type = 'reg'
-            AND shot_zone_area = 'all'
-            AND shot_zone_basic = 'all'
-        ) b;
-        """
-        metric_qry = metric_q % (player_id, player_id)
-
-    # raw_input(metric_qry)
-    try:
-        res = db.query(metric_qry)[0][0]
-    except IndexError:
-        res = 0
-
-    return res
-
-
-def get_descriptor(category, metric):
-
-    # from the bot_percentiles.py script
-    # < 15 percentile group for lowest group
-    # 15-35 for 2nd lowest
-    # 35-65 for middle
-    # 65-85 for 2nd highest
-    # > 85 for highest
-
-    vol_dict = {"Extreme":[1000,13.9], "High":[13.9,10.0], "Average":[10.0,6.6], "Low":[6.6,4.9], "Miniscule":[4.9,-1]}
-    shot_dict = {"Excellent":[1000,108.3], "Good":[108.3,102.8], "Average":[102.8,96.5], "Poor":[96.5,90.8], "Bad":[90.8,-1]}
-    eff_dict = {"Excellent":[1000,109.2], "Good":[109.2,103.2], "Average":[103.2,96.8], "Poor":[96.8,91.7], "Bad":[91.7,-1]}
-    ev_dict = {"Excellent":[1000,0.7], "Good":[0.7,0.3], "Average":[0.3,-0.2], "Poor":[-0.2,-0.6], "Bad":[-0.6,-1000]}
-
-
-    descriptor = ''
-    if category == 'volume':
-        desc_dict = vol_dict
-    elif category == 'shot_making':
-        desc_dict = shot_dict
-    elif category == 'efficiency':
-        desc_dict = eff_dict
-    elif category == 'efficiency_value':
-        desc_dict = ev_dict
-
-    for k,v in desc_dict.items():
-        high, low = v
-        if (metric > low and metric <= high):
-            descriptor = k.upper()
-
-    return descriptor
 
 
 def get_teams(p_id, year, isCareer=False):

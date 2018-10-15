@@ -4,7 +4,7 @@ import csv
 import os
 import sys
 from time import time
-
+import argparse
 
 from py_data_getter import data_getter
 from py_db import db
@@ -12,13 +12,12 @@ from py_db import db
 db = db('nba_shots')
 
 
-def initiate():
+def initiate(start_year, end_year):
+    start_time = time()
     print "-------------------------"
     print "shots_Relative_Year.py"
 
-    start_time = time()
-
-    for year in range(2017,2018):
+    for year in range(start_year,end_year+1):
         season_start = year
         season_id = str(season_start)+str(season_start%100+1).zfill(2)[-2:]
         print season_id
@@ -39,13 +38,13 @@ def process(season_id):
 
         query = """SELECT
 %s_id, season_id, season_type, b.shot_zone_basic, b.shot_zone_area, a.games, a.attempts, 
-(a.zone_pct/b.zone_pct)*100 AS zone_pct_plus, 
-(a.efg/b.efg)*100 AS ZONE_efg_plus,
-a.attempts*(a.efg-b.efg)*2 AS ZONE_paa,
-(a.attempts*(a.efg-b.efg)*2)/a.games AS ZONE_paa_per_game,
-(a.efg/c.efg)*100 AS efg_plus,
-a.attempts*(a.efg-c.efg)*2 AS paa,
-(a.attempts*(a.efg-c.efg)*2)/a.games AS paa_per_game
+IFNULL((a.zone_pct/b.zone_pct)*100,0) AS zone_pct_plus, 
+IFNULL((a.efg/b.efg)*100,0) AS ZONE_efg_plus,
+IFNULL(a.attempts*(a.efg-b.efg)*2,0) AS ZONE_paa,
+IFNULL((a.attempts*(a.efg-b.efg)*2)/a.games,0) AS ZONE_paa_per_game,
+IFNULL((a.efg/c.efg)*100,0) AS efg_plus,
+IFNULL(a.attempts*(a.efg-c.efg)*2,0) AS paa,
+IFNULL((a.attempts*(a.efg-c.efg)*2)/a.games,0) AS paa_per_game
 FROM shots_%s_Distribution_Year a
 JOIN shots_League_Distribution_Year b USING (season_id, season_type, shot_zone_basic, shot_zone_area)
 JOIN shots_League_Distribution_Year c USING (season_id, season_type)
@@ -55,6 +54,7 @@ AND season_id = '%s'
 """
         
         q = query % (_type, _type, season_id)
+        # raw_input(q)
 
         res = db.query(q)
 
@@ -73,7 +73,13 @@ AND season_id = '%s'
 
 
 if __name__ == "__main__":     
-    initiate()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--start_year',type=int,default=2018)
+    parser.add_argument('--end_year',type=int,default=2018)
+
+    args = parser.parse_args()
+    
+    initiate(args.start_year, args.end_year)
 
 
 

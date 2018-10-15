@@ -50,7 +50,8 @@ def initiate(p_list, list_length, printer=True):
         os.chdir(path)
         files=glob.glob('*.png')
         for filename in files:
-            os.unlink(filename)
+            if 'CAREER' in filename:
+                os.unlink(filename)
         os.chdir(base_path)
 
 

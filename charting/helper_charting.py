@@ -21,7 +21,7 @@ import helper_data
 db = db('nba_shots')
 
 # setting the color map we want to use
-mymap = mpb.cm.YlOrRd
+mymap = mpb.cm.OrRd
 
 np.seterr(divide='ignore', invalid='ignore')
 
@@ -72,17 +72,19 @@ def draw_court(ax=None, color='white', lw=2, outer_lines=False):
 
 
 # we set gridNum to be 30 (basically a grid of 30x30 hexagons)
-def shooting_plot(dataType, path, shot_df, _id, season_id, _title, _name, isCareer=False, min_year = 0, max_year = 0, plot_size=(12,12), gridNum=30):
+def shooting_plot(dataType, path, shot_df, _id, season_id, _title, _name, isCareer=False, min_year = 0, max_year = 0, plot_size=(24,24), gridNum=30):
 
     # get the shooting percentage and number of shots for all bins, all shots, and a subset of some shots
     (ShootingPctLocs, shotNumber), shot_count_all = find_shootingPcts(shot_df, gridNum)
 
-    all_efg_plus = float(helper_data.get_metrics(dataType, _id, season_id, isCareer, 'all', 'efg_plus'))
+    all_efg_percentile = float(helper_data.get_metrics(dataType, _id, season_id, isCareer, 'all', 'EFG_Percentile'))
+
+    color_efg = max(min((all_efg_percentile/100),1.0),0.0)
+
     paa = float(helper_data.get_metrics(dataType, _id, season_id, isCareer, 'all', 'paa'))
-    color_efg = max(min(((all_efg_plus/100)-0.5),1.0),0.0)
 
     # set the figure for drawing on
-    fig = plt.figure(figsize=(12,12))
+    fig = plt.figure(figsize=(24,24))
 
     # cmap will be used as our color map going forward
     cmap = mymap
@@ -91,7 +93,9 @@ def shooting_plot(dataType, path, shot_df, _id, season_id, _title, _name, isCare
     ax = plt.axes([0.05, 0.15, 0.81, 0.775]) 
 
     # setting the background color using a hex code (http://www.rapidtables.com/web/color/RGB_Color.htm)
-    ax.set_facecolor('#0C232E')
+    # ax.set_facecolor('#0C232E')
+    ax.set_facecolor('#152535')
+
 
     # draw the outline of the court
     draw_court(outer_lines=False)
@@ -178,106 +182,166 @@ def shooting_plot(dataType, path, shot_df, _id, season_id, _title, _name, isCare
         ax.add_patch(patch)
 
         # add the text for the hexagon
-        ax.text(text_x, text_y, text_text, fontsize=12, horizontalalignment='left', verticalalignment='center', family='DejaVu Sans', color='white', fontweight='bold')
+        ax.text(text_x, text_y, text_text, fontsize=16, horizontalalignment='left', verticalalignment='center', family='DejaVu Sans', color='white', fontweight='bold')
 
     # Add a title to our frequency legend (the x/y coords are hardcoded).
     # Again, the color=map(eff_fg_all_float/100) makes the hexagons in the legend the same color as the player's overall eFG%
-    ax.text(-235, 310, 'Zone Frequencies', fontsize = 15, horizontalalignment='left', verticalalignment='bottom', family='DejaVu Sans', color=cmap(color_efg), fontweight='bold')
+    ax.text(-235, 310, 'Zone Frequencies', fontsize=16, horizontalalignment='left', verticalalignment='bottom', family='DejaVu Sans', color=cmap(color_efg), fontweight='bold')
 
     # Add a title to our chart (just the player's name)
     chart_title = "%s | %s" % (_title.upper(), season_id)
-    ax.text(31.25,-40, chart_title, fontsize=29, horizontalalignment='center', verticalalignment='bottom', family='DejaVu Sans', color=cmap(color_efg), fontweight='bold')
+    ax.text(31.25,-40, chart_title, fontsize=32, horizontalalignment='center', verticalalignment='bottom', family='DejaVu Sans', color=cmap(color_efg), fontweight='bold')
 
     # Add user text
     ax.text(-250,-31,'CHARTS BY CONNOR REED (@NBAChartBot)',
-        fontsize=10,  horizontalalignment='left', verticalalignment = 'bottom', family='DejaVu Sans', color='white', fontweight='bold')
+        fontsize=16,  horizontalalignment='left', verticalalignment = 'bottom', family='DejaVu Sans', color='white', fontweight='bold')
 
     # Add data source text
     ax.text(31.25,-31,'DATA FROM STATS.NBA.COM',
-        fontsize=10,  horizontalalignment='center', verticalalignment = 'bottom', family='DejaVu Sans', color='white', fontweight='bold')
+        fontsize=16,  horizontalalignment='center', verticalalignment = 'bottom', family='DejaVu Sans', color='white', fontweight='bold')
 
     # Add date text
     _date = date.today()
 
     ax.text(250,-31,'AS OF %s' % (str(_date)),
-        fontsize=10,  horizontalalignment='right', verticalalignment = 'bottom', family='DejaVu Sans', color='white', fontweight='bold')
+        fontsize=16,  horizontalalignment='right', verticalalignment = 'bottom', family='DejaVu Sans', color='white', fontweight='bold')
 
 
     key_text = get_key_text(dataType, _id, season_id, isCareer)
     # adding breakdown of eFG% by shot zone at the bottom of the chart
-    ax.text(307,380, key_text, fontsize=12, horizontalalignment='right', verticalalignment = 'top', family='DejaVu Sans', color='white', linespacing=1.5)
+    ax.text(307,380, key_text, fontsize=20, horizontalalignment='right', verticalalignment = 'top', family='DejaVu Sans', color='white', linespacing=1.5)
 
     if dataType == 'player':
         teams_text, team_len = get_teams_text(_id, season_id, isCareer)
     else:
-        teams_text = _title + ' ' + _name
+        teams_text = _title
         team_len = 0
 
     # adding which season the chart is for, as well as what teams the player is on
     if team_len > 12:
         ax.text(-250,380, season_id + ' Regular Season:\n' + teams_text,
-            fontsize=10,  horizontalalignment='left', verticalalignment = 'top', family='DejaVu Sans', color='white', linespacing=1.4)
+            fontsize=20,  horizontalalignment='left', verticalalignment = 'top', family='DejaVu Sans', color='white', linespacing=1.4)
     else:
         ax.text(-250,380,season_id + ' Regular Season:\n' + teams_text,
-            fontsize=10,  horizontalalignment='left', verticalalignment = 'top', family='DejaVu Sans', color='white', linespacing=1.6)
+            fontsize=20,  horizontalalignment='left', verticalalignment = 'top', family='DejaVu Sans', color='white', linespacing=1.6)
 
     # adding a color bar for reference
     ax2 = fig.add_axes([0.875, 0.15, 0.04, 0.775])
     cb = mpb.colorbar.ColorbarBase(ax2,cmap=cmap, orientation='vertical')
     cbytick_obj = plt.getp(cb.ax.axes, 'yticklabels')
-    plt.setp(cbytick_obj, color='white', fontweight='bold')
-    cb.set_label('EFG+ (100 is League Average)', family='DejaVu Sans', color='white', fontweight='bold', labelpad=-4, fontsize=14)
+    plt.setp(cbytick_obj, color='white', fontweight='bold',fontsize=16)
+    cb.set_label('EFG+ (100 is League Average)', family='DejaVu Sans', color='white', fontweight='bold', labelpad=-4, fontsize=24)
     cb.set_ticks([0.0, 0.25, 0.5, 0.75, 1.0])
     cb.set_ticklabels(['$\mathbf{\leq}$50','75', '100','125', '$\mathbf{\geq}$150'])
 
-    figtit = path+'shot_charts_%s(%s)_%s.png' % (_name, _id, season_id.replace(' ',''))
-    plt.savefig(figtit, facecolor='#26373F', edgecolor='black')
+    figtit = path+'%s(%s)_%s.png' % (_name, _id, season_id.replace(' ',''))
+    plt.savefig(figtit, facecolor='#2E3748', edgecolor='black')
     plt.clf()
 
 
 #Producing the text for the bottom of the shot chart
-def get_key_text(dataType, _id, season_id, isCareer):
+def get_key_text(dataType, _id, season_id, isCareer, isTwitter=False):
 
     text = ''
 
-    games_text = helper_data.get_metrics(dataType, _id, season_id, isCareer, 'All', 'r.games')
+    total_atts = ("%.0f" % helper_data.get_metrics(dataType, _id, season_id, isCareer, 'all', 'r.attempts'))
+    total_makes = ("%.0f" % helper_data.get_metrics(dataType, _id, season_id, isCareer, 'all', 'b.makes'))
+    total_games = ("%.0f" % helper_data.get_metrics(dataType, _id, season_id, isCareer, 'all', 'r.games'))
+    total_attPerGame = ("%.1f" % helper_data.get_metrics(dataType, _id, season_id, isCareer, 'all', 'r.attempts/r.games'))
+    vol_percentile = ("%.0f" % helper_data.get_metrics(dataType, _id, season_id, isCareer, 'all', 'AttemptsPerGame_percentile'))
+    vol_word = helper_data.get_text_description('AttemptsPerGame', vol_percentile)
+    vol_text = '$\mathbf{' + vol_word.upper() + '}$ Volume | ' + str(total_makes) + ' for ' + str(total_atts) + ' in ' + str(total_games) + ' Games | ' + str(total_attPerGame) + ' FGA/Game, $\mathbf{P_{' + str(vol_percentile) + '}}$'
+    vol_twitter_text = 'Volume: ' + vol_word.upper() + ' | P_' + str(vol_percentile) + ' (percentile)'
+
+
     shotSkillPlus = ("%.1f" % helper_data.get_metrics(dataType, _id, season_id, isCareer, 'All', 's.ShotSkillPlus'))
+    shotSkill_percentile = ("%.0f" % helper_data.get_metrics(dataType, _id, season_id, isCareer, 'all', 'shotSkill_Percentile'))
+    shotSkill_word = helper_data.get_text_description('shotSkill', shotSkill_percentile)
+    shotSkill_text = '$\mathbf{' + shotSkill_word.upper() + '}$ Shot Skill | ' + str(shotSkillPlus) + ' ShotSkill+, $\mathbf{P_{' + str(shotSkill_percentile) + '}}$'
+    shotSkill_twitter_text = 'Shot Skill: ' + shotSkill_word.upper() + ' | P_' + str(shotSkill_percentile)
 
-    for _type in ('All', 'Above The Break 3', 'Corner 3', 'Mid-Range', 'In The Paint (Non-RA)', 'Restricted Area'):
-        if _type == 'All':
-            text += 'All Shots | %s Games | ' % games_text
-        elif _type == 'Above The Break 3':
-            text += '\n' + 'Arc 3 | '
-        elif _type == 'In The Paint (Non-RA)':
-            text += '\n' + 'Paint(Non-RA) | '
-        elif _type == 'Restricted Area':
-            text += '\n' + 'Restricted | '
-        else:
-            text += '\n' + _type + ' | '        
 
-        atts = ("%.0f" % helper_data.get_metrics(dataType, _id, season_id, isCareer, _type, 'r.attempts'))
-        makes = ("%.0f" % helper_data.get_metrics(dataType, _id, season_id, isCareer, _type, 'b.makes'))
-        zone_pct = ("%.1f" % helper_data.get_metrics(dataType, _id, season_id, isCareer, _type, 'zone_pct*100'))
-        zone_pct_plus = ("%.1f" % helper_data.get_metrics(dataType, _id, season_id, isCareer, _type, 'zone_pct_plus'))
-        efg = ("%.1f" % helper_data.get_metrics(dataType, _id, season_id, isCareer, _type, 'efg*100'))
-        efg_plus = ("%.1f" % helper_data.get_metrics(dataType, _id, season_id, isCareer, _type, 'efg_plus'))
-        zone_efg_plus = ("%.1f" % helper_data.get_metrics(dataType, _id, season_id, isCareer, _type, 'zone_efg_plus'))
-        paa = ("%.1f" % helper_data.get_metrics(dataType, _id, season_id, isCareer, _type, 'paa'))
-        paa_game = ("%.1f" % helper_data.get_metrics(dataType, _id, season_id, isCareer, _type, 'paa_per_game'))
-        
-        if _type == 'All':
-            text += str(makes) + ' for ' + str(atts)
-            text += ' (' + str(shotSkillPlus) + ' ShotSkill+ | '
-            text += str(efg) + ' EFG% ('
-            text += str(efg_plus) + ' EFG+ | '
-            text += str(paa) + ' PAA)'
-        else:
-            text += str(makes) + '/' + str(atts) + ' | '
-            text += str(zone_pct) + '% z% (' + str(zone_pct_plus) + ' z%+) | '
-            text += str(zone_efg_plus) + ' zEFG+ ('
-            text += str(efg_plus) + ' EFG+ | '
-            text += str(paa) + ' PAA)'
+    efg = ("%.1f" % helper_data.get_metrics(dataType, _id, season_id, isCareer, 'All', 'd.efg*100'))
+    efgPlus = ("%.1f" % helper_data.get_metrics(dataType, _id, season_id, isCareer, 'All', 'r.efg_plus'))
+    efg_percentile = ("%.0f" % helper_data.get_metrics(dataType, _id, season_id, isCareer, 'all', 'EFG_Percentile'))
+    efg_word = helper_data.get_text_description('EFG', efg_percentile)
+    efg_text = '$\mathbf{' + efg_word.upper() + '}$ Efficiency | ' + str(efg) + ' EFG% | ' + str(efgPlus) + ' EFG+, $\mathbf{P_{' + str(efg_percentile) + '}}$'
+    efg_twitter_text = 'Efficiency: ' + efg_word.upper() + ' | P_' + str(efg_percentile)
+
+
+    PAA = ("%.1f" % helper_data.get_metrics(dataType, _id, season_id, isCareer, 'All', 'r.paa'))
+    PAAperGame = ("%.1f" % helper_data.get_metrics(dataType, _id, season_id, isCareer, 'All', 'r.paa_per_game'))
+    PAA_percentile = ("%.0f" % helper_data.get_metrics(dataType, _id, season_id, isCareer, 'all', 'PAAperGame_percentile'))
+    PAA_word = helper_data.get_text_description('PAAperGame', PAA_percentile)
+    PAA_text = '$\mathbf{' + PAA_word.upper() + '}$ Efficiency Value Added | ' + str(PAA) + ' Total PAA | ' + str(PAAperGame) + ' PAA/Game, $\mathbf{P_{' + str(PAA_percentile) + '}}$'
+    PAA_twitter_text = 'Efficiency Value: ' + PAA_word.upper() + ' | P_' + str(PAA_percentile)
+
+
+    fav_zone, fav_zoneVal = helper_data.get_extreme_zones(dataType, _id, season_id, isCareer, 'positive', 'ROUND(zone_pct_plus-100,0)')
+    if fav_zoneVal >= 0:
+        fav_zoneTextAdd = "+"
+    else:
+        fav_zoneTextAdd = ""
+    fav_zoneTEXT = '$\mathbf{Favorite Zone}$ (Relative to League Averages) -- $\mathbf{' + str(fav_zone) + '}$ (' + str(fav_zoneTextAdd) + str(fav_zoneVal) + '% distribution)'
+    fav_twitter_zoneTEXT = 'Favorite Zone: ' + str(fav_zone)
+
+
+    skill_zone, skill_zoneVal = helper_data.get_extreme_zones(dataType, _id, season_id, isCareer, 'positive', 'ROUND(zone_efg_plus-100,0)')
+    if skill_zoneVal >= 0:
+        skill_zoneTextAdd = 'above'
+    else:
+        skill_zoneTextAdd = 'below'
+    skill_zoneTEXT = '$\mathbf{Best Skill}$ -- $\mathbf{' + str(skill_zone) + '}$ (' + str(abs(skill_zoneVal)) + '% ' + str(skill_zoneTextAdd) + ' average)'
+    skill_twitter_zoneTEXT = 'Best Skill Zone: ' + str(skill_zone)
+
+
+    value_zone, value_zoneVal = helper_data.get_extreme_zones(dataType, _id, season_id, isCareer, 'positive', 'ROUND(paa, 0)')
+    if value_zoneVal >= 0:
+        value_zoneTextAdd = "+"
+    else:
+        value_zoneTextAdd = ""
+    value_zoneTEXT = '$\mathbf{Best Value}$ -- $\mathbf{' + str(value_zone) + '}$ (' + str(value_zoneTextAdd) + str(value_zoneVal) + ' PAA)'
+    value_twitter_zoneTEXT = 'Best Value Zone: ' + str(value_zone)
+
+
+    LEASTskill_zone, LEASTskill_zoneVal = helper_data.get_extreme_zones(dataType, _id, season_id, isCareer, 'negative', 'ROUND(zone_efg_plus-100,0)')
+    if LEASTskill_zoneVal >= 0:
+        LEASTskill_zoneTextAdd = 'above'
+    else:
+        LEASTskill_zoneTextAdd = 'below'
+    LEASTskill_zoneTEXT = '$\mathbf{Worst Skill}$ -- $\mathbf{' + str(LEASTskill_zone) + '}$ (' + str(abs(LEASTskill_zoneVal)) + '% ' + str(LEASTskill_zoneTextAdd) + ' average)'
+
+
+    LEASTvalue_zone, LEASTvalue_zoneVal = helper_data.get_extreme_zones(dataType, _id, season_id, isCareer, 'negative', 'ROUND(paa, 0)')
+    if LEASTvalue_zoneVal >= 0:
+        LEASTvalue_zoneTextAdd = "+"
+    else:
+        LEASTvalue_zoneTextAdd = ""
+    LEASTvalue_zoneTEXT = '$\mathbf{Least Value}$ -- $\mathbf{' + str(LEASTvalue_zone) + '}$ (' + str(LEASTvalue_zoneTextAdd) + str(LEASTvalue_zoneVal) + ' PAA)'
+
+
+    if isTwitter is False:
+        text += vol_text
+        text += '\n'+shotSkill_text
+        text += '\n'+efg_text
+        text += '\n'+PAA_text
+        text += '\n'+fav_zoneTEXT
+        text += '\n'+skill_zoneTEXT
+        text += ' | '+value_zoneTEXT
+        text += '\n'+LEASTskill_zoneTEXT
+        text += ' | '+LEASTvalue_zoneTEXT
+
+    else:
+        text += ':\n\n'+vol_twitter_text
+        text += '\n'+shotSkill_twitter_text
+        text += '\n'+efg_twitter_text
+        text += '\n'+PAA_twitter_text
+        text += '\n\n'+fav_twitter_zoneTEXT
+        text += '\n'+skill_twitter_zoneTEXT
+        text += '\n'+value_twitter_zoneTEXT
+
     return text
+
 
 
 #Getting the shooting percentages for each grid.
@@ -389,12 +453,12 @@ def get_teams_text(player_id, season_id, isCareer):
     else:
         i = 0
         for team in team_list[0:-1]:
-            if i%2 == 0 and i > 0:
+            if i%3 == 0 and i > 0:
                 team_text += '\n'
             text_add = '%s, ' % str(team)
             team_text += text_add
             i += 1
-        if i%2 == 0:
+        if i%3 == 0:
             team_text += '\n'
         # raw_input(team_list)
         team_text += str(team_list[-1])

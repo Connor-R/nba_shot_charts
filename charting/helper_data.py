@@ -75,6 +75,128 @@ def get_metrics(dataType, _id, season_id, isCareer, zone, metric):
         JOIN shots_%s_Distribution_Year d USING (%s_id, season_id, season_type, shot_zone_basic, shot_zone_area)
         JOIN shots_%s_Breakdown b USING (%s_id, season_id, season_type, shot_zone_basic, shot_zone_area)
         JOIN shot_skill_plus_%s_Year s USING (%s_id, season_id, season_type)
+        JOIN percentiles_%s_Year p USING (%s_id, season_id, season_type)
+        WHERE season_id = %s
+        AND %s_id = %s
+        AND shot_zone_area = 'all'
+        AND shot_zone_basic = '%s'
+        AND season_type = 'reg'
+        """
+        metric_qry = metric_q % (metric, dataType, dataType, dataType, dataType, dataType, dataType, dataType, dataType, dataType, season_id.replace('-',''), dataType, _id, zone)
+
+    else:
+        metric_q = """SELECT
+        ROUND(%s,1)
+        FROM shots_%s_Relative_Career r
+        JOIN shots_%s_Distribution_Career d USING (%s_id, season_id, season_type, shot_zone_basic, shot_zone_area)
+        JOIN(
+            SELECT 
+            %s_id, season_type, shot_zone_basic, shot_zone_area,
+            SUM(games) AS games,
+            SUM(attempts) AS attempts,
+            SUM(makes) AS makes,
+            SUM(points) AS points
+            FROM shots_%s_Breakdown
+            WHERE %s_id = %s
+            AND season_type = 'reg'
+            GROUP BY shot_zone_area, shot_zone_basic, season_type
+        ) b USING (%s_id, season_type, shot_zone_basic, shot_zone_area)
+        JOIN shot_skill_plus_%s_Career s USING (%s_id, season_id, season_type)
+        JOIN percentiles_%s_Career p USING (%s_id, season_id, season_type)
+        WHERE %s_id = %s
+        AND shot_zone_area = 'all'
+        AND shot_zone_basic = '%s'
+        AND season_type = 'reg'
+        """
+        metric_qry = metric_q % (metric, dataType, dataType, dataType, dataType, dataType, dataType, _id, dataType, dataType, dataType, dataType, dataType, dataType, _id, zone)
+
+    # raw_input(metric_qry)
+    try:
+        res = db.query(metric_qry)[0][0]
+    except IndexError:
+        res = 0
+
+    return res
+
+
+# Find the most extreme zone for a given player or team
+def get_extreme_zones(dataType, _id, season_id, isCareer, positive_negative, metric):
+
+    if isCareer is False:
+        qry_add = "\nAND season_id = %s" % (season_id.replace('-',''))
+        yearCareer = "Year"
+    else:
+        qry_add = ""
+        yearCareer = "Career"
+
+    if positive_negative == "positive":
+        order_qry = "DESC"
+    elif positive_negative == "negative":
+        order_qry = "ASC"
+
+    metric_q = """SELECT shot_zone_basic, %s
+    FROM(
+        SELECT
+        shot_zone_basic, zone_pct, zone_pct_plus, zone_efg_plus, efg_plus, paa
+        FROM shots_%s_Relative_%s r
+        JOIN shots_%s_Distribution_%s d USING (%s_id, season_id, season_type, shot_zone_basic, shot_zone_area)
+        WHERE %s_id = %s%s
+        AND shot_zone_area = 'all'
+        AND shot_zone_basic NOT IN ('all', 'Backcourt')
+        AND season_type = 'reg'
+        AND (zone_pct > 0.15 OR r.attempts > 50)
+        ORDER BY %s %s
+    ) a;"""
+
+    metric_qry = metric_q % (metric, dataType, yearCareer, dataType, yearCareer, dataType, dataType, _id, qry_add, metric, order_qry)
+
+    # raw_input(metric_qry)
+
+    zone_name, zone_value = db.query(metric_qry)[0]
+
+    zones_dict = {
+    'all': 'All',
+    'Above the Break 3': 'Break3',
+    'Corner 3': 'Corner3',
+    'In The Paint (Non-RA)': 'Paint(NonRA)',
+    'Mid-Range': 'MidRange',
+    'Restricted Area': 'Restricted',
+    'Backcourt': 'Backcourt'}
+
+    zone_name = zones_dict.get(zone_name)
+
+    return zone_name, zone_value
+
+
+# Get a text description based on a value and category
+def get_text_description(category, value):
+    qry = """SELECT word
+    FROM percentile_text_descriptors
+    WHERE category = '%s'
+    AND percentile_floor = (
+        SELECT max(percentile_floor)
+        FROM percentile_text_descriptors
+        WHERE category = '%s'
+        AND %s >= percentile_floor
+    );"""
+
+    query = qry % (category, category, value)
+
+    text_word = db.query(query)[0][0]
+
+    return text_word
+
+
+# Get percentile values from the percentiles table
+def get_percentiles(dataType, _id, season_id, isCareer, zone, metric):
+
+    if isCareer is False:
+        metric_q = """SELECT
+        ROUND(%s,1)
+        FROM shots_%s_Relative_Year r
+        JOIN shots_%s_Distribution_Year d USING (%s_id, season_id, season_type, shot_zone_basic, shot_zone_area)
+        JOIN shots_%s_Breakdown b USING (%s_id, season_id, season_type, shot_zone_basic, shot_zone_area)
+        JOIN shot_skill_plus_%s_Year s USING (%s_id, season_id, season_type)
         WHERE season_id = %s
         AND %s_id = %s
         AND shot_zone_area = 'all'

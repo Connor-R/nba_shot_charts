@@ -43,7 +43,7 @@ def process(group_type, time_type):
         FROM(
             SELECT %s_id, season_id, season_type, SUM(attempts*zone_efg_plus) AS sum_efg_plus
             FROM shots_%s_Relative_%s r
-            WHERE shot_zone_area = 'all'
+            WHERE shot_zone_area != 'all'
             AND shot_zone_basic != 'all'
             GROUP BY %s_id, season_id, season_type
         ) a
@@ -59,6 +59,7 @@ def process(group_type, time_type):
 
     q = query % (group_type, group_type, group_type, time_type, group_type, group_type, group_type, time_type, group_type, group_type)
 
+    # raw_input(q)
     res = db.query(q)
     # raw_input(res)
 
