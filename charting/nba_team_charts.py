@@ -40,7 +40,7 @@ def initiate(p_list, list_length, printer=True):
         counter += 1
 
         start_year = max(1996, start_year)
-        end_year = min(2018, end_year)
+        end_year = min(2020, end_year)
 
         path = base_path+'/shot_charts_team/'+str(city.replace(' ','_'))+'_'+str(tname.replace(' ','_'))+'('+str(team_id)+')/'
 
@@ -102,23 +102,25 @@ def gen_charts(team_string):
 
 
 #teams_list generation
-def get_plist(backfill=False):
+def get_plist(min_start=1996):
     p_list = {}
  
-    query = """SELECT team_id, city, tname, start_year, end_year, end_year-GREATEST(1996,start_year) AS seasons_cnt
+    qry = """SELECT team_id, city, tname, 
+    GREATEST(start_year,%s) as 'start', end_year, 
+    end_year-GREATEST(%s,start_year) AS seasons_cnt
     FROM teams
-    WHERE end_year >= 1997
-    ORDER BY team_id ASC, end_year DESC"""
+    WHERE end_year >= %s
+    ORDER BY team_id ASC, end_year DESC;"""
+
+    query = qry % (min_start, min_start, min_start)
     res = db.query(query)
+
+
  
     for row in res:
         team_id, city, team_name, start_year, end_year, seasons_cnt = row
  
         team_search_name = city.replace(" ","_") + "_" + team_name.replace(" ","_")
- 
-        if backfill is True:
-            if os.path.exists(os.getcwd()+'/shot_charts_team/'+team_search_name+'('+str(team_id)+')'):
-                continue
  
         # a filter for which teams to update
         p_list[city.replace(' ','_')+'_'+team_name.replace(' ','_')+'('+str(team_id)+')'] = [team_id, city, team_name, start_year, end_year]
@@ -128,7 +130,13 @@ def get_plist(backfill=False):
 
 if __name__ == "__main__": 
 
-    team_list = get_plist(backfill=True)
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('--min_start',type=int,default=1996)
+    args = parser.parse_args()
+
+
+    team_list = get_plist(args.min_start)
 
     print "\nBegin processing " + str(len(team_list)) + " teams\n"
 

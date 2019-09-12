@@ -56,10 +56,13 @@ def export_table(dataType, rangeType, isCareer):
         ROUND(efg_plus,1) as 'EFG+',
         ROUND(PAA,1) as 'PAA',
         ROUND(PAA_per_game,1) as 'PAA/Game',
+        ROUND(PAR,1) as 'PAR',
+        ROUND(PAR_per_game,1) as 'PAR/Game',
         ROUND(ShotSkillPlus,1) as 'ShotSkill+',
         AttemptsPerGame_percentile as 'Volume Percentile',
         EFG_percentile as 'EFG Percentile',
         PAAperGame_percentile as 'PAA/Game Percentile',
+        PARperGame_percentile as 'PAR/Game Percentile',
         shotSkill_percentile as 'ShotSkill Percentile'
         FROM shots_%s_Relative_Year r
         JOIN shots_%s_Distribution_Year d USING (%s_id, season_id, season_type, shot_zone_basic, shot_zone_area)
@@ -71,6 +74,8 @@ def export_table(dataType, rangeType, isCareer):
         AND season_type = '%s';"""
 
         query = qry % (fname, lname, dataType, dataType, dataType, dataType, dataType, dataType, dataType, dataType, dataType, dataType, qry_join, rangeType)
+
+        # raw_input(query)
 
     elif isCareer is True:
         careerText = "_Career"
@@ -88,10 +93,13 @@ def export_table(dataType, rangeType, isCareer):
         ROUND(efg_plus,1) as 'EFG+',
         ROUND(PAA,1) as 'PAA',
         ROUND(PAA_per_game,1) as 'PAA/Game',
+        ROUND(PAR,1) as 'PAR',
+        ROUND(PAR_per_game,1) as 'PAR/Game',
         ROUND(ShotSkillPlus,1) as 'ShotSkill+',
         AttemptsPerGame_percentile as 'Volume Percentile',
         EFG_percentile as 'EFG Percentile',
         PAAperGame_percentile as 'PAA/Game Percentile',
+        PARperGame_percentile as 'PAR/Game Percentile',
         shotSkill_percentile as 'ShotSkill Percentile'
         FROM shots_player_Relative_Career r
         JOIN shots_player_Distribution_Career d USING (player_id, season_id, season_type, shot_zone_basic, shot_zone_area)
@@ -120,7 +128,7 @@ def export_table(dataType, rangeType, isCareer):
     csv_title = "/Users/connordog/Dropbox/Desktop_Files/Work_Things/CodeBase/Python_Scripts/Python_Projects/nba_shot_charts/csvs/leaderboards/%s.csv" % (file_name)
     csv_file = open(csv_title, "wb")
     append_csv = csv.writer(csv_file)
-    csv_header = ["Name", "Season Type", "NBA ID", "Year(s)", "Games", "FG", "FGA", "FG Points", "EFG%", "EFG+", "PAA", "PAA/Game", "ShotSkill+", "Volume Percentile", "EFG Percentile", "PAA/Game Percentile", "ShotSkill Percentile"]
+    csv_header = ["Name", "Season Type", "NBA ID", "Year(s)", "Games", "FG", "FGA", "FG Points", "EFG%", "EFG+", "PAA", "PAA/Game", "PAR", "PAR/Game", "ShotSkill+", "Volume Percentile", "EFG Percentile", "PAA/Game Percentile", "PAR/Game Percentile", "ShotSkill Percentile"]
     append_csv.writerow(csv_header)
 
     for row in res:

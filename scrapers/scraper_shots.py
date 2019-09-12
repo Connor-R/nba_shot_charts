@@ -41,8 +41,12 @@ def initiate(start_year, end_year, lastNgames, short_type):
         print season_url
 
         json = getter.get_url_data(season_url, "json")
-        print "acquired data"
+        if json is None:
+            sys.exit('\n\n\nNo data acquired')
+        else:
+            print "acquired data"
 
+        sleep(5)
         resultSets = json["resultSets"]
 
         shots = resultSets[0]["rowSet"]

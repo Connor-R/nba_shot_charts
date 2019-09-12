@@ -40,9 +40,11 @@ bash nba_shots_tables_run.sh
 
 wait
 
-python ../charting/nba_shot_charts.py --player_name "YESTERDAY"
+cd ../charting
+python nba_shot_charts.py --player_name "YESTERDAY"
+python nba_team_charts.py --min_start "$startYear"
 
-wait
+# wait
 
 # Run every offseason
 # python ../charting/nba_shot_charts.py --player_name "LASTYEAR"

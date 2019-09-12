@@ -3,7 +3,7 @@ import urllib
 import csv
 import os
 import sys
-from time import time
+from time import time, sleep
 
 
 from py_data_getter import data_getter
@@ -21,6 +21,7 @@ print "-------------------------"
 print "scraper_teams.py"
 
 json = getter.get_url_data(team_url, "json")
+sleep(5)
 
 resultSets = json["resultSets"]
 

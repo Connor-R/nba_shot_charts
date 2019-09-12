@@ -4,6 +4,7 @@ import sys
 import os
 import random
 import csv
+from numpy.random import choice
 import nba_shot_charts as charts
 from urllib import urlopen
 from bs4 import BeautifulSoup
@@ -144,14 +145,31 @@ def tweet(player_path, chart, hashtags, p_id, thread):
 
 def get_rand_player():
     p_list = {}
-    p_list_res = db.query("SELECT CONCAT(fname, ' ', lname) AS p_name, player_id FROM shots_player_relative_year JOIN players USING (player_id) WHERE season_type = 'reg' AND shot_zone_basic = 'all';")
+    p_list_res = db.query("""SELECT CONCAT(fname, ' ', lname) AS p_name
+    , player_id
+    , SUM(attempts) as p_att
+    FROM shots_Player_Distribution_Career
+    JOIN players USING (player_id)
+    WHERE 1
+        AND season_type = 'Reg'
+        AND shot_zone_basic = 'all'
+        AND shot_zone_area = 'all'
+    GROUP BY player_id
+    ;""")
+
+    p_dict = {}
+    plrs = []
+    wghts = []
     for i, row in enumerate(p_list_res):
-        p_list[i] = [row[0],row[1]]
+        pname, pid, p_shots = row
+        p_dict[pid] = pname
+        plrs.append(pid)
+        wghts.append(float(p_shots)**0.5)
 
-    player = random.choice(p_list.items())
 
-    p_id = player[1][1]
-    p_name = player[1][0]
+    norm_wghts = [float(i)/sum(wghts) for i in wghts]
+    p_id = choice(plrs, p=norm_wghts)
+    p_name = p_dict.get(p_id)
 
     if p_name.split(' ')[0][1].isupper() and p_name not in ('OG Anunoby',):
         temp_name = p_name
@@ -178,12 +196,17 @@ def parse_text(pic, hashtags, p_id):
     year = pic.split('.png')[0].split('_')[-1]
 
     if year[:6] == 'CAREER':
-        tweet += year + ' Shot Chart' 
+        start_year = db.query("SELECT from_year FROM players WHERE player_id = %s" % (p_id)) [0][0]
+        if start_year < 1996:
+            tweet += 'POST-1996 ' + year + ' Shot Chart'
+        else:
+            tweet += year + ' Shot Chart' 
         isCareer = True
         teams = get_teams(p_id, year, isCareer=isCareer)
     else:
         if year == '2018-19':
-            tweet += year + '(in progress) Shot Chart'
+            tweet += year + ' Shot Chart'
+            # tweet += year + '(in progress) Shot Chart'
         else:
             tweet += year + ' Shot Chart' 
         isCareer = False
@@ -318,11 +341,13 @@ def get_twitter(full_name):
 
 
 if __name__ == "__main__":
+
     tweet_dict = {} 
     # tweet_dict = {
-    #     'Carmelo Anthony':['Thunder'],
-    #     'Enes Kanter':['Knicks'],
-    #     'Doug McDermott':['Knicks'],
+    #     'Jimmy Butler':['76ers'],
+    #     'Robert Covington':['Timberwolves'],
+    #     'Dario Saric':['Timberwolves'],
+    #     'Justin Patton':['76ers']    
     #     }
 
 

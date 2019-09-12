@@ -222,7 +222,7 @@ def shooting_plot(dataType, path, shot_df, _id, season_id, _title, _name, isCare
         ax.text(-250,380, season_id + ' Regular Season:\n' + teams_text,
             fontsize=20,  horizontalalignment='left', verticalalignment = 'top', family='DejaVu Sans', color='white', linespacing=1.4)
     else:
-        ax.text(-250,380,season_id + ' Regular Season:\n' + teams_text,
+        ax.text(-250,380, season_id + ' Regular Season:\n' + teams_text,
             fontsize=20,  horizontalalignment='left', verticalalignment = 'top', family='DejaVu Sans', color='white', linespacing=1.6)
 
     # adding a color bar for reference
@@ -234,7 +234,7 @@ def shooting_plot(dataType, path, shot_df, _id, season_id, _title, _name, isCare
     cb.set_ticks([0.0, 0.25, 0.5, 0.75, 1.0])
     cb.set_ticklabels(['$\mathbf{\leq}$50','75', '100','125', '$\mathbf{\geq}$150'])
 
-    figtit = path+'%s(%s)_%s.png' % (_name, _id, season_id.replace(' ',''))
+    figtit = path+'%s(%s)_%s.png' % (_name, _id, season_id.replace(' ','').replace('POST-1996',''))
     plt.savefig(figtit, facecolor='#2E3748', edgecolor='black')
     plt.clf()
 
@@ -378,11 +378,12 @@ def acquire_playerPic(player_id, zoom, offset=(250,370)):
         player_pic = plt.imread(img_path)
     except (ValueError,IOError):
         try:
-            pic = urllib.urlretrieve("http://stats.nba.com/media/players/230x185/"+str(player_id)+".png",str(player_id)+".png")
+            pic = urllib.urlretrieve("https://ak-static.cms.nba.com/wp-content/uploads/headshots/nba/latest/260x190/"+str(player_id)+".png",str(player_id)+".png")
+
             player_pic = plt.imread(pic[0])
         except (ValueError, IOError):
             try:
-                pic = urllib.urlretrieve("https://ak-static.cms.nba.com/wp-content/uploads/headshots/nba/latest/260x190/"+str(player_id)+".png",str(player_id)+".png")
+                pic = urllib.urlretrieve("http://stats.nba.com/media/players/230x185/"+str(player_id)+".png",str(player_id)+".png")
                 player_pic = plt.imread(pic[0])
             except (ValueError, IOError):
                 img_path = os.getcwd()+'/chart_icon.png'

@@ -37,7 +37,7 @@ def initiate(p_list, list_length, printer=True):
         counter += 1
 
         start_year = max(1996, start_year)
-        end_year = min(2019, end_year)
+        end_year = min(2020, end_year)
 
         player_name = player_title.replace(" ","_")
 
@@ -76,9 +76,13 @@ def initiate(p_list, list_length, printer=True):
                 helper_charting.shooting_plot('player', path, year_shots_df, player_id, season_id, player_title, player_name)
                 charts_cnt += 1
 
-        career_qry = "SELECT GREATEST(from_year,1996), to_year FROM players WHERE player_id = %s;" % (player_id)
+        career_qry = "SELECT from_year, to_year FROM players WHERE player_id = %s;" % (player_id)
         career_start, career_end = db.query(career_qry)[0]
-        career_string = "CAREER (%s-%s)" % (career_start, career_end)
+        if career_start < 1996:
+            career_start = 1996
+            career_string = "POST-1996 CAREER (%s-%s)" % (career_start, career_end)
+        else:
+            career_string = "CAREER (%s-%s)" % (career_start, career_end)
         # if printer is True:
         #     print '\t\t\t', career_string, player_name
 
@@ -194,6 +198,8 @@ def get_yesterdaysPlayers(days=1):
         p_id, p_name, start_year, end_year, shot_attempts = row
         player_list[p_id] = [str(p_name), int(start_year), int(end_year)]
 
+    return player_list
+
 if __name__ == "__main__": 
 
     parser = argparse.ArgumentParser()
@@ -208,9 +214,9 @@ if __name__ == "__main__":
         player_list = get_yesterdaysPlayers(days=1)
         if player_list is None:
             sys.exit("No Players to Chart")
-    if args.player_name == 'LASTYEAR':
+    elif args.player_name == 'LASTYEAR':
         player_list = get_yesterdaysPlayers(days=365)
-    elif args.player_name != '':
+    elif (args.player_name != '' and args.player_name not in ('YESTERDAY', 'LASTYEAR')):
         p_list = get_plist()
         vals = None
         p_key = None
@@ -222,11 +228,11 @@ if __name__ == "__main__":
             sys.exit('Need a valid player name')
         player_list = {p_key:vals}
     else:
+        print "backfilling"
         # If we don't have a name, we assume we're trying to backfill
         # player_list = get_plist(operator='==', filt_value=2018, backfill=False)\
         # A full backfill takes ~40 hours
         player_list = get_plist(operator='<=', filt_value=9999, backfill=True)
-
 
 
     print "\nBegin processing " + str(len(player_list)) + " players"

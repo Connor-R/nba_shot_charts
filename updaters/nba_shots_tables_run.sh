@@ -40,14 +40,14 @@ python /Users/connordog/Dropbox/Desktop_Files/Work_Things/connor-r.github.io/Tab
 
 wait
 
-cd ~/Dropbox/Desktop_Files/Work_Things/connor-r.github.io/
+cd /Users/connordog/Dropbox/Desktop_Files/Work_Things/connor-r.github.io/
 git add Tables/NBA_leaderboards/*
-git commit -m "NBA leaderboards update"
+git commit -m "NBA leaderboards update ($updateDate)"
 git push
 
 wait 
 
-cd ~/Dropbox/Desktop_Files/Work_Things/CodeBase/Python_Scripts/Python_Projects/nba_shot_charts/
+cd /Users/connordog/Dropbox/Desktop_Files/Work_Things/CodeBase/Python_Scripts/Python_Projects/nba_shot_charts/
 git add csvs/leaderboards/*
-git commit -m "NBA leaderboards update"
+git commit -m "NBA leaderboards update ($updateDate)"
 git push

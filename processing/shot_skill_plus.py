@@ -62,15 +62,19 @@ def process(group_type, time_type):
     # raw_input(q)
     res = db.query(q)
     # raw_input(res)
-
     entries = []
     _id = '%s_id' % (group_type.lower())
     for row in res:
+        # print row
         type_id, season_id, season_type, attempts, shotskillplus = row
         entry = {_id:type_id, "season_id":season_id, "season_type":season_type, "attempts":attempts, "ShotSkillPlus":shotskillplus}   
         entries.append(entry)
 
     table = "shot_skill_plus_%s_%s" % (group_type, time_type)
+
+    if time_type == "Career":
+        db.query("TRUNCATE TABLE %s;" % (table))
+
     if entries != []:
         for i in range(0, len(entries), 1000):
             db.insertRowDict(entries[i: i + 1000], table, insertMany=True, replace=True, rid=0,debug=1)

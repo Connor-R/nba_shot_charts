@@ -45,7 +45,8 @@ def process_percentiles(season_id):
             efg_plus, 
             ROUND(attempts/games,1) AS volume,
             ShotSkillPlus,
-            paa_per_game
+            paa_per_game,
+            par_per_game
             FROM shots_%s_relative_year
             JOIN(
                 SELECT 
@@ -86,16 +87,18 @@ def process_percentiles(season_id):
             AttemptsPerGame_list = []
             shotSkillPlus_list = []
             PAAperGame_list = []
+            PARperGame_list = []
 
             for row in res:
-                foo, foo, EFGplus, AttemptsPerGame, shotSkillPlus, PAAperGame = row
+                foo, foo, EFGplus, AttemptsPerGame, shotSkillPlus, PAAperGame, PARperGame = row
 
                 EFGplus_list.append(float(EFGplus))
                 AttemptsPerGame_list.append(float(AttemptsPerGame))
                 shotSkillPlus_list.append(float(shotSkillPlus))
                 PAAperGame_list.append(float(PAAperGame))
+                PARperGame_list.append(float(PARperGame))
 
-            for cat in ('EFG', 'AttemptsPerGame', 'shotSkill', 'PAAperGame'):
+            for cat in ('EFG', 'AttemptsPerGame', 'shotSkill', 'PAAperGame', 'PARperGame'):
                 entries = []
                 # print '\t', '('+str(len(res))+')', season_type, _type, cat
 
@@ -107,6 +110,8 @@ def process_percentiles(season_id):
                     arry = np.array(shotSkillPlus_list)
                 elif cat == 'PAAperGame':
                     arry = np.array(PAAperGame_list)
+                elif cat == 'PARperGame':
+                    arry = np.array(PARperGame_list)
 
                 for i in range(0,101):
                     pv = np.percentile(arry, i)
@@ -135,7 +140,7 @@ def update_yearly_percentiles():
         relative_qry = """SELECT 
         %s_id, season_id, season_type, 
         r.attempts, r.games, 
-        r.attempts/r.games, efg_plus, paa/r.games, ShotSkillPlus
+        r.attempts/r.games, efg_plus, paa/r.games, par/r.games, ShotSkillPlus
         FROM shots_%s_relative_Year r
         JOIN shot_skill_plus_%s_Year ss USING (%s_id, season_id, season_type)
         WHERE shot_zone_basic = 'all'
@@ -147,7 +152,7 @@ def update_yearly_percentiles():
         for i, row in enumerate(relative_res):
             entry = {}
            
-            _id, season_id, season_type, attempts, games, att_per_game, efg_plus, paa, ShotSkillPlus = row
+            _id, season_id, season_type, attempts, games, att_per_game, efg_plus, paa, par, ShotSkillPlus = row
            
             id_key = _type+'_id'
             entry[id_key] = _id
@@ -160,6 +165,7 @@ def update_yearly_percentiles():
             'AttemptsPerGame': att_per_game,
             'EFG': efg_plus,
             'PAAperGame': paa,
+            'PARperGame': par,
             'shotSkill': ShotSkillPlus,
             }
 
@@ -195,27 +201,23 @@ def update_career_percentiles():
         entries = []
 
         qry = """SELECT 
-        %s_id, b.season_id, season_type, SUM(attempts), SUM(games),
+        %s_id, ssp.season_id, season_type, SUM(attempts), SUM(games),
         ROUND(SUM(AttemptsPerGame_percentile*games)/SUM(games),1),
         ROUND(SUM(EFG_Percentile*attempts)/SUM(attempts),1),
         ROUND(SUM(PAAperGame_percentile*attempts)/SUM(attempts),1),
+        ROUND(SUM(PARperGame_percentile*attempts)/SUM(attempts),1),
         ROUND(SUM(shotSkill_Percentile*attempts)/SUM(attempts),1)
         FROM percentiles_%s_Year
-        JOIN (SELECT %s_id, CONCAT(LEFT(MIN(season_id),4), RIGHT(MAX(season_id),2)) as season_id FROM percentiles_%s_Year GROUP BY %s_id) b USING (%s_id)
+        JOIN (SELECT %s_id, season_id, season_type FROM shot_skill_plus_%s_Career) ssp USING (%s_id, season_type)
         GROUP By %s_id, season_type;""" 
 
-        query = qry % (_type, _type, _type, _type, _type, _type, _type)
+        query = qry % (_type, _type, _type, _type, _type, _type)
 
         res = db.query(query)
         for i, row in enumerate(res):
             entry = {}
            
-            _id, season_id, season_type, attempts, games, AttemptsPerGame_percentile, EFG_Percentile, PAAperGame_percentile, shotSkill_Percentile = row
-
-            if str(season_id)[4:] < '50':
-                season_id = int(str(season_id)[:4]+'20'+str(season_id)[4:])
-            else:
-                season_id = int(str(season_id)[:4]+'19'+str(season_id)[4:])
+            _id, season_id, season_type, attempts, games, AttemptsPerGame_percentile, EFG_Percentile, PAAperGame_percentile, PARperGame_percentile, shotSkill_Percentile = row
 
             id_key = _type+'_id'
             entry[id_key] = _id
@@ -226,11 +228,15 @@ def update_career_percentiles():
             entry['AttemptsPerGame_percentile'] = AttemptsPerGame_percentile
             entry['EFG_Percentile'] = EFG_Percentile
             entry['PAAperGame_percentile'] = PAAperGame_percentile
+            entry['PARperGame_percentile'] = PAAperGame_percentile
             entry['shotSkill_Percentile'] = shotSkill_Percentile
 
             entries.append(entry)
 
         table = "percentiles_%s_Career" % (_type)
+
+        db.query("TRUNCATE TABLE %s;" % (table))
+
         if entries != []:
             for i in range(0, len(entries), 1000):
                 db.insertRowDict(entries[i: i + 1000], table, insertMany=True, replace=True, rid=0,debug=1)
