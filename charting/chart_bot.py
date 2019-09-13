@@ -106,7 +106,7 @@ def get_random_pic(players, hashtags, thread):
                 
             player_path = base_path+player.replace(' ','_')+'('+str(p_id)+')/'
             # tweets a range of seasons (-1 is career, -2 is current season, -3 is 2 seasons previous, etc.)
-            for i in range(max(0, len(os.listdir(player_path))-2), len(os.listdir(player_path))-1):
+            for i in range(max(0, len(os.listdir(player_path))-1), len(os.listdir(player_path))-0):
                 chart = os.listdir(player_path)[i]
                 # print chart
                 tweet(player_path, chart, hashtags, p_id, thread)
@@ -198,7 +198,7 @@ def parse_text(pic, hashtags, p_id):
     if year[:6] == 'CAREER':
         start_year = db.query("SELECT from_year FROM players WHERE player_id = %s" % (p_id)) [0][0]
         if start_year < 1996:
-            tweet += 'POST-1996 ' + year + ' Shot Chart'
+            tweet += 'PBP ERA (1996/97 onward) ' + year + ' Shot Chart'
         else:
             tweet += year + ' Shot Chart' 
         isCareer = True

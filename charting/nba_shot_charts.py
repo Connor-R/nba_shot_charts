@@ -80,7 +80,7 @@ def initiate(p_list, list_length, printer=True):
         career_start, career_end = db.query(career_qry)[0]
         if career_start < 1996:
             career_start = 1996
-            career_string = "POST-1996 CAREER (%s-%s)" % (career_start, career_end)
+            career_string = "PBP ERA (1996/97 onward) CAREER (%s-%s)" % (career_start, career_end)
         else:
             career_string = "CAREER (%s-%s)" % (career_start, career_end)
         # if printer is True:

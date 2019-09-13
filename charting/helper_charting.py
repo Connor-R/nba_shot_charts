@@ -234,7 +234,7 @@ def shooting_plot(dataType, path, shot_df, _id, season_id, _title, _name, isCare
     cb.set_ticks([0.0, 0.25, 0.5, 0.75, 1.0])
     cb.set_ticklabels(['$\mathbf{\leq}$50','75', '100','125', '$\mathbf{\geq}$150'])
 
-    figtit = path+'%s(%s)_%s.png' % (_name, _id, season_id.replace(' ','').replace('POST-1996',''))
+    figtit = path+'%s(%s)_%s.png' % (_name, _id, season_id.replace('PBP ERA (1996/97 onward)','').replace(' ',''))
     plt.savefig(figtit, facecolor='#2E3748', edgecolor='black')
     plt.clf()
 
