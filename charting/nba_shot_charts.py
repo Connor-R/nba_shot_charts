@@ -189,6 +189,7 @@ def get_yesterdaysPlayers(days=1):
     ORDER BY shot_attempts DESC;"""
 
     query = qry % (days)
+    # raw_input(query)
 
     res = db.query(query)
     if res == ((None, None, None, None, None),):

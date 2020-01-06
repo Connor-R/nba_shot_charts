@@ -2,10 +2,10 @@ SHELL=/bin/bash
 source "/Users/connordog/.bash_profile"
 
 # Years defined as the starting year for a season (e.g. 2017 is for the 2017/18 season)
-startYear=2018
-endYear=2018
+startYear=2019
+endYear=2019
 lastNgames=10
-shortType="Pre" #Pre/Post/AS/Reg
+shortType="Reg" #Pre/Post/AS/Reg
 
 python ../scrapers/scraper_shots.py --start_year "$startYear" --end_year "$endYear" --lastNgames "$lastNgames" --short_type "$shortType"
 

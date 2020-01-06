@@ -40,7 +40,7 @@ def initiate(start_year, end_year, lastNgames, short_type):
         season_url = base_url % (season_id, lastNgames, season_id, season_type)
         print season_url
 
-        json = getter.get_url_data(season_url, "json")
+        json = getter.get_url_data(season_url, "json", nba=True)
         if json is None:
             sys.exit('\n\n\nNo data acquired')
         else:
@@ -108,7 +108,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument('--start_year',type=int,default=2018)
     parser.add_argument('--end_year',type=int,default=2018)
-    parser.add_argument('--lastNgames',type=int,default=10)
+    parser.add_argument('--lastNgames',type=int,default=1)
     parser.add_argument('--short_type',type=str,default='Reg')
 
 

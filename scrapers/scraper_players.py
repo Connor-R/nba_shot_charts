@@ -21,7 +21,7 @@ url = 'http://stats.nba.com/stats/commonallplayers?IsOnlyCurrentSeason=0&LeagueI
 print "\n\nscraper_players.py"
 print "-------------------------"
 
-json = getter.get_url_data(url, "json")
+json = getter.get_url_data(url, "json", nba=True)
 sleep(5)
 
 resultSets = json["resultSets"]

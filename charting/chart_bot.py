@@ -164,7 +164,7 @@ def get_rand_player():
         pname, pid, p_shots = row
         p_dict[pid] = pname
         plrs.append(pid)
-        wghts.append(float(p_shots)**0.5)
+        wghts.append(float(p_shots)**0.8)
 
 
     norm_wghts = [float(i)/sum(wghts) for i in wghts]
