@@ -690,14 +690,14 @@ if __name__ == "__main__":
 
 
     parser.add_argument('--_type',          default = 'Player')
-    parser.add_argument('--_names',         default = ["Blake Griffin"])
+    parser.add_argument('--_names',         default = ["Drew Gooden"])
     parser.add_argument('--season_type',    default = 'Reg')
-    parser.add_argument('--start_date',     default = '2017-06-01')
-    parser.add_argument('--end_date',       default = '2018-06-01')
-    parser.add_argument('--custom_title',   default = 'Blake Griffin - 2017/18')
+    parser.add_argument('--start_date',     default = '2010-02-20')
+    parser.add_argument('--end_date',       default = '2010-04-14')
+    parser.add_argument('--custom_title',   default = 'Drew Gooden - 2009/10 Clippers')
     parser.add_argument('--custom_text',    default = None)    
-    parser.add_argument('--custom_img',     default =  None) 
-    parser.add_argument('--custom_file',    default =  'Blake Griffin_201718') 
+    parser.add_argument('--custom_img',     default = None) 
+    parser.add_argument('--custom_file',    default =  'Drew_Gooden_Custom') 
 
 
 

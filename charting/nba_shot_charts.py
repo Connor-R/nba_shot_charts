@@ -212,7 +212,7 @@ if __name__ == "__main__":
     print args.player_name
 
     if args.player_name == 'YESTERDAY':
-        player_list = get_yesterdaysPlayers(days=1)
+        player_list = get_yesterdaysPlayers(days=50)
         if player_list is None:
             sys.exit("No Players to Chart")
     elif args.player_name == 'LASTYEAR':

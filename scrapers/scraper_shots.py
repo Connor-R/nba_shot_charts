@@ -6,6 +6,7 @@ import sys
 from time import time, sleep
 from datetime import date, datetime
 import argparse
+import json as jsnn
 
 from py_data_getter import data_getter
 from py_db import db
@@ -16,10 +17,9 @@ start_time = time()
 
 getter = data_getter()
 
-type_dict = {'Pre':'Pre+Season','Post':'Playoffs', 'AS':'All+Star', 'Reg':'Regular+Season'}
+type_dict = {'Pre':'Pre Season','Post':'Playoffs', 'AS':'All Star', 'Reg':'Regular Season'}
 
-
-base_url = 'http://stats.nba.com/stats/shotchartdetail?CFID=33&CFPARAMS=%s&ContextFilter=&ContextMeasure=FGA&DateFrom=&DateTo=&GameID=&GameSegment=&LastNGames=%s&LeagueID=00&Location=&MeasureType=Base&Month=0&OpponentTeamID=0&Outcome=&PaceAdjust=N&PerMode=PerGame&Period=0&PlayerID=0&PlusMinus=N&PlayerPosition=&Rank=N&RookieYear=&Season=%s&SeasonSegment=&SeasonType=%s&TeamID=0&VsConference=&VsDivision=&mode=Advanced&showDetails=0&showShots=1&showZones=0'
+base_url = "https://stats.nba.com/stats/shotchartdetail"
 
 print "-------------------------"
 print "scraper_shots.py"
@@ -37,10 +37,34 @@ def initiate(start_year, end_year, lastNgames, short_type):
 
         db_season_id = str(season_start)+str(season_start%100+1).zfill(2)[-2:]
 
-        season_url = base_url % (season_id, lastNgames, season_id, season_type)
-        print season_url
+        season_url = base_url
+        parameters = {
+            'ContextMeasure': 'FGA',
+            'LastNGames': lastNgames,
+            'LeagueID': '00',
+            'Month': 0,
+            'OpponentTeamID': 0,
+            'Period': 0,
+            'PlayerID': 0,
+            'SeasonType': season_type,
+            'TeamID': 0,
+            'VsDivision': '',
+            'VsConference': '',
+            'SeasonSegment': '',
+            'Season': season_id,
+            'RookieYear': '',
+            'PlayerPosition': '',
+            'Outcome': '',
+            'Location': '',
+            'GameSegment': '',
+            'GameId': '',
+            'DateTo': '',
+            'DateFrom': ''
+        }
+        # print season_url
 
-        json = getter.get_url_data(season_url, "json", nba=True)
+
+        json = getter.get_url_data(season_url, "json", nba=True, params=parameters)
         if json is None:
             sys.exit('\n\n\nNo data acquired')
         else:
