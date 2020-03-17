@@ -16,12 +16,22 @@ start_time = time()
 
 getter = data_getter()
 
-url = 'http://stats.nba.com/stats/commonallplayers?IsOnlyCurrentSeason=0&LeagueID=00&Season=0000-00'
+url = 'http://stats.nba.com/stats/commonallplayers'
 
 print "\n\nscraper_players.py"
 print "-------------------------"
 
-json = getter.get_url_data(url, "json", nba=True)
+parameters = {
+    'IsOnlyCurrentSeason': 0,
+    'LeagueID': '00',
+    'Season': '0000-00',
+}
+
+json = getter.get_url_data(url, "json", nba=True, params=parameters)
+if json is None:
+    sys.exit('\n\n\nNo data acquired')
+else:
+    print "acquired data"
 sleep(5)
 
 resultSets = json["resultSets"]

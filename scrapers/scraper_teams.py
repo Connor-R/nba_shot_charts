@@ -20,8 +20,17 @@ team_url = 'http://stats.nba.com/stats/franchisehistory?LeagueID=00'
 print "-------------------------"
 print "scraper_teams.py"
 
-json = getter.get_url_data(team_url, "json", nba=True)
+parameters = {
+    'LeagueID': '00',
+}
+
+json = getter.get_url_data(team_url, "json", nba=True, params=parameters)
+if json is None:
+    sys.exit('\n\n\nNo data acquired')
+else:
+    print "acquired data"
 sleep(5)
+
 
 resultSets = json["resultSets"]
 
