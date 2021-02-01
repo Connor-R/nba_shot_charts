@@ -2,8 +2,8 @@ SHELL=/bin/bash
 source "/Users/connordog/.bash_profile"
 
 # Years defined as the starting year for a season (e.g. 2017 is for the 2017/18 season)
-startYear=2019
-endYear=2019
+startYear=2020
+endYear=2020
 lastNgames=10
 shortType="Reg" #Pre/Post/AS/Reg
 

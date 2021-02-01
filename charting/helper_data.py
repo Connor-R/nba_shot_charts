@@ -14,8 +14,11 @@ db = db('nba_shots')
 def acquire_shootingData(dataType, _id, season='', isCareer=True):
 
     if isCareer is False:
-        start_season_filt = str(season[:4])+'-08-01'
-        end_season_filt = str(int(season[:4])+1)+'-08-01'
+        start_season_filt, end_season_filt = db.query("SELECT min(game_date), max(game_date) FROM shots WHERE season_id = %s" % (season.replace('-','')))[0]
+
+
+        # start_season_filt = str(season[:4])+'-08-01'
+        # end_season_filt = str(int(season[:4])+1)+'-08-01'
 
         query_append = """AND season_id = %s
         AND game_date > '%s'

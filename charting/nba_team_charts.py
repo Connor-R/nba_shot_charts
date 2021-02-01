@@ -40,7 +40,7 @@ def initiate(p_list, list_length, printer=True):
         counter += 1
 
         start_year = max(1996, start_year)
-        end_year = min(2020, end_year)
+        # end_year = min(2021, end_year)
 
         path = base_path+'/shot_charts_team/'+str(city.replace(' ','_'))+'_'+str(tname.replace(' ','_'))+'('+str(team_id)+')/'
 
