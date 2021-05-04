@@ -49,3 +49,7 @@ python nba_team_charts.py --min_start "$startYear"
 # Run every offseason
 # python ../charting/nba_shot_charts.py --player_name "LASTYEAR"
 
+
+wait
+
+printf "\n\nNBA SHOTS DAILY RUN COMPLETED\n\n"

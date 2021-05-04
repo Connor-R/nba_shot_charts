@@ -8,15 +8,15 @@ HOUR=$(date +"%H")
 
 if { [ "$DOW" -eq "1" ] || [ "$DOW" -eq "3" ] || [ "$DOW" -eq "5" ]; } && [ "$HOUR" == "15" ]; then
 
-    cd ../charting/ && python chart_bot_team.py
+    pkill -f chart_bot_team.py && printf "\n\nkillingbot\n\n"
 
 else
 
-    cd ../charting/ && python chart_bot.py 
+    pkill -f chart_bot.py && printf "\n\nkillingbot\n\n"
 
 fi
 
 
 wait
 
-printf "\n\nNBA SHOT CHART POSTING RUN COMPLETED\n\n"
+printf "\n\nBOT TERMINATED\n\n"
