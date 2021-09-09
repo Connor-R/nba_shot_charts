@@ -5,7 +5,7 @@ source "/Users/connordog/.bash_profile"
 startYear=2020
 endYear=2020
 lastNgames=10
-shortType="Reg" #Pre/Post/AS/Reg
+shortType="Post" #Pre/Post/AS/Reg
 
 python ../scrapers/scraper_shots.py --start_year "$startYear" --end_year "$endYear" --lastNgames "$lastNgames" --short_type "$shortType"
 

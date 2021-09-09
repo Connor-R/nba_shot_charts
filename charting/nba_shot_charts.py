@@ -114,14 +114,11 @@ def initiate(p_list, list_length, printer=True):
 #for usage with shot_chart_bot
 def gen_charts(player_id):
     p_list = get_plist()
-    
     vals = p_list.get(player_id)
-
     if vals is None:
         sys.exit('Need a valid player (check spelling)')
 
     player_list = {player_id:vals}
-    # raw_input(player_list)
 
     initiate(player_list, str(len(player_list)), printer=False)
 
@@ -132,8 +129,8 @@ def get_plist(operator='', filt_value=0, backfill=False):
 
     query = """SELECT player_id, CONCAT(fname, ' ', lname), from_year, to_year
     FROM players
-    WHERE games_played_FLAG = 1
-    AND to_year >= 1997
+    WHERE 1
+        AND to_year >= 1997
     ORDER BY lname ASC, fname ASC, player_id ASC"""
     res = db.query(query)
 
