@@ -2,9 +2,9 @@ SHELL=/bin/bash
 source "/Users/connordog/.bash_profile"
 
 # Years defined as the starting year for a season (e.g. 2017 is for the 2017/18 season)
-startYear=2020
-endYear=2020
-lastNgames=10
+startYear=2021
+endYear=2021
+lastNgames=15
 shortType="Post" #Pre/Post/AS/Reg
 
 python ../scrapers/scraper_shots.py --start_year "$startYear" --end_year "$endYear" --lastNgames "$lastNgames" --short_type "$shortType"
@@ -44,7 +44,7 @@ cd ../charting
 python nba_shot_charts.py --player_name "YESTERDAY"
 python nba_team_charts.py --min_start "$startYear"
 
-# wait
+# # wait
 
 # Run every offseason
 # python ../charting/nba_shot_charts.py --player_name "LASTYEAR"
