@@ -45,9 +45,9 @@ python nba_shot_charts.py --player_name "YESTERDAY"
 python nba_team_charts.py --min_start "$startYear"
 
 # # wait
-
-# Run every offseason
-# python ../charting/nba_shot_charts.py --player_name "LASTYEAR"
+# # Run every offseason
+# cd ../charting
+# python nba_shot_charts.py --player_name "LASTYEAR"
 
 
 wait
